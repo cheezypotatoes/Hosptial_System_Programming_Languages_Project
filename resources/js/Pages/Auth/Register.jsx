@@ -81,13 +81,18 @@ export default function Register() {
             <label className="block text-sm font-semibold mb-1 text-gray-700">
               Position
             </label>
-            <input
-              type="text"
+            <select
               value={data.position}
               onChange={(e) => setData("position", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               required
-            />
+            >
+              <option value="">Select a position</option>
+              <option value="Doctor">Doctor</option>
+              <option value="Cashier">Cashier</option>
+              <option value="Pharmacist">Pharmacist</option>
+              <option value="LabTech">LabTech</option>
+            </select>
             {errors.position && (
               <p className="text-red-500 text-sm mt-1">{errors.position}</p>
             )}
