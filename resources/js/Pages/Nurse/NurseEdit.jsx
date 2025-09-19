@@ -6,11 +6,13 @@ export default function NurseEdit({ user, nurse }) {
         first_name: user.first_name || "",
         last_name: user.last_name || "",
         assigned_to: nurse?.assigned_to || "",
+        start_time: nurse?.start_time || "",
+        end_time: nurse?.end_time || "",
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route("nurse.update"));
+        post(route("nurse.update")); // using POST request
     };
 
     return (
@@ -19,6 +21,7 @@ export default function NurseEdit({ user, nurse }) {
                 <h1 className="text-2xl font-bold mb-6">Edit Profile & Assignment</h1>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* First Name */}
                     <div>
                         <label className="block mb-1 font-semibold">First Name</label>
                         <input
@@ -32,6 +35,7 @@ export default function NurseEdit({ user, nurse }) {
                         )}
                     </div>
 
+                    {/* Last Name */}
                     <div>
                         <label className="block mb-1 font-semibold">Last Name</label>
                         <input
@@ -45,6 +49,7 @@ export default function NurseEdit({ user, nurse }) {
                         )}
                     </div>
 
+                    {/* Assigned To */}
                     <div>
                         <label className="block mb-1 font-semibold">Assigned To</label>
                         <input
@@ -55,6 +60,34 @@ export default function NurseEdit({ user, nurse }) {
                         />
                         {errors.assigned_to && (
                             <p className="text-red-500">{errors.assigned_to}</p>
+                        )}
+                    </div>
+
+                    {/* Start Time */}
+                    <div>
+                        <label className="block mb-1 font-semibold">Start Time</label>
+                        <input
+                            type="time"
+                            value={data.start_time}
+                            onChange={(e) => setData("start_time", e.target.value)}
+                            className="w-full border px-3 py-2 rounded-lg"
+                        />
+                        {errors.start_time && (
+                            <p className="text-red-500">{errors.start_time}</p>
+                        )}
+                    </div>
+
+                    {/* End Time */}
+                    <div>
+                        <label className="block mb-1 font-semibold">End Time</label>
+                        <input
+                            type="time"
+                            value={data.end_time}
+                            onChange={(e) => setData("end_time", e.target.value)}
+                            className="w-full border px-3 py-2 rounded-lg"
+                        />
+                        {errors.end_time && (
+                            <p className="text-red-500">{errors.end_time}</p>
                         )}
                     </div>
 

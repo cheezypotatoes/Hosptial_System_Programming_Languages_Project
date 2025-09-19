@@ -13,6 +13,8 @@ return new class extends Migration {
             $table->string('specialization');
             $table->string('contract_number');
             $table->string('room_number');
+            $table->time('starting_time')->nullable();
+            $table->time('end_time')->nullable();
             $table->timestamps();
         });
     }

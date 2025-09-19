@@ -12,6 +12,8 @@ class Nurse extends Model
     protected $fillable = [
         'user_id',
         'assigned_to',
+        'start_time',
+        'end_time',
     ];
 
     public function user()

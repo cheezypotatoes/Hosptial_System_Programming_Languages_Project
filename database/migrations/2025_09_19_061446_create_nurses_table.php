@@ -9,8 +9,10 @@ return new class extends Migration {
     {
         Schema::create('nurses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // links to users
-            $table->string('assigned_to')->nullable(); // the assignment
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); 
+            $table->string('assigned_to')->nullable(); 
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
             $table->timestamps();
         });
     }

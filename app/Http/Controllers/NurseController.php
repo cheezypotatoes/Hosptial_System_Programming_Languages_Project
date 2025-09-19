@@ -39,9 +39,11 @@ class NurseController extends Controller
 
         // Validate input
         $data = $request->validate([
-            'first_name'   => 'required|string|max:255',
-            'last_name'    => 'required|string|max:255',
-            'assigned_to'  => 'required|string|max:255',
+            'first_name'  => 'required|string|max:255',
+            'last_name'   => 'required|string|max:255',
+            'assigned_to' => 'required|string|max:255',
+            'start_time'  => 'nullable|date_format:H:i',
+            'end_time'    => 'nullable|date_format:H:i',
         ]);
 
         // Update user info
@@ -53,9 +55,13 @@ class NurseController extends Controller
         // Update or create nurse record
         Nurse::updateOrCreate(
             ['user_id' => $user->id],
-            ['assigned_to' => $data['assigned_to']]
+            [
+                'assigned_to' => $data['assigned_to'],
+                'start_time'  => $data['start_time'] ?? null,
+                'end_time'    => $data['end_time'] ?? null,
+            ]
         );
 
         return redirect()->route('dashboard')->with('success', 'Profile updated successfully.');
-    }
+    } 
 }

@@ -14,6 +14,8 @@ class Physician extends Model
         'specialization',
         'contract_number',
         'room_number',
+        'starting_time',
+        'end_time',
     ];
 
     public function user()
