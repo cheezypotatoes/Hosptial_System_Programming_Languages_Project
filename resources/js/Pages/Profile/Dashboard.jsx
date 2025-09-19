@@ -15,7 +15,22 @@ export default function Dashboard({ user }) {
                 <h1 className="text-3xl font-bold mb-4">
                     Welcome, {user.first_name}!
                 </h1>
+
+                {/* Show position */}
+                <p className="text-gray-500 mb-4">Position: {user.position}</p>
+
                 <p className="text-gray-700 mb-6">You are now logged in.</p>
+
+                {/* Conditional link for Doctors */}
+                {user.position === "Doctor" && (
+                    <a
+                        href={route("physician.edit")} // Replace with your actual route
+                        className="block mb-4 text-blue-600 font-semibold hover:underline"
+                    >
+                        Edit Physician Data
+                    </a>
+                )}
+
                 <button
                     onClick={handleLogout}
                     className="bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700 transition"

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\PhysicianController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -20,5 +21,9 @@ Route::get('/register', function () {
 })->name('register');
 
 Route::post('/register', action: [RegisterController::class, 'store'])->name('register.store');
+
+
+Route::get('/physician/edit', [PhysicianController::class, 'edit'])
+    ->name('physician.edit');
 
 require __DIR__.'/auth.php';

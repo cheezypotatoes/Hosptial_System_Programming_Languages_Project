@@ -9,8 +9,13 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
+        $user = $request->user();
+
+        $position = $user->position;
+
         return Inertia::render('Profile/Dashboard', [
-            'user' => $request->user(),
+            'user' => $user,
+            'role' => $position,
         ]);
     }
 }
