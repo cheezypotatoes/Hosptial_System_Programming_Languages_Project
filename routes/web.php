@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\PhysicianController;
+use App\Http\Controllers\NurseController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -25,5 +26,8 @@ Route::post('/register', action: [RegisterController::class, 'store'])->name('re
 
 Route::get('/physician/edit', [PhysicianController::class, 'edit'])
     ->name('physician.edit');
+
+Route::get('/nurse/edit', [NurseController::class, 'edit'])->name('nurse.edit');
+    Route::post('/nurse/edit', [NurseController::class, 'update'])->name('nurse.update');
 
 require __DIR__.'/auth.php';

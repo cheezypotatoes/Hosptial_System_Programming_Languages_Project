@@ -13,9 +13,10 @@ class PhysicianController extends Controller
     {
         $user = Auth::user();
 
+
         // Only allow doctors
         if ($user->position !== 'Doctor') {
-            abort(403, 'Unauthorized');
+            return redirect()->route('dashboard');
         }
 
         return Inertia::render('Physician/PhysicianEdit', [

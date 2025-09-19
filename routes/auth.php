@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PhysicianController;
+use App\Http\Controllers\NurseController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -32,4 +33,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/physician/edit', [PhysicianController::class, 'edit'])->name('physician.edit');
     Route::post('/physician/edit', [PhysicianController::class, 'update'])->name('physician.update');
+
+
+    Route::get('/nurse/edit', [NurseController::class, 'edit'])->name('nurse.edit');
+    Route::post('/nurse/edit', [NurseController::class, 'update'])->name('nurse.update');
+
 });

@@ -27,4 +27,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Physician::class);
     }
+
+    public function Nurse()
+    {
+        return $this->hasOne(Nurse::class);
+    }
 }
