@@ -27,4 +27,11 @@ class Patient extends Model
     protected $casts = [
         'birthdate' => 'date',
     ];
+
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
 }
