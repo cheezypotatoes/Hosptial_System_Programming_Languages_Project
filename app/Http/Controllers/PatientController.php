@@ -13,6 +13,9 @@ class PatientController extends Controller
      */
     public function create()
     {
+
+        
+
         return inertia('Nurse/AddPatients'); // React/Inertia page
     }
 

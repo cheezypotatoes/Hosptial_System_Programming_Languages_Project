@@ -31,6 +31,8 @@ class NurseController extends Controller
     // Handle form submission
     public function update(Request $request)
     {
+
+
         $user = Auth::user();
 
         if ($user->position !== 'Nurse') {
