@@ -38,10 +38,18 @@ export default function Dashboard({ user }) {
                         </a>
 
                         <a
-                            href={route("patients.create")}
+                            href={route("nurse.patients.create")}
                             className="block mb-4 text-purple-600 font-semibold hover:underline"
                         >
                             Add Patient
+                        </a>
+
+
+                        <a
+                            href={route("nurse.patients.index")}
+                            className="block mb-4 text-blue-600 font-semibold hover:underline"
+                        >
+                            View Patient
                         </a>
                     </>
                 )}

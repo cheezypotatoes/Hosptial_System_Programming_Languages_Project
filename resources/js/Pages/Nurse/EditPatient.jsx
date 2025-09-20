@@ -1,27 +1,25 @@
 import React from "react";
-import { useForm } from "@inertiajs/react";
+import { useForm, Link } from "@inertiajs/react";
 
-export default function Create() {
-    const { data, setData, post, processing, errors } = useForm({
-        first_name: "",
-        last_name: "",
-        birthdate: "",
-        gender: "",
-        contact_num: "",
-        address: "",
+export default function Edit({ patient }) {
+        const { data, setData, put, processing, errors } = useForm({
+        first_name: patient.first_name || "",
+        last_name: patient.last_name || "",
+        birthdate: patient.birthdate ? patient.birthdate : "",
+        gender: patient.gender || "",
+        contact_num: patient.contact_num || "",
+        address: patient.address || "",
     });
 
     function handleSubmit(e) {
         e.preventDefault();
-        post(route("nurse.patients.store"));
+        put(route("nurse.patients.update", patient.id));
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
             <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-lg">
-                <h1 className="text-2xl font-bold mb-6 text-center">
-                    Add New Patient
-                </h1>
+                <h1 className="text-2xl font-bold mb-6 text-center">Edit Patient</h1>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* First Name */}
@@ -112,14 +110,23 @@ export default function Create() {
                         )}
                     </div>
 
-                    {/* Submit Button */}
-                    <button
-                        type="submit"
-                        disabled={processing}
-                        className="w-full bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
-                    >
-                        {processing ? "Saving..." : "Save Patient"}
-                    </button>
+                    {/* Buttons */}
+                    <div className="flex justify-between items-center mt-4">
+                        <Link
+                            href={route("nurse.patients.index")}
+                            className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
+                        >
+                            Back to List
+                        </Link>
+
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="bg-yellow-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-yellow-600 transition"
+                        >
+                            {processing ? "Updating..." : "Update Patient"}
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

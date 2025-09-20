@@ -32,8 +32,14 @@ Route::get('/nurse/edit', [NurseController::class, 'edit'])->name('nurse.edit');
     Route::post('/nurse/edit', [NurseController::class, 'update'])->name('nurse.update');
 
 
-Route::get('/nurse/addPatient', [PatientController::class, 'create'])->name('patients.create');
-Route::post('/nurse/addPatient', [PatientController::class, 'store'])->name('patients.store');
+Route::prefix('nurse')->group(function () {
+        Route::get('/patients', [PatientController::class, 'index'])->name('nurse.patients.index');
+        Route::get('/patients/create', [PatientController::class, 'create'])->name('nurse.patients.create');
+        Route::post('/patients', [PatientController::class, 'store'])->name('nurse.patients.store');
+        Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('nurse.patients.edit');
+        Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('nurse.patients.update');
+        Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('nurse.patients.destroy');
+    });
 
 
 require __DIR__.'/auth.php';
