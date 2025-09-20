@@ -27,14 +27,23 @@ export default function Dashboard({ user }) {
                     </a>
                 )}
 
-                {/* Edit Nurse link for nurses */}
+                {/* Links for nurses */}
                 {user.position === "Nurse" && (
-                    <a
-                        href={route("nurse.edit")}
-                        className="block mb-4 text-green-600 font-semibold hover:underline"
-                    >
-                        Edit Nurse Assignment
-                    </a>
+                    <>
+                        <a
+                            href={route("nurse.edit")}
+                            className="block mb-4 text-green-600 font-semibold hover:underline"
+                        >
+                            Edit Nurse Assignment
+                        </a>
+
+                        <a
+                            href={route("patients.create")}
+                            className="block mb-4 text-purple-600 font-semibold hover:underline"
+                        >
+                            Add Patient
+                        </a>
+                    </>
                 )}
 
                 <button

@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PhysicianController;
 use App\Http\Controllers\NurseController;
+use App\Http\Controllers\PatientController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -37,5 +38,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/nurse/edit', [NurseController::class, 'edit'])->name('nurse.edit');
     Route::post('/nurse/edit', [NurseController::class, 'update'])->name('nurse.update');
+
+    Route::get('/nurse/addPatient', [PatientController::class, 'create'])->name('patients.create');
+    Route::post('/nurse/addPatient', [PatientController::class, 'store'])->name('patients.store');
+
+
+
 
 });
