@@ -1,4 +1,6 @@
 import React from "react";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Link, useForm } from "@inertiajs/react";
 
 export default function Register() {
@@ -15,9 +17,12 @@ export default function Register() {
     e.preventDefault();
     post(route("register.store"));
   }
+    const [showPassword, setShowPassword] = useState(false);
+     const [showConfirmPassword, setShowConfirmPassword] = useState(false); 
+
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-100">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
         <h1 className="text-3xl font-extrabold mb-6 text-center text-gray-900">
           Create Your Account
@@ -99,42 +104,65 @@ export default function Register() {
             )}
           </div>
 
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-semibold mb-1 text-gray-700">
-              Password
-            </label>
-            <input
-              type="password"
-              value={data.password}
-              onChange={(e) => setData("password", e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-              required
-            />
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-            )}
-          </div>
+        {/* Password */}
+            <div>
+              <label className="block text-sm font-semibold mb-1 text-gray-700">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={data.password}
+                  onChange={(e) => setData("password", e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              )}
+            </div>
 
-          {/* Confirm Password */}
+
+
+      {/* Confirm Password */}
           <div>
             <label className="block text-sm font-semibold mb-1 text-gray-700">
               Confirm Password
             </label>
-            <input
-              type="password"
-              value={data.password_confirmation}
-              onChange={(e) => setData("password_confirmation", e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-              required
-            />
-          </div>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"} // 👈 uses second state
+                value={data.password_confirmation}
+                onChange={(e) => setData("password_confirmation", e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700"
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+        {errors.password_confirmation && (
+          <p className="text-red-500 text-sm mt-1">{errors.password_confirmation}</p>
+        )}
+      </div>
 
           {/* Register Button */}
           <button
             type="submit"
             disabled={processing}
-            className="w-full bg-indigo-600 text-black py-2.5 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-50"
+            className="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-50"
           >
             {processing ? "Registering..." : "Register"}
           </button>

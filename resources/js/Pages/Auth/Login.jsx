@@ -1,4 +1,6 @@
 import React from "react";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Link, useForm } from "@inertiajs/react";
 
 export default function Login() {
@@ -12,9 +14,10 @@ export default function Login() {
         e.preventDefault();
         post(route("login.store"));
     }
+        const [showPassword, setShowPassword] = useState(false);
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-500">
             <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
                 <h1 className="text-3xl font-extrabold mb-6 text-center text-gray-900">
                     Login
@@ -40,20 +43,29 @@ export default function Login() {
 
                     {/* Password */}
                     <div>
-                        <label className="block text-sm font-semibold mb-1 text-gray-700">
-                            Password
+                    <label className="block text-sm font-semibold mb-1 text-gray-700">
+                       Password
                         </label>
-                        <input
-                            type="password"
-                            value={data.password}
-                            onChange={(e) => setData("password", e.target.value)}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                            required
-                        />
-                        {errors.password && (
-                            <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-                        )}
-                    </div>
+                          <div className="relative">
+                             <input
+                                 type={showPassword ? "text" : "password"}
+                                 value={data.password}
+                                 onChange={(e) => setData("password", e.target.value)}
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                               required
+                             />
+                            <button
+                             type="button"
+                              onClick={() => setShowPassword((prev) => !prev)}
+                                className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700"
+                                 >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                         </div>
+                            {errors.password && (
+                             <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                              )}
+                     </div>
 
                     {/* Remember Me */}
                     <div className="flex items-center">
@@ -70,7 +82,7 @@ export default function Login() {
                     <button
                         type="submit"
                         disabled={processing}
-                        className="w-full bg-indigo-600 text-black py-2.5 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-50"
+                        className="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-50"
                     >
                         {processing ? "Logging in..." : "Login"}
                     </button>

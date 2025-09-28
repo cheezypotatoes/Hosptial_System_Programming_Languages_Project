@@ -7,8 +7,10 @@ use App\Http\Controllers\NurseController;
 use App\Http\Controllers\PatientController;
 use App\Http\Middleware\EnsureUserIsNurse;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 // Public routes
 Route::get('/', fn() => Inertia::render('Index'));
@@ -22,13 +24,17 @@ Route::post('/register', [RegisterController::class, 'store'])->name('register.s
 // Authenticated routes
 Route::middleware('auth')->group(function () {
 
+
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
     // Physician edit routes
     Route::get('/physician/edit', [PhysicianController::class, 'edit'])->name('physician.edit');
 
     // Nurse edit routes
     Route::get('/nurse/edit', [NurseController::class, 'edit'])->name('nurse.edit');
     Route::post('/nurse/edit', [NurseController::class, 'update'])->name('nurse.update');
-
+    
     // Nurse patient management routes with middleware applied to the whole group
     Route::prefix('nurse')
         ->middleware(EnsureUserIsNurse::class)
@@ -40,11 +46,15 @@ Route::middleware('auth')->group(function () {
             Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('nurse.patients.update');
             Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('nurse.patients.destroy');
             
-            Route::get('/patients/{patient}/appointments', action: [AppointmentController::class, 'viewAppointments'])->name('nurse.patients.viewAppointments');
-            Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroyAppointment'])->name('nurse.appointments.destroy');
-            Route::get('/patients/{patient}/make-appointment', [AppointmentController::class, 'create'])->name('nurse.patients.makeAppointment');
-            Route::post('/patients/{patient}/make-appointment', [AppointmentController::class, 'store'])->name('nurse.patients.storeAppointment');
-        
+            Route::get('/patients/{patient}/appointments', [AppointmentController::class, 'viewAppointments'])
+                ->name('nurse.patients.viewAppointments');
+            Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroyAppointment'])
+                ->name('nurse.appointments.destroy');
+            Route::get('/patients/{patient}/make-appointment', [AppointmentController::class, 'create'])
+                ->name('nurse.patients.makeAppointment');
+            Route::post('/patients/{patient}/make-appointment', [AppointmentController::class, 'store'])
+                ->name('nurse.patients.storeAppointment');
+
         
         });
 });

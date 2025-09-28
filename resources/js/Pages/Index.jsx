@@ -3,7 +3,7 @@ import { Link } from "@inertiajs/react";
 
 export default function Index() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-blue-500 to-blue-100">
       <h1 className="text-4xl font-bold mb-6">Welcome to My App</h1>
 
       <div className="space-x-6">
