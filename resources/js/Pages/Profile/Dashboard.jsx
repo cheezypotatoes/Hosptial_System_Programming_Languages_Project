@@ -4,6 +4,11 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { MdDashboard, MdPerson, MdOutlinePersonPin, MdInventory} from "react-icons/md";
+import { BiLogOutCircle } from "react-icons/bi";
+import {  FaFileInvoiceDollar, FaPills, FaNotesMedical } from "react-icons/fa";
+
+import Logo from "@/../images/New_Logo.png";
 
 export default function Dashboard({ user }) {
   const { post } = useForm();
@@ -24,7 +29,7 @@ export default function Dashboard({ user }) {
     { day: "Sat", patients: 40 },
     { day: "Sun", patients: 30 },
   ];
-const activeLabel = "Dashboard"; // or pass this as a prop/state
+const activeLabel = "Dashboard"; 
 
   return (
     <div className="flex h-screen bg-[#E6F0FA] font-sans text-[#1E3A8A]">
@@ -37,54 +42,64 @@ const activeLabel = "Dashboard"; // or pass this as a prop/state
           className="h-16 flex items-center justify-center border-b border-blue-700"
           role="banner"
         >
-          <span
-            className="text-xl font-bold text-[#BFDBFE]"
+         <span
+            className="flex items-center text-xl font-bold text-white space-x-2"
             aria-label="MedBoard Logo and Title"
           >
-             MedBoard
+            <img
+              src = {Logo}   
+              alt="MedBoard Logo"
+              className="margin-left-5 h-12 w-12 object-contain"
+            />
+            <span>Jorge & Co. Med</span>
           </span>
         </div>
 
                 
-            <nav
-            className="flex-1 p-4 space-y-2 text-sm font-medium text-[#BFDBFE]"
-            role="navigation"
-            aria-label="Main menu"
-            >  
-          {[
-            { href: route("dashboard"), label: "Dashboard", icon: "" },
-            { href: route("nurse.patients.index"), label: "Patient Management", icon: "" },
-            { href: "#", label: "Physician Record", icon: "" },
-            { href: "#", label: "Billing", icon: "" },
-            { href: "#", label: "Medicine Inventory", icon: "" },
-            { href: "#", label: "Dispensing", icon: "" },
-          ].map(({ href, label, icon }) => (
-                    <a
-                key={label}
-                href={href}
-                className={`block p-2 rounded focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#BFDBFE] transition ${
-                    label === activeLabel
-                    ? "bg-[#2563EB] text-white font-semibold"
-                    : "hover:bg-[#2563EB] hover:text-white"
-                }`}
-                aria-current={label === activeLabel ? "page" : undefined} // for accessibility
-                >
-                <span aria-hidden="true">{icon}</span> {label}
-                </a>
-          ))}
-        </nav>
+          <nav
+  className="flex-1 p-4 space-y-2 text-sm font-medium text-[#BFDBFE]"
+  role="navigation"
+  aria-label="Main menu"
+>
+  {[
+    { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
+    { href: route("nurse.patients.index"), label: "Patient Management", icon: <MdPerson /> },
+    { href: route("physician.records"), label: "Physician Record", icon: <MdOutlinePersonPin /> },
+    { href: route('cashier.dashboard'), label: "Billing", icon: <FaFileInvoiceDollar /> },
+    { href: route('medicine.inventory'), label: "Medicine Inventory", icon:<MdInventory /> },
+    { href: route('nurse.assistant.dashboard'), label: "Nurse Assistant", icon: <FaNotesMedical /> },
+    { href: route('dispensing'), label: "Dispensing", icon: < FaPills /> },
+  ].map(({ href, label, icon }) => (
+    <a
+      key={label}
+      href={href}
+      className={`flex items-center gap-x-2 p-2 rounded focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#BFDBFE] transition ${
+        label === activeLabel
+          ? "bg-[#2563EB] text-white font-semibold"
+          : "hover:bg-[#2563EB] hover:text-white"
+      }`}
+      aria-current={label === activeLabel ? "page" : undefined} // for accessibility
+    >
+      {icon && <span className="text-lg">{icon}</span>}
+      <span>{label}</span>
+    </a>
+  ))}
+</nav>
 
-        {/* Logout link fixed at bottom */}
+
+              {/* Logout link fixed at bottom */}
         <div className="p-4 border-t border-blue-700">
           <button
             onClick={handleLogout}
-            className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-400 transition font-semibold"
+            className="w-full flex items-center justify-center gap-x-2 bg-red-600 text-white py-2 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-400 transition font-semibold"
             aria-label="Logout"
             type="button"
           >
-            Logout
+            <BiLogOutCircle className="text-lg" />
+            <span>Logout</span>
           </button>
         </div>
+
       </aside>
 
       {/* Main Content */}
@@ -150,8 +165,7 @@ const activeLabel = "Dashboard"; // or pass this as a prop/state
           {/* Dashboard Cards */}
           <section
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10"
-            aria-label="Dashboard summary cards"
-          >
+            aria-label="Dashboard summary cards" >
             {[
               { label: "Patients Today", value: 143 },
               { label: "Upcoming Appointments", value: 69 },

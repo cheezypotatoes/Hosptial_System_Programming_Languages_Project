@@ -4,31 +4,11 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use App\Models\User;
 
-class DatabaseSeeder extends Seeder
+class HospitalSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        $this->call([
-        MedicineSeeder::class,
-    ]);
-        // Create a default test user
-        User::create([
-            'first_name' => 'Test',
-            'last_name'  => 'User',
-            'position'   => 'Nurse',
-            'email'      => 'test@example.com',
-            'password'   => bcrypt('password'),
-        ]);
-
-        // --------------------------
-        // Hospital data (Categories, Services, Items)
-        // --------------------------
-
         // Categories
         $categories = [
             ['name' => 'Consultation', 'description' => 'Doctor consultations and related services'],
@@ -59,8 +39,5 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Alcohol 70% 500ml', 'description' => 'Disinfectant solution', 'stock_quantity' => 80, 'price' => 75.00, 'category_id' => 5],
         ];
         DB::table('items')->insert($items);
-
-        $this->command->info('Default user and hospital data seeded successfully!');
-        
     }
 }

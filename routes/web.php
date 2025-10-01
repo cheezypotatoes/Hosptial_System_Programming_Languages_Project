@@ -8,21 +8,63 @@ use App\Http\Controllers\PatientController;
 use App\Http\Middleware\EnsureUserIsNurse;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CashierController;
+use App\Http\Controllers\Api\ItemController;
+use App\Http\Controllers\Api\ServiceController;
+use App\Http\Controllers\Api\PatientsController;
+use App\Http\Controllers\AssistantController;
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\TransactionController;
+use App\Http\Controllers\Api\MedicineController;
+use App\Http\Controllers\DispensingController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
-// Public routes
-Route::get('/', fn() => Inertia::render('Index'));
 
-Route::get('/login', fn() => Inertia::render('Auth/Login'))->name('login');
-Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 
-Route::get('/register', fn() => Inertia::render('Auth/Register'))->name('register');
-Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
+            //Api
+            Route::get('/services', [ServiceController::class, 'index']);
+            Route::get('/patients', [PatientController::class, 'index']);
+            Route::get('/pending-payments', [PaymentController::class, 'pending']);
+            Route::get('/transactions', [TransactionController::class, 'recent']);
+            Route::get('/items', [ItemController::class, 'index']);
 
-// Authenticated routes
-Route::middleware('auth')->group(function () {
+            //Medicine Routes
+            Route::get('/medicines', function () {
+                return Inertia::render('Medicine/MedicineInventory');
+            })->name('medicine.inventory');
+
+            
+            Route::middleware(['auth'])->group(function () {
+                Route::get('/medicine/inventory', [MedicineController::class, 'index'])->name('medicine.inventory');
+                Route::post('/medicine/store', [MedicineController::class, 'store'])->name('medicine.store');
+
+                // Dispensing
+                Route::post('/dispensing/store', [DispensingController::class, 'store'])->name('dispensing.store');
+                Route::get('/dispensing/logs', [DispensingController::class, 'logs'])->name('dispensing.logs');
+            });
+
+
+                Route::get('/dispensing', function () { return Inertia::render('Dispensing/Dispensing'); })->name('dispensing');
+
+            // API routes for data/actions
+            Route::prefix('medicines')->group(function () {
+                Route::get('/list', [MedicineController::class, 'index']);        
+                Route::post('/', [MedicineController::class, 'store']);      
+                Route::post('/dispense', [MedicineController::class, 'dispense']); 
+            });
+
+            // Public routes
+            Route::get('/', fn() => Inertia::render('Index'));
+            Route::get('/login', fn() => Inertia::render('Auth/Login'))->name('login');
+            Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+
+            Route::get('/register', fn() => Inertia::render('Auth/Register'))->name('register');
+            Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
+
+            // Authenticated routes
+            Route::middleware('auth')->group(function () {
 
 
 
@@ -30,6 +72,12 @@ Route::middleware('auth')->group(function () {
 
     // Physician edit routes
     Route::get('/physician/edit', [PhysicianController::class, 'edit'])->name('physician.edit');
+    // Physician Records routes
+    Route::get('/physician/records', [PhysicianController::class, 'records'])
+        ->name('physician.records');
+
+    Route::post('/physician/update', [PhysicianController::class, 'update'])
+        ->name('physician.update');
 
     // Nurse edit routes
     Route::get('/nurse/edit', [NurseController::class, 'edit'])->name('nurse.edit');
@@ -54,8 +102,19 @@ Route::middleware('auth')->group(function () {
                 ->name('nurse.patients.makeAppointment');
             Route::post('/patients/{patient}/make-appointment', [AppointmentController::class, 'store'])
                 ->name('nurse.patients.storeAppointment');
+                    
+            Route::get('/nurse/assistant', [AssistantController::class, 'dashboard'])
+                ->name('nurse.assistant.dashboard');
 
-        
+
+            // Cashier routes
+          Route::get('/cashier', [CashierController::class, 'index'])->name('cashier.dashboard');
+          Route::get('/cashier/services-items', [CashierController::class, 'getServicesAndItems']);
+            Route::get('/cashier/patients', [CashierController::class, 'searchPatients']);
+            Route::post('/cashier/generate-bill', [CashierController::class, 'generateBill']);
+            Route::post('/cashier/record-payment', [CashierController::class, 'recordPayment']);
+            Route::get('/cashier/transactions', [CashierController::class, 'transactions']);
+
         });
 });
 

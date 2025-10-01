@@ -1,5 +1,10 @@
 import React, { useState } from "react";
 import { Link, useForm } from "@inertiajs/react";
+import { MdDashboard, MdPerson, MdOutlinePersonPin, MdInventory} from "react-icons/md";
+import { BiLogOutCircle } from "react-icons/bi";
+import {  FaFileInvoiceDollar, FaPills, FaNotesMedical } from "react-icons/fa";
+
+import Logo from "@/../images/New_Logo.png";
 
 export default function Index({ patients }) {
   const { delete: destroy } = useForm();
@@ -25,41 +30,55 @@ export default function Index({ patients }) {
       {/* Sidebar */}
       <aside className="w-64 bg-[#1E40AF] shadow-lg flex flex-col">
         <div className="h-16 flex items-center justify-center border-b border-blue-700">
-          <span className="text-xl font-bold text-[#BFDBFE]">🩺 MedBoard</span>
+           <span
+            className="flex items-center text-xl font-bold text-white space-x-2"
+            aria-label="MedBoard Logo and Title"
+          >
+            <img
+              src = {Logo}   
+              alt="MedBoard Logo"
+              className="margin-left-5 h-12 w-12 object-contain"
+            />
+            <span>Jorge & Co. Med</span>
+          </span>
         </div>
         <nav
           className="flex-1 p-4 space-y-2 text-sm font-medium text-[#BFDBFE]"
           role="navigation"
           aria-label="Main menu"
         >
-          {[
-            { href: route("dashboard"), label: "Dashboard", icon: "" },
-            { href: route("nurse.patients.index"), label: "Patient Management", icon: "" },
-            { href: "#", label: "Physician Record", icon: "" },
-            { href: "#", label: "Billing", icon: "" },
-            { href: "#", label: "Medicine Inventory", icon: "" },
-            { href: "#", label: "Dispensing", icon: "" },
-          ].map(({ href, label }) => (
-            <a
-              key={label}
-              href={href}
-              className={`block p-2 rounded focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#BFDBFE] transition ${
-                label === activeLabel
-                  ? "bg-[#2563EB] text-white font-semibold"
-                  : "hover:bg-[#2563EB] hover:text-white"
-              }`}
-              aria-current={label === activeLabel ? "page" : undefined}
-            >
-              {label}
-            </a>
-          ))}
+       {[
+              { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
+              { href: route("nurse.patients.index"), label: "Patient Management", icon: <MdPerson /> },
+              { href: route("physician.records"), label: "Physician Record", icon: <MdOutlinePersonPin /> },
+              { href: route('cashier.dashboard'), label: "Billing", icon: <FaFileInvoiceDollar /> },
+              { href: route('medicine.inventory'), label: "Medicine Inventory", icon:<MdInventory /> },
+              { href: route('nurse.assistant.dashboard'), label: "Nurse Assistant", icon: <FaNotesMedical /> },
+              { href: route('dispensing'), label: "Dispensing", icon: < FaPills /> },
+         ].map(({ href, label, icon }) => (
+           <a
+             key={label}
+             href={href}
+             className={`flex items-center gap-x-2 p-2 rounded focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#BFDBFE] transition ${
+               label === activeLabel
+                 ? "bg-[#2563EB] text-white font-semibold"
+                 : "hover:bg-[#2563EB] hover:text-white"
+             }`}
+             aria-current={label === activeLabel ? "page" : undefined} // for accessibility
+           >
+             {icon && <span className="text-lg">{icon}</span>}
+             <span>{label}</span>
+           </a>
+         ))}
         </nav>
         <div className="p-4 border-t border-blue-700">
           <button
             onClick={() => alert("Implement logout")}
             className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 transition font-semibold"
           >
-            Logout
+              <BiLogOutCircle className="text-lg" />
+               <span>Logout</span>
+    
           </button>
         </div>
       </aside>
