@@ -15,6 +15,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
         MedicineSeeder::class,
+        UserSeeder::class,
+        PatientSeeder::class,
+        AppointmentSeeder::class,
     ]);
         // Create a default test user
         User::create([

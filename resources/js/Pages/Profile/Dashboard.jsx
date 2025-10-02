@@ -10,7 +10,7 @@ import {  FaFileInvoiceDollar, FaPills, FaNotesMedical } from "react-icons/fa";
 
 import Logo from "@/../images/New_Logo.png";
 
-export default function Dashboard({ user }) {
+export default function Dashboard({ user, appointmentsTodayCount, upcomingAppointmentsCount }) {
   const { post } = useForm();
 
   function handleLogout(e) {
@@ -29,66 +29,64 @@ export default function Dashboard({ user }) {
     { day: "Sat", patients: 40 },
     { day: "Sun", patients: 30 },
   ];
-const activeLabel = "Dashboard"; 
+  const activeLabel = "Dashboard"; 
 
   return (
-    <div className="flex h-screen bg-[#E6F0FA] font-sans text-[#1E3A8A]">
+    <div className="flex min-h-screen bg-[#E6F0FA] font-sans text-[#1E3A8A]">
       {/* Sidebar */}
       <aside
         className="w-64 bg-[#1E40AF] shadow-lg flex flex-col"
-        aria-label="Primary Navigation"
-      >
-        <div
-          className="h-16 flex items-center justify-center border-b border-blue-700"
-          role="banner"
+        aria-label="Primary Navigation">
+      <div
+        className="h-16 flex items-center justify-center border-b border-blue-700"
+        role="banner"
         >
-         <span
-            className="flex items-center text-xl font-bold text-white space-x-2"
-            aria-label="MedBoard Logo and Title"
-          >
-            <img
-              src = {Logo}   
-              alt="MedBoard Logo"
-              className="margin-left-5 h-12 w-12 object-contain"
-            />
-            <span>Jorge & Co. Med</span>
-          </span>
+        <span
+          className="flex items-center space-x-2 text-xl font-bold text-white"
+          aria-label="MedBoard Logo and Title"
+        >
+          <img
+            src={Logo}
+            alt="MedBoard Logo"
+            className="h-12 w-12 object-contain"
+          />
+          <span>Jorge & Co. Med</span>
+        </span>
+
         </div>
 
-                
-          <nav
-  className="flex-1 p-4 space-y-2 text-sm font-medium text-[#BFDBFE]"
-  role="navigation"
-  aria-label="Main menu"
->
-  {[
-    { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
-    { href: route("nurse.patients.index"), label: "Patient Management", icon: <MdPerson /> },
-    { href: route("physician.records"), label: "Physician Record", icon: <MdOutlinePersonPin /> },
-    { href: route('cashier.dashboard'), label: "Billing", icon: <FaFileInvoiceDollar /> },
-    { href: route('medicine.inventory'), label: "Medicine Inventory", icon:<MdInventory /> },
-    { href: route('nurse.assistant.dashboard'), label: "Nurse Assistant", icon: <FaNotesMedical /> },
-    { href: route('dispensing'), label: "Dispensing", icon: < FaPills /> },
-  ].map(({ href, label, icon }) => (
-    <a
-      key={label}
-      href={href}
-      className={`flex items-center gap-x-2 p-2 rounded focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#BFDBFE] transition ${
-        label === activeLabel
-          ? "bg-[#2563EB] text-white font-semibold"
-          : "hover:bg-[#2563EB] hover:text-white"
-      }`}
-      aria-current={label === activeLabel ? "page" : undefined} // for accessibility
-    >
-      {icon && <span className="text-lg">{icon}</span>}
-      <span>{label}</span>
-    </a>
-  ))}
-</nav>
+        <nav
+          className="flex-1 p-4 space-y-2 text-sm font-medium text-[#BFDBFE] overflow-y-auto"
+          role="navigation"
+          aria-label="Main menu"
+        >
+          {[ 
+            { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
+            { href: route("nurse.patients.index"), label: "Patient Management", icon: <MdPerson /> },
+            { href: route("physician.records"), label: "Physician Record", icon: <MdOutlinePersonPin /> },
+            { href: route('cashier.dashboard'), label: "Billing", icon: <FaFileInvoiceDollar /> },
+            { href: route('medicine.inventory'), label: "Medicine Inventory", icon:<MdInventory /> },
+            { href: route('nurse.assistant.dashboard'), label: "Nurse Assistant", icon: <FaNotesMedical /> },
+            { href: route('dispensing'), label: "Dispensing", icon: < FaPills /> },
+          ].map(({ href, label, icon }) => (
+            <a
+              key={label}
+              href={href}
+              className={`flex items-center gap-x-2 p-2 rounded focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#BFDBFE] transition ${
+                label === activeLabel
+                  ? "bg-[#2563EB] text-white font-semibold"
+                  : "hover:bg-[#2563EB] hover:text-white"
+              }`}
+              aria-current={label === activeLabel ? "page" : undefined}
+            >
+              {icon && <span className="text-lg">{icon}</span>}
+              <span>{label}</span>
+            </a>
+          ))}
+        </nav>
 
-
-              {/* Logout link fixed at bottom */}
-        <div className="p-4 border-t border-blue-700">
+        {/* Logout link fixed at bottom */}
+        <div className="p-4 border-t border-blue-700 flex-shrink-0">
           <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-x-2 bg-red-600 text-white py-2 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-400 transition font-semibold"
@@ -99,13 +97,12 @@ const activeLabel = "Dashboard";
             <span>Logout</span>
           </button>
         </div>
-
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-y-auto" role="main" tabIndex={-1}>
-        {/* Topbar */}
-        <header className="bg-[#3B82F6] shadow px-6 py-4 flex justify-between items-center">
+      <div className="flex-1 flex flex-col overflow-auto" role="main" tabIndex={-1}>
+        {/* Top bar */}
+        <header className="bg-[#3B82F6] shadow px-6 py-4 flex justify-between items-center flex-shrink-0">
           <label htmlFor="search" className="sr-only">Search patients, appointments</label>
           <input
             id="search"
@@ -127,48 +124,16 @@ const activeLabel = "Dashboard";
         </header>
 
         {/* Page Content */}
-        <main className="p-6">
+        <main className="p-6 overflow-auto">
           <h1 className="text-3xl font-bold mb-6 text-[#1E40AF]">Welcome, {user.first_name}!</h1>
-
-          {/* Conditional Links */}
-          {user.position === "Doctor" && (
-            <a
-              href={route("physician.edit")}
-              className="block mb-4 text-[#2563EB] font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
-            >
-              🩺 Edit Physician Data
-            </a>
-          )}
-          {user.position === "Nurse" && (
-            <>
-              <a
-                href={route("nurse.edit")}
-                className="block mb-2 text-[#2563EB] font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
-              >
-                 Edit Nurse Assignment
-              </a>
-              <a
-                href={route("nurse.patients.create")}
-                className="block mb-2 text-[#2563EB] font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
-              >
-                 Add Patient
-              </a>
-              <a
-                href={route("nurse.patients.index")}
-                className="block mb-4 text-[#2563EB] font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
-              >
-                 View Patients
-              </a>
-            </>
-          )}
 
           {/* Dashboard Cards */}
           <section
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10"
             aria-label="Dashboard summary cards" >
             {[
-              { label: "Patients Today", value: 143 },
-              { label: "Upcoming Appointments", value: 69 },
+              { label: "Patients Today", value: appointmentsTodayCount },
+              { label: "Upcoming Appointments", value: upcomingAppointmentsCount },
               { label: "Billing Section", value: 25 },
               { label: "Medicine Stock Alerts", value: 67 },
             ].map(({ label, value }) => (
