@@ -2,7 +2,7 @@
 import React from "react";
 import ActionMenu from "./ActionMenu"; // Import the ActionMenu
 
-const PatientRow = ({ patient, onDelete, onEdit }) => {
+const PatientRow = ({ patient, onDelete, onEdit, onMakeAppointment }) => {
   return (
     <tr className="hover:bg-gray-50">
       <td className="px-4 py-2 border text-sm text-gray-800">{patient.id}</td>
@@ -20,6 +20,7 @@ const PatientRow = ({ patient, onDelete, onEdit }) => {
           patientId={patient.id}
           onEdit={onEdit}
           onDelete={onDelete}
+          onMakeAppointment={onMakeAppointment}
         />
       </td>
     </tr>

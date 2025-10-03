@@ -1,10 +1,9 @@
-// resources/js/Pages/Dashboard.jsx
 import React from "react";
 import { useForm } from "@inertiajs/react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Sidebar from '../../Components/Sidebar';
 
-export default function Dashboard({ user, appointmentsTodayCount, upcomingAppointmentsCount }) {
+export default function Dashboard({ user, role, appointmentsTodayCount, upcomingAppointmentsCount }) {
   const { post } = useForm();
 
   function handleLogout(e) {
@@ -28,8 +27,8 @@ export default function Dashboard({ user, appointmentsTodayCount, upcomingAppoin
 
   return (
     <div className="flex min-h-screen bg-[#E6F0FA] font-sans text-[#1E3A8A]">
-      {/* Sidebar Component */}
-      <Sidebar activeLabel={activeLabel} handleLogout={handleLogout} />
+      {/* Pass the user role (position in lowercase) to Sidebar */}
+      <Sidebar role={role} activeLabel={activeLabel} handleLogout={handleLogout} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-auto" role="main" tabIndex={-1}>

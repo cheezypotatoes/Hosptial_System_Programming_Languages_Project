@@ -14,8 +14,6 @@ class PatientController extends Controller
     public function create()
     {
 
-        
-
         return inertia('Nurse/AddPatients'); // React/Inertia page
     }
 
@@ -41,13 +39,19 @@ class PatientController extends Controller
     }
 
     public function index()
-    {
-        $patients = Patient::latest()->get();
+{
+    // Fetch the authenticated user's role and convert it to lowercase
+    $role = strtolower(auth()->user()->position);
 
-        return inertia('Nurse/Index', [
-            'patients' => $patients,
-        ]);
-    }
+    // Fetch all patients
+    $patients = Patient::latest()->get();
+
+    // Return the data with the lowercase user role
+    return inertia('Nurse/PatientManagement', [
+        'patients' => $patients,
+        'role' => $role,  // Ensure role is passed to the frontend
+    ]);
+}
 
     public function destroy(Patient $patient)
     {

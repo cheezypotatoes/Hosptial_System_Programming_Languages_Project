@@ -1,12 +1,9 @@
 import React, { useState } from "react";
 import { Link, useForm } from "@inertiajs/react";
-import { MdDashboard, MdPerson, MdOutlinePersonPin, MdInventory } from "react-icons/md";
-import { BiLogOutCircle } from "react-icons/bi";
-import { FaFileInvoiceDollar, FaPills, FaNotesMedical } from "react-icons/fa";
-import Logo from "@/../images/New_Logo.png";
+import Sidebar from "@/Components/Sidebar";
 import PatientRow from "../../Components/PatientRow";
 
-export default function Index({ patients }) {
+export default function PatientManagement({ patients, role }) {
   const { delete: destroy } = useForm();
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -19,8 +16,11 @@ export default function Index({ patients }) {
 
   // Redirect to Edit page
   function handleEdit(id) {
-    // Navigate to the patient's edit page using Inertia's route function
     window.location.href = route('nurse.patients.edit', id);
+  }
+
+  function handleAppointment(id) {
+    window.location.href = route('nurse.patients.makeAppointment', id);
   }
 
   const activeLabel = "Patient Management"; // highlight the active menu item
@@ -32,49 +32,19 @@ export default function Index({ patients }) {
       patient.last_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Define the handleLogout function for the Sidebar
+  function handleLogout() {
+    alert("Logging out..."); // Implement logout functionality here
+  }
+
   return (
     <div className="flex min-h-screen bg-[#E6F0FA] font-sans text-[#1E3A8A]">
-      {/* Sidebar */}
-      <aside className="w-64 bg-[#1E40AF] shadow-lg flex flex-col">
-        <div className="h-16 flex items-center justify-center border-b border-blue-700">
-          <span className="flex items-center text-xl font-bold text-white space-x-2" aria-label="MedBoard Logo and Title">
-            <img src={Logo} alt="MedBoard Logo" className="h-12 w-12 object-contain" />
-            <span>Jorge & Co. Med</span>
-          </span>
-        </div>
-        <nav className="flex-1 p-4 space-y-2 text-sm font-medium text-[#BFDBFE]">
-          {[ 
-            { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
-            { href: route("nurse.patients.index"), label: "Patient Management", icon: <MdPerson /> },
-            { href: route("physician.records"), label: "Physician Record", icon: <MdOutlinePersonPin /> },
-            { href: route('cashier.dashboard'), label: "Billing", icon: <FaFileInvoiceDollar /> },
-            { href: route('medicine.inventory'), label: "Medicine Inventory", icon: <MdInventory /> },
-            { href: route('nurse.assistant.dashboard'), label: "Nurse Assistant", icon: <FaNotesMedical /> },
-            { href: route('dispensing'), label: "Dispensing", icon: <FaPills /> },
-          ].map(({ href, label, icon }) => (
-            <a
-              key={label}
-              href={href}
-              className={`flex items-center gap-x-2 p-2 rounded focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#BFDBFE] transition ${
-                label === activeLabel ? "bg-[#2563EB] text-white font-semibold" : "hover:bg-[#2563EB] hover:text-white"
-              }`}
-              aria-current={label === activeLabel ? "page" : undefined}
-            >
-              {icon && <span className="text-lg">{icon}</span>}
-              <span>{label}</span>
-            </a>
-          ))}
-        </nav>
-        <div className="p-4 border-t border-blue-700">
-          <button
-            onClick={() => alert("Implement logout")}
-            className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 transition font-semibold"
-          >
-            <BiLogOutCircle className="text-lg" />
-            <span>Logout</span>
-          </button>
-        </div>
-      </aside>
+      {/* Sidebar Component */}
+      <Sidebar 
+        role={role}
+        activeLabel={activeLabel} 
+        handleLogout={handleLogout} 
+      />
 
       {/* Main Content */}
       <main className="flex-1 p-8">
@@ -120,6 +90,7 @@ export default function Index({ patients }) {
                       patient={patient}
                       onDelete={handleDelete}
                       onEdit={handleEdit} // Passing the handleEdit function here
+                      onMakeAppointment={handleAppointment}
                     />
                   ))
                 ) : (

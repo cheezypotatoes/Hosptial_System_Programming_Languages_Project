@@ -3,4 +3,6 @@ protected $routeMiddleware = [
     'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
     // Add your middleware here
     'assistant' => \App\Http\Middleware\AssistantMiddleware::class,
+    'attach.role' => \App\Http\Middleware\AttachUserRole::class,
+    
 ];
