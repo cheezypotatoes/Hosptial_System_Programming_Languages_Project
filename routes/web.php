@@ -108,8 +108,8 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 
             // Cashier routes
-          Route::get('/cashier', [CashierController::class, 'index'])->name('cashier.dashboard');
-          Route::get('/cashier/services-items', [CashierController::class, 'getServicesAndItems']);
+            Route::get('/cashier', [CashierController::class, 'index'])->name('cashier.dashboard');
+            Route::get('/cashier/services-items', [CashierController::class, 'getServicesAndItems']);
             Route::get('/cashier/patients', [CashierController::class, 'searchPatients']);
             Route::post('/cashier/generate-bill', [CashierController::class, 'generateBill']);
             Route::post('/cashier/record-payment', [CashierController::class, 'recordPayment']);

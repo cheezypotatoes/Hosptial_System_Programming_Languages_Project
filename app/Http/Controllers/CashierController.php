@@ -15,15 +15,18 @@ class CashierController extends Controller
 {
     // Dashboard view
     public function index()
-    {
-        $pendingPayments = Payment::where('status', 'processing')->latest()->take(5)->get();
-        $recentTransactions = Transaction::latest()->take(5)->get();
+{
+    // Fetching pending payments, recent transactions, and all patients
+    $pendingPayments = Payment::where('status', 'processing')->latest()->take(5)->get();
+    $recentTransactions = Transaction::latest()->take(5)->get();
+    $allPatients = Patient::all(); // Fetching all patients
 
-        return Inertia::render('Cashier/CashierDashboard', [
-            'pendingPayments'   => $pendingPayments,
-            'recentTransactions'=> $recentTransactions,
-        ]);
-    }
+    return Inertia::render('Cashier/CashierDashboard', [
+        'pendingPayments'   => $pendingPayments,
+        'recentTransactions'=> $recentTransactions,
+        'patients'          => $allPatients, // Passing all patients to the view
+    ]);
+}
 
     // 🔹 Fetch services + medicines + items
     public function getServicesAndItems()
