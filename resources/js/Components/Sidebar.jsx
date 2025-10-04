@@ -34,8 +34,9 @@ const Sidebar = ({ role, activeLabel, handleLogout }) => {
       { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
       { href: route('cashier.dashboard'), label: "Billing", icon: <FaFileInvoiceDollar /> },
     ],
-    physician: [
+    doctor: [
       { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
+      { href: route("physician.appointments.index"), label: "View All Appointments", icon: <MdDashboard /> },
       { href: route("physician.records"), label: "Physician Record", icon: <MdOutlinePersonPin /> },
     ],
     default: [

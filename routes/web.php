@@ -11,7 +11,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\ServiceController;
-use App\Http\Controllers\Api\PatientsController;
+use App\Http\Controllers\PhysicianAppointmentController;
 use App\Http\Controllers\AssistantController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\TransactionController;
@@ -83,6 +83,11 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
     Route::get('/nurse/edit', [NurseController::class, 'edit'])->name('nurse.edit');
     Route::post('/nurse/edit', [NurseController::class, 'update'])->name('nurse.update');
     
+
+    Route::get('/physician/appointments', [PhysicianAppointmentController::class, 'index'])
+        ->name('physician.appointments.index');
+
+
     // Nurse patient management routes with middleware applied to the whole group
     Route::prefix('nurse')
         ->middleware(EnsureUserIsNurse::class)
@@ -106,6 +111,11 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
                     
             Route::get('/nurse/assistant', [AssistantController::class, 'dashboard'])
                 ->name('nurse.assistant.dashboard');
+
+
+   
+
+
 
 
             // Cashier routes

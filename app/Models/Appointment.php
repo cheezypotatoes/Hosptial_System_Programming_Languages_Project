@@ -37,4 +37,14 @@ class Appointment extends Model
     {
         return $this->belongsTo(User::class, 'doctor_id');
     }
+
+    public function medications()
+    {
+        return $this->hasMany(AppointmentMedication::class);
+    }
+
+    public function services()
+    {
+        return $this->hasMany(AppointmentService::class);
+    }
 }

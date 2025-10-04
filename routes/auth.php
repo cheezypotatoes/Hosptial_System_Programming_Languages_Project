@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PhysicianController;
 use App\Http\Controllers\NurseController;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\PhysicianAppointmentController;
 use App\Http\Middleware\EnsureUserIsNurse;
 use App\Http\Controllers\AppointmentController;
 
@@ -36,6 +37,12 @@ Route::middleware('auth')->group(function () {
     // Nurse edit routes
     Route::get('/nurse/edit', [NurseController::class, 'edit'])->name('nurse.edit');
     Route::post('/nurse/edit', [NurseController::class, 'update'])->name('nurse.update');
+
+
+    Route::get('/physician/appointments', [PhysicianAppointmentController::class, 'index'])
+        ->name('physician.appointments.index');
+
+
 
     // Nurse patient management routes with middleware applied to all
     Route::prefix('nurse')->middleware(EnsureUserIsNurse::class)->group(function () {
