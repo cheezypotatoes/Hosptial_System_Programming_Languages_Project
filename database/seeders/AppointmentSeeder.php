@@ -33,6 +33,10 @@ class AppointmentSeeder extends Seeder
                 'patient_id' => $faker->randomElement($patientIds),
                 'fee' => $faker->randomFloat(2, 50, 300),
                 'notes' => $faker->sentence(),
+                'problem' => $faker->word(),           // Random problem (short description)
+                'history' => $faker->text(200),        // Random medical history (short text)
+                'symptoms' => $faker->sentence(),      // Random symptoms
+                'medication' => $faker->word(),        // Random medication
             ]);
         }
 
@@ -44,6 +48,10 @@ class AppointmentSeeder extends Seeder
                 'patient_id' => $faker->randomElement($patientIds),
                 'fee' => $faker->randomFloat(2, 50, 300),
                 'notes' => $faker->sentence(),
+                'problem' => $faker->word(),           // Random problem (short description)
+                'history' => $faker->text(200),        // Random medical history (short text)
+                'symptoms' => $faker->sentence(),      // Random symptoms
+                'medication' => $faker->word(),        // Random medication
             ]);
         }
 

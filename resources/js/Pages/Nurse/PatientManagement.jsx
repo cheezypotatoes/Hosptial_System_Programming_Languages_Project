@@ -32,19 +32,17 @@ export default function PatientManagement({ patients, role }) {
       patient.last_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Define the handleLogout function for the Sidebar
-  function handleLogout() {
-    alert("Logging out..."); // Implement logout functionality here
+  
+  function handleLogout(e) {
+    e.preventDefault();
+    Inertia.post(route('/logout'));
   }
 
   return (
     <div className="flex min-h-screen bg-[#E6F0FA] font-sans text-[#1E3A8A]">
       {/* Sidebar Component */}
-      <Sidebar 
-        role={role}
-        activeLabel={activeLabel} 
-        handleLogout={handleLogout} 
-      />
+  
+      <Sidebar role={role} activeLabel={activeLabel} handleLogout={handleLogout} />
 
       {/* Main Content */}
       <main className="flex-1 p-8">

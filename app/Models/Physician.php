@@ -9,15 +9,16 @@ class Physician extends Model
 {
     use HasFactory;
 
+    // Define the table name explicitly if it's not the plural form of the model name
+    protected $table = 'physicians';
+
+    // The attributes that are mass assignable
     protected $fillable = [
-        'user_id',
+        'user_id', 
         'specialization',
-        'contract_number',
-        'room_number',
-        'starting_time',
-        'end_time',
     ];
 
+    // Relationship: A physician belongs to a user (doctor)
     public function user()
     {
         return $this->belongsTo(User::class);

@@ -15,6 +15,13 @@ return new class extends Migration
             $table->dateTime('checkup_date');
             $table->text('notes')->nullable();
             $table->decimal('fee', 8, 2)->default(0.00);
+
+            // New fields added to the table
+            $table->text('problem')->nullable();        // Problem description
+            $table->text('history')->nullable();        // Medical history
+            $table->text('symptoms')->nullable();       // Symptoms reported
+            $table->text('medication')->nullable();     // Medication prescribed
+
             $table->timestamps();
         });
     }
