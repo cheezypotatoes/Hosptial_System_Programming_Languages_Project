@@ -45,8 +45,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('nurse.patients.edit');
         Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('nurse.patients.update');
         Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('nurse.patients.destroy');
-        
 
+        Route::get('/appointments', [AppointmentController::class, 'viewAllAppointments'])->name('nurse.appointments.viewAll');
         Route::get('/patients/{patient}/appointments', action: [AppointmentController::class, 'viewAppointments'])->name('nurse.patients.viewAppointments');
         Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroyAppointment'])->name('nurse.appointments.destroy');
         Route::get('/patients/{patient}/make-appointment', [AppointmentController::class, 'create'])->name('nurse.patients.makeAppointment');

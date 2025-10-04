@@ -72,9 +72,31 @@ class AppointmentController extends Controller
     {
         $appointments = $patient->appointments()->with('doctor')->get();
 
-        return Inertia::render('Nurse/PatientAppointments', [
+        return Inertia::render('Nurse/ViewAllAppointments', [
             'patient' => $patient,
             'appointments' => $appointments,
+        ]);
+    }
+
+    public function viewAllAppointments(Request $request)
+    {
+        $user = $request->user();
+        
+        // Get the position of the user and convert it to lowercase
+        $role = strtolower($user->position); // this is the `role` you're passing
+        
+
+        // Fetch all appointments along with related patient and doctor data
+        $appointments = Appointment::with('patient')
+        ->join('users', 'appointments.doctor_id', '=', 'users.id') // Join with the users table for doctor's data
+        ->select('appointments.*', 'users.first_name as doctor_first_name', 'users.last_name as doctor_last_name') // Select doctor's name along with appointment data
+        ->orderBy('checkup_date', 'desc') // Order by checkup date in descending order
+        ->get();
+        
+
+        return Inertia::render('Nurse/ViewAllAppointments', [
+            'appointments' => $appointments,
+            'role' => $role,
         ]);
     }
 

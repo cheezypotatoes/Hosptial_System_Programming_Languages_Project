@@ -94,6 +94,7 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
             Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('nurse.patients.update');
             Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('nurse.patients.destroy');
             
+            Route::get('/appointments', [AppointmentController::class, 'viewAllAppointments'])->name('nurse.appointments.viewAll');
             Route::get('/patients/{patient}/appointments', [AppointmentController::class, 'viewAppointments'])
                 ->name('nurse.patients.viewAppointments');
             Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroyAppointment'])

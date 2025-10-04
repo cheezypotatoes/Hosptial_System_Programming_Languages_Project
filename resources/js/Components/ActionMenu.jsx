@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { MdMoreHoriz } from "react-icons/md";
 
-const ActionMenu = ({ patientId, onEdit, onDelete, onMakeAppointment }) => {
+const ActionMenu = ({ patientId, onEdit, onDelete, onMakeAppointment, onViewAppointments }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   // Toggle the action menu visibility
@@ -38,7 +38,16 @@ const ActionMenu = ({ patientId, onEdit, onDelete, onMakeAppointment }) => {
                 Delete
               </button>
             </li>
-            {/* Add Make Appointment Option */}
+            {/* View Appointments Option */}
+            <li>
+              <button
+                onClick={() => onViewAppointments(patientId)}
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-100"
+              >
+                View Appointments
+              </button>
+            </li>
+            {/* Make Appointment Option */}
             <li>
               <button
                 onClick={() => onMakeAppointment(patientId)}

@@ -23,6 +23,12 @@ export default function PatientManagement({ patients, role }) {
     window.location.href = route('nurse.patients.makeAppointment', id);
   }
 
+  function handleViewAppointments(id) {
+    window.location.href = route('nurse.patients.viewAppointments', id); // This is the route where appointments are viewed
+  }
+
+
+
   const activeLabel = "Patient Management"; // highlight the active menu item
 
   // Filter patients based on search term
@@ -89,6 +95,7 @@ export default function PatientManagement({ patients, role }) {
                       onDelete={handleDelete}
                       onEdit={handleEdit} // Passing the handleEdit function here
                       onMakeAppointment={handleAppointment}
+                      onViewAppointments={handleViewAppointments}
                     />
                   ))
                 ) : (
