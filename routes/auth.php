@@ -41,7 +41,10 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/physician/appointments', [PhysicianAppointmentController::class, 'index'])
         ->name('physician.appointments.index');
-
+    
+    Route::get('/physician/appointments/{patientId}', [PhysicianAppointmentController::class, 'show']);
+    Route::post('/physician/appointments/{appointmentId?}', [PhysicianAppointmentController::class, 'store'])
+    ->name('physician.appointments.store');
 
 
     // Nurse patient management routes with middleware applied to all

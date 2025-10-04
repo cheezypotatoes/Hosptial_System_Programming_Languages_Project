@@ -79,6 +79,11 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
     Route::post('/physician/update', [PhysicianController::class, 'update'])
         ->name('physician.update');
 
+    Route::get('/physician/appointments/{patientId}', [PhysicianAppointmentController::class, 'show']);
+    Route::post('/physician/appointments/{appointmentId?}', [PhysicianAppointmentController::class, 'store'])
+    ->name('physician.appointments.store');
+
+
     // Nurse edit routes
     Route::get('/nurse/edit', [NurseController::class, 'edit'])->name('nurse.edit');
     Route::post('/nurse/edit', [NurseController::class, 'update'])->name('nurse.update');

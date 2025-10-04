@@ -19,11 +19,10 @@ export default function Appointments({ role, physician, appointments }) {
     }
   }
 
-
   return (
     <div className="flex min-h-screen bg-[#E6F0FA] font-sans text-[#1E3A8A]">
       {/* Sidebar Component */}
-        <Sidebar role={role} activeLabel={"TEST"} handleLogout={handleLogout} />
+      <Sidebar role={role} activeLabel={"TEST"} handleLogout={handleLogout} />
 
       {/* Main Content */}
       <main className="flex-1 p-8">
@@ -60,6 +59,9 @@ export default function Appointments({ role, physician, appointments }) {
                   <th className="px-4 py-2 border text-left text-sm font-semibold text-gray-700">
                     Symptoms
                   </th>
+                  <th className="px-4 py-2 border text-left text-sm font-semibold text-gray-700">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -74,11 +76,19 @@ export default function Appointments({ role, physician, appointments }) {
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-800">{appointment.problem}</td>
                       <td className="px-4 py-4 text-sm text-gray-800">{appointment.symptoms}</td>
+                      <td className="px-4 py-4 text-sm text-gray-800">
+                        <Link
+                          href={`/physician/appointments/${appointment.patient.id}`}
+                          className="text-blue-500 hover:text-blue-700 font-semibold"
+                        >
+                          View
+                        </Link>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="4" className="text-center py-4 text-gray-600">
+                    <td colSpan="5" className="text-center py-4 text-gray-600">
                       No appointments found.
                     </td>
                   </tr>

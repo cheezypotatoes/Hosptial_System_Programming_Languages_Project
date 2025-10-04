@@ -17,9 +17,7 @@ class Appointment extends Model
         'notes',
         'fee',
         'problem',      // New field for problem
-        'history',      // New field for medical history
         'symptoms',     // New field for symptoms
-        'medication',   // New field for medication
     ];
 
     protected $casts = [

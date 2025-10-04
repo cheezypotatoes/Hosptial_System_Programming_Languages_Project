@@ -41,8 +41,6 @@ class AppointmentController extends Controller
         $request->validate([
             'doctor_id' => 'required|exists:users,id',
             'checkup_date' => 'required|date',
-            'problem' => 'required|string|max:255', // Add validation for the problem field
-            'history' => 'nullable|string', // Medical history is optional, but should be a string if provided
             'symptoms' => 'nullable|string', // Symptoms field is optional
             'medication' => 'nullable|string', // Medication field is optional
             'fee' => 'required|numeric|min:0', // Fee must be a positive number
@@ -53,7 +51,6 @@ class AppointmentController extends Controller
             'patient_id' => $patient->id,
             'doctor_id' => $request->doctor_id,  // Store the selected doctor ID
             'checkup_date' => $request->checkup_date,
-            'problem' => $request->problem,      // Store the problem field
             'history' => $request->history,      // Store the medical history
             'symptoms' => $request->symptoms,    // Store the symptoms
             'medication' => $request->medication, // Store the medication

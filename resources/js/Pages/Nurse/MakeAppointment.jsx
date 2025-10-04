@@ -7,7 +7,6 @@ export default function MakeAppointment({ patient, doctors }) {
         checkup_date: "",
         notes: "",
         fee: "",
-        problem: "",       // New field for problem
         history: "",       // New field for medical history
         symptoms: "",      // New field for symptoms
         medication: "",    // New field for medication
@@ -62,21 +61,7 @@ export default function MakeAppointment({ patient, doctors }) {
                     {errors.checkup_date && <p className="text-red-500 text-sm">{errors.checkup_date}</p>}
                 </div>
 
-                {/* Problem */}
-                <div>
-                    <label className="block text-sm font-medium mb-1">Problem</label>
-                    <input
-                        type="text"
-                        name="problem"
-                        value={data.problem}
-                        onChange={e => setData("problem", e.target.value)}
-                        className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        required
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Describe the main issue or reason for the appointment (e.g., pain, discomfort, etc.).</p>
-                    {errors.problem && <p className="text-red-500 text-sm">{errors.problem}</p>}
-                </div>
-
+              
                 {/* Medical History */}
                 <div>
                     <label className="block text-sm font-medium mb-1">Medical History</label>
