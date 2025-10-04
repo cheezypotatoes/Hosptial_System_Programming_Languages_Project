@@ -75,7 +75,6 @@ export default function ViewAllAppointments({ appointments, role }) {
                   <th className="px-4 py-2 border text-left text-sm font-semibold text-gray-700">Patient</th>
                   <th className="px-4 py-2 border text-left text-sm font-semibold text-gray-700">Doctor</th>
                   <th className="px-4 py-2 border text-left text-sm font-semibold text-gray-700">Appointment Date</th>
-                  <th className="px-4 py-2 border text-left text-sm font-semibold text-gray-700">Problem</th>
                   <th className="px-4 py-2 border text-left text-sm font-semibold text-gray-700">Symptoms</th>
                   <th className="px-4 py-2 border text-left text-sm font-semibold text-gray-700">Actions</th>
                 </tr>
@@ -93,7 +92,7 @@ export default function ViewAllAppointments({ appointments, role }) {
                       <td className="px-4 py-4 text-sm text-gray-800">
                         {new Date(appointment.checkup_date).toLocaleString()}
                       </td>
-                      <td className="px-4 py-4 text-sm text-gray-800">{appointment.problem}</td>
+            
                       <td className="px-4 py-4 text-sm text-gray-800">{appointment.symptoms}</td>
                       <td className="px-4 py-4 text-sm text-gray-800">
                         {/* ActionMenu Component for each appointment */}

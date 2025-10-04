@@ -65,15 +65,35 @@ class AppointmentController extends Controller
 
 
     // View appointments for a patient
-    public function viewAppointments(Patient $patient)
-    {
-        $appointments = $patient->appointments()->with('doctor')->get();
+public function viewAppointments(Request $request, Patient $patient)
+{
+    $user = $request->user();
+        
+        // Get the position of the user and convert it to lowercase
+    $role = strtolower($user->position);
+    // Eager load the 'doctor' relation to get doctor details
+    $appointments = $patient->appointments()->with('doctor')->get();
 
-        return Inertia::render('Nurse/ViewAllAppointments', [
-            'patient' => $patient,
-            'appointments' => $appointments,
-        ]);
-    }
+    // Loop through the appointments to add patient and doctor details
+    $appointments = $appointments->map(function ($appointment) {
+        // Get the full name of the patient
+        $appointment->patient_full_name = $appointment->patient->first_name . ' ' . $appointment->patient->last_name;
+
+        // Get the first name and last name of the doctor
+        $appointment->doctor_first_name = $appointment->doctor->first_name;
+        $appointment->doctor_last_name = $appointment->doctor->last_name;
+
+        return $appointment;
+    });
+
+    return Inertia::render('Nurse/ViewAllAppointments', [
+        'role' => $role,
+        'patient' => $patient,
+        'appointments' => $appointments,
+    ]);
+}
+
+
 
     public function viewAllAppointments(Request $request)
     {
