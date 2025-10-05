@@ -11,23 +11,18 @@ class Category extends Model
 
     // Mass assignable fields
     protected $fillable = [
-        'name',       // e.g., Consultation, Medication
-        'description' // optional description
+        'name',     
+        'description' 
     ];
 
-    /**
-     * A category can have many services
-     */
-    public function services()
-    {
-        return $this->hasMany(Service::class);
-    }
+  public function services()
+{
+    return $this->hasMany(Service::class);
+}
 
-    /**
-     * A category can have many items
-     */
-    public function items()
-    {
-        return $this->hasMany(Item::class);
-    }
+public function items()
+{
+    return $this->hasMany(Item::class);
+}
+
 }

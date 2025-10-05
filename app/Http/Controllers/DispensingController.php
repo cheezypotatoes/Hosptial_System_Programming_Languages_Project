@@ -2,12 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 use App\Models\Dispense;
-use Illuminate\Http\Request;
 use App\Models\Medicine;
+use App\Models\Category;
+use Illuminate\Http\Request;
 
 class DispensingController extends Controller
 {
+    // ✅ API endpoint for categories with services and items
+    public function categories()
+    {
+        return Category::with(['services', 'items'])->get();
+    }
+
     // Store a dispensing record
     public function store(Request $request)
     {
@@ -35,10 +44,17 @@ class DispensingController extends Controller
             $med->save();
         }
 
-        return back()->with('success', 'Medicine dispensed successfully.');
+        return response()->json(['message' => 'Medicine dispensed successfully.']);
     }
 
-    // Get recent dispensing logs
+    public function index()
+{
+    $nurse = Auth::user();
+    return Inertia::render('Dispensing', [
+        'role' => $nurse->role ?? 'nurse',
+        'nurseName' => $nurse->name,
+    ]);
+}
     public function logs()
     {
         return Dispense::latest()->take(10)->get();

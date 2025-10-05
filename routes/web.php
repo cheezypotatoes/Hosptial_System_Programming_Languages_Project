@@ -17,13 +17,18 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\MedicineController;
 use App\Http\Controllers\DispensingController;
+use App\Http\Controllers\Api\PrescriptionController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Api\PatientsController;
+use App\Http\Controllers\MedicalConditionController;
 use Inertia\Inertia;
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 
 
             //Api
+         
             Route::get('/services', [ServiceController::class, 'index']);
             Route::get('/patients', [PatientController::class, 'index']);
             Route::get('/pending-payments', [PaymentController::class, 'pending']);
@@ -31,24 +36,43 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
             Route::get('/items', [ItemController::class, 'index']);
 
             //Medicine Routes
-            Route::get('/medicines', function () {
-                return Inertia::render('Medicine/MedicineInventory');
-            })->name('medicine.inventory');
-
-            
             Route::middleware(['auth'])->group(function () {
                 Route::get('/medicine/inventory', [MedicineController::class, 'index'])->name('medicine.inventory');
                 Route::post('/medicine/store', [MedicineController::class, 'store'])->name('medicine.store');
 
-                // Dispensing
-                Route::post('/dispensing/store', [DispensingController::class, 'store'])->name('dispensing.store');
-                Route::get('/dispensing/logs', [DispensingController::class, 'logs'])->name('dispensing.logs');
-            });
+        
+             
+                });
+                
+                //dispensing
 
-
+          
+                Route::middleware(['auth'])->group(function () {
+                    Route::get('/dispensing', [DispensingController::class, 'index'])->name('dispensing');
+                });
                 Route::get('/dispensing', function () { return Inertia::render('Dispensing/Dispensing'); })->name('dispensing');
 
-            // API routes for data/actions
+                 Route::get('/categories', [DispensingController::class, 'categories'])->name('categories'); 
+                Route::post('/dispense/store', [DispensingController::class, 'store'])->name('dispense.store');
+                Route::get('/dispense/logs', [DispensingController::class, 'logs'])->name('dispense.logs');
+                Route::get('/categories', [DispensingController::class, 'categories'])->name('categories');
+
+                //patient prescription
+                
+              Route::get('/patients', [PatientsController::class, 'index']);
+                Route::get('/patients/{id}', [PatientsController::class, 'show']);
+                Route::get('/patients/{id}/prescriptions', [PrescriptionController::class, 'getByPatient']);
+
+                // Patient Medical Condition
+                Route::get('/patients/{id}/medical-conditions', [MedicalConditionController::class, 'index']);
+                Route::post('/patients/{id}/medical-conditions', [MedicalConditionController::class, 'store']);
+                Route::get('/medical-conditions/{id}', [MedicalConditionController::class, 'show']);
+
+                // print
+                Route::get('/prescriptions/{id}/print', [PrescriptionController::class, 'print'])->name('prescriptions.print');
+
+
+                            // API routes for data/actions
             Route::prefix('medicines')->group(function () {
                 Route::get('/list', [MedicineController::class, 'index']);        
                 Route::post('/', [MedicineController::class, 'store']);      
@@ -75,10 +99,8 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
     // Physician Records routes
     Route::get('/physician/records', [PhysicianController::class, 'records'])
         ->name('physician.records');
-
     Route::post('/physician/update', [PhysicianController::class, 'update'])
         ->name('physician.update');
-
     Route::get('/physician/appointments/{patientId}', [PhysicianAppointmentController::class, 'show']);
     Route::post('/physician/appointments/{appointmentId?}', [PhysicianAppointmentController::class, 'store'])
     ->name('physician.appointments.store');
@@ -124,14 +146,22 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 
             // Cashier routes
-            Route::get('/cashier', [CashierController::class, 'index'])->name('cashier.dashboard');
-            Route::get('/cashier/services-items', [CashierController::class, 'getServicesAndItems']);
-            Route::get('/cashier/patients', [CashierController::class, 'searchPatients']);
-            Route::post('/cashier/generate-bill', [CashierController::class, 'generateBill']);
-            Route::post('/cashier/record-payment', [CashierController::class, 'recordPayment']);
-            Route::get('/cashier/transactions', [CashierController::class, 'transactions']);
+                Route::prefix('cashier')->group(function () {
+                    Route::get('/dashboard', [CashierController::class, 'index'])->name('cashier.dashboard');
+                          Route::get('/cashier/categories', [CashierController::class, 'getCategories'])->name('cashier.categories');
+                    Route::get('/services-items', [CashierController::class, 'getServicesAndItems'])->name('cashier.services.items');
+                    Route::get('/cashier/patients', [CashierController::class, 'searchPatients'])->name('cashier.patients');
+                    Route::post('/bill', [CashierController::class, 'generateBill'])->name('cashier.bill');
+                    Route::post('/payment', [CashierController::class, 'recordPayment'])->name('cashier.payment');
+                    Route::get('/transactions', [CashierController::class, 'transactions'])->name('cashier.transactions');
+
+
+            
+                });
+
 
         });
 });
+
 
 require __DIR__.'/auth.php';

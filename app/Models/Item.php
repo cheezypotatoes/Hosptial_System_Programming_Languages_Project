@@ -9,7 +9,6 @@ class Item extends Model
 {
     use HasFactory;
 
-    // Mass assignable fields
     protected $fillable = [
         'name',
         'description',
@@ -18,17 +17,10 @@ class Item extends Model
         'category_id',
     ];
 
-    /**
-     * Item belongs to a category
-     */
-    public function category()
-    {
-        return $this->belongsTo(Category::class);
-    }
-
-    /**
-     * Ensure stock quantity is always non-negative
-     */
+public function category()
+{
+    return $this->belongsTo(Category::class);
+}
     protected static function booted()
     {
         static::saving(function ($item) {

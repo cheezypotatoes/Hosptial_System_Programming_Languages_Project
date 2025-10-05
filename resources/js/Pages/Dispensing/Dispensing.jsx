@@ -1,242 +1,243 @@
-import React, { useState, useEffect } from "react";
-import Select from "rc-select";
-import "rc-select/assets/index.css"; // Import rc-select styles
-import { MdDashboard, MdPerson, MdOutlinePersonPin, MdInventory } from "react-icons/md";
-import { BiLogOutCircle } from "react-icons/bi";
-import { FaFileInvoiceDollar, FaPills, FaNotesMedical } from "react-icons/fa";
-import Logo from "@/../images/New_Logo.png";
+import React, { useState, useEffect, useRef } from "react";
+import Sidebar from "../../Components/Sidebar";
+import axios from "axios";
+import { router } from "@inertiajs/react";
 
-export default function CashierDashboard() {
-  const [search, setSearch] = useState(""); // search query for patients
-  const [patients, setPatients] = useState([]); // list of all patients
-  const [selectedPatient, setSelectedPatient] = useState(null); // selected patient
-  const [cart, setCart] = useState([]); // items added to the cart
-  const [selectedService, setSelectedService] = useState(""); // selected service/item
-  const [quantity, setQuantity] = useState(1); // quantity of service/item
-  const [amountReceived, setAmountReceived] = useState(""); // amount received from patient
-  const [paymentMethod, setPaymentMethod] = useState("Cash"); // payment method
-  const [showReceipt, setShowReceipt] = useState(false); // show/hide receipt
 
-  // Fetch patients from the API on initial load
+export default function Dispensing({ role}) {
+  const [patients, setPatients] = useState([]);
+  const [search, setSearch] = useState("");
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
+  const printRef = useRef(); 
+
+  const activeLabel = "Dispensing";
+
+  function handleLogout(e) {
+    e.preventDefault();
+    if (window.confirm("Are you sure you want to logout?")) {
+      router.post(route("logout"));
+    }
+  }
+
+
+  // 🔹 Fetch all patients
   useEffect(() => {
-    fetch("http://localhost:8000/nurse/cashier/patients")
-      .then((res) => res.json())
-      .then((data) => setPatients(Array.isArray(data) ? data : data.data || []))
+    axios
+      .get("/patients")
+      .then((res) => setPatients(res.data))
       .catch((err) => console.error("Error fetching patients:", err));
   }, []);
 
-  // Filter patients based on the search input
-  const filteredPatients = patients.filter((p) => {
-    const fullName = `${p.first_name ?? ""} ${p.last_name ?? ""}`.toLowerCase();
-    const searchTerm = search.toLowerCase().trim();
-    return fullName.includes(searchTerm) || p.user_id?.toString() === searchTerm;
-  });
+  // 🔹 Handle typing search
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setSearch(value);
 
-  // Handle patient selection from the dropdown
-  const handleSelectPatient = (patient) => {
-    setSelectedPatient(patient);
-    setCart([]); // reset cart when a new patient is selected
-    setSearch(""); // reset search input when a patient is selected
-  };
-
-  // Show receipt when ready
-  const handleShowReceipt = () => {
-    if (!selectedPatient) return alert("Please select a patient!");
-    if (cart.length === 0) return alert("Cart is empty!");
-    setShowReceipt(true);
-  };
-
-  // Close receipt view
-  const handleCloseReceipt = () => setShowReceipt(false);
-
-  // Handle adding a service/item to the cart
-  const handleAddToCart = () => {
-    if (!selectedService) return alert("Please select a service/item");
-    // For simplicity, assume `services` and `items` are already fetched
-    const service = { id: selectedService, name: "Sample Service", price: 100 }; // Example service/item
-    const existingIndex = cart.findIndex((c) => c.id === service.id);
-    if (existingIndex >= 0) {
-      const updatedCart = [...cart];
-      updatedCart[existingIndex].quantity += quantity;
-      setCart(updatedCart);
-    } else {
-      setCart([...cart, { ...service, quantity }]);
+    if (value.trim() === "") {
+      setSuggestions([]);
+      return;
     }
-    setSelectedService("");
-    setQuantity(1);
+
+    const matches = patients.filter((p) =>
+      `${p.first_name} ${p.last_name}`.toLowerCase().includes(value.toLowerCase())
+    );
+    setSuggestions(matches);
   };
 
-  // Calculate total price of cart
-  const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-  // Handle payment recording
-  const handleRecordPayment = () => {
-    if (!selectedPatient) return alert("Please select a patient!");
-    if (!amountReceived || amountReceived < totalPrice) return alert("Insufficient payment.");
-    alert(`Payment of ₱${amountReceived} via ${paymentMethod} recorded for ${selectedPatient.first_name}`);
+  const fetchPatientData = (found) => {
+    axios
+      .get(`/patients/${found.id}/prescriptions`)
+      .then((res) => {
+        axios
+          .get(`/patients/${found.id}/medical-conditions`)
+          .then((condRes) => {
+            setSelectedPatient({
+              ...found,
+              prescriptions: res.data,
+              medical_conditions: condRes.data,
+            });
+            setSuggestions([]);
+          })
+          .catch(() => {
+            setSelectedPatient({ ...found, prescriptions: res.data, medical_conditions: [] });
+            setSuggestions([]);
+          });
+      })
+      .catch(() => {
+        setSelectedPatient(found);
+        setSuggestions([]);
+      });
   };
 
-  // Handle logout (placeholder)
-  const handleLogout = () => alert("Logout functionality not implemented yet.");
+  // 🔹 Search button (manual)
+  const handleSearch = () => {
+    const found = patients.find((p) =>
+      `${p.first_name} ${p.last_name}`.toLowerCase().includes(search.toLowerCase())
+    );
+
+    if (found) {
+      fetchPatientData(found);
+    } else {
+      setSelectedPatient(null);
+    }
+  };
+
+  // 🔹 Print function
+const handlePrint = () => {
+  const logoPath = "/images/New_Logo.png";
+  const companyName = "Jorge & Co Medical Center";
+    const companyAddress = "University of Mindanao, Matina Davao City";
+
+  const content = printRef.current.innerHTML;
+  const printWindow = window.open("", "", "width=900,height=650");
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Patient Record</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          h2, h3 { margin-top: 2px; margin-bottom: 5px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          table, th, td { border: 1px solid #333; }
+          th, td { padding: 8px; text-align: left; }
+          .header { text-align: center; margin-bottom: 20px; }
+          .header img { width: 160px; display: block; margin: 0 auto 5px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <img src="${logoPath}" alt="Company Logo">
+          <h2>${companyName}</h2>
+          <p>${companyAddress}</p>
+        </div>
+        ${content}
+      </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+  printWindow.print();
+};
+
 
   return (
-    <div className="flex h-screen bg-[#E6F0FA] font-sans text-[#1E3A8A]">
-      {/* Sidebar */}
-      <aside className="w-64 bg-[#1E40AF] shadow-lg flex flex-col">
-        <div className="h-16 flex items-center justify-center border-b border-blue-700">
-          <span className="flex items-center text-xl font-bold text-white space-x-2">
-            <img src={Logo} alt="MedBoard Logo" className="h-12 w-12 object-contain" />
-            <span>Jorge & Co. Med</span>
-          </span>
-        </div>
-        <nav className="flex-1 p-4 space-y-2 text-sm font-medium text-[#BFDBFE]">
-          {[{ href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> }, { href: route("nurse.patients.index"), label: "Patient Management", icon: <MdPerson /> }, { href: route("physician.records"), label: "Physician Record", icon: <MdOutlinePersonPin /> }, { href: route('cashier.dashboard'), label: "Billing", icon: <FaFileInvoiceDollar /> }, { href: route('medicine.inventory'), label: "Medicine Inventory", icon:<MdInventory /> }, { href: route('nurse.assistant.dashboard'), label: "Nurse Assistant", icon: <FaNotesMedical /> }, { href: route('dispensing'), label: "Dispensing", icon: < FaPills /> }]
-            .map(({ href, label, icon }) => (
-              <a key={label} href={href} className={`flex items-center gap-x-2 p-2 rounded focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#BFDBFE] transition ${label === "Billing" ? "bg-[#2563EB] text-white font-semibold" : "hover:bg-[#2563EB] hover:text-white"}`} aria-current={label === "Billing" ? "page" : undefined}>
-                {icon && <span className="text-lg">{icon}</span>}
-                <span>{label}</span>
-              </a>
-            ))}
-        </nav>
-        <div className="p-4 border-t border-blue-700">
-          <button onClick={handleLogout} className="w-full flex items-center justify-center gap-x-2 bg-red-600 text-white py-2 rounded hover:bg-red-700">
-            <BiLogOutCircle className="text-lg" />
-            <span>Logout</span>
-          </button>
-        </div>
-      </aside>
+    <div className="flex h-screen bg-gray-100">
+      <Sidebar role={role} activeLabel={activeLabel} handleLogout={handleLogout} />
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col">
-        <header className="flex items-center justify-between p-4 border-b">
-          <div className="flex items-center gap-4 w-full">
-            <h1 className="text-xl font-bold">Cashier Dashboard</h1>
-            {/* Patient Search Combobox */}
-            <Select
-              showSearch
-              value={selectedPatient ? `${selectedPatient.first_name} ${selectedPatient.last_name}` : ""}
-              onSearch={(value) => setSearch(value)} // Update search value
-              onChange={(value) => {
-                const patient = patients.find((p) => `${p.first_name} ${p.last_name}` === value);
-                handleSelectPatient(patient);
-              }}
-              placeholder="Search patients"
-              style={{ width: "100%" }}
-              filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
-            >
-              {filteredPatients.map((patient) => (
-                <Select.Option key={patient.user_id} value={`${patient.first_name} ${patient.last_name}`}>
-                  {patient.first_name} {patient.last_name} - ID: {patient.user_id}
-                </Select.Option>
-              ))}
-            </Select>
-          </div>
-        </header>
-
-        <div className="p-6 grid grid-cols-3 gap-6">
-          <div className="col-span-2 space-y-6">
-            {selectedPatient && (
-              <div className="border rounded p-4 mb-4">
-                <h2 className="font-semibold">Patient Info</h2>
-                <p><strong>Name:</strong> {selectedPatient.first_name} {selectedPatient.last_name}</p>
-                <p><strong>Balance:</strong> ₱{selectedPatient.balance ?? 0}</p>
-              </div>
-            )}
-
-            {/* Add Services/Items */}
-            <div>
-              <h2 className="font-semibold mb-2">Add Services / Items</h2>
+      <div className="flex-1 flex flex-col">
+        <div className="flex items-center justify-between bg-white p-4 shadow relative">
+          <div className="flex items-center gap-2 w-full max-w-lg">
+            <div className="relative w-full">
               <input
                 type="text"
-                placeholder="Search services or medicines..."
+                placeholder="Search patient..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="border rounded px-3 py-2 w-full mb-2"
+                onChange={handleChange}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                className="w-full border rounded px-3 py-2"
               />
-              <div className="flex items-center gap-4">
-                <select
-                  className="border rounded px-3 py-2 flex-1"
-                  value={selectedService}
-                  onChange={(e) => setSelectedService(e.target.value)}
-                >
-                  <option value="">Select Service/Item</option>
-                  <option value="1">Sample Service - ₱100</option>
-                  <option value="2">Sample Item - ₱50</option>
-                  {/* Add more options as needed */}
-                </select>
 
-                <input
-                  type="number"
-                  value={quantity}
-                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value)))}
-                  className="border rounded px-3 py-2 w-20"
-                  min={1}
-                />
-
-                <button
-                  onClick={handleAddToCart}
-                  className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
-                >
-                  Add to Cart
-                </button>
-              </div>
-            </div>
-            {/* Cart Summary */}
-            {cart.length > 0 && (
-              <div className="mt-6 border rounded p-4">
-                <h3 className="font-semibold mb-2">Cart Summary</h3>
-                <ul className="space-y-2">
-                  {cart.map((item, index) => (
-                    <li key={index}>
-                      {item.name} x {item.quantity} - ₱{item.price * item.quantity}
+              {suggestions.length > 0 && (
+                <ul className="absolute z-10 bg-white border w-full mt-1 rounded shadow max-h-40 overflow-y-auto">
+                  {suggestions.map((p) => (
+                    <li
+                      key={p.id}
+                      onClick={() => {
+                        setSearch(`${p.first_name} ${p.last_name}`);
+                        fetchPatientData(p);
+                      }}
+                      className="px-3 py-2 cursor-pointer hover:bg-blue-100"
+                    >
+                      {p.first_name} {p.last_name}
                     </li>
                   ))}
                 </ul>
-                <div className="mt-4">
-                  <strong>Total:</strong> ₱{totalPrice}
-                </div>
-                <div className="mt-4 flex gap-4">
-                  <input
-                    type="number"
-                    value={amountReceived}
-                    onChange={(e) => setAmountReceived(e.target.value)}
-                    placeholder="Amount Received"
-                    className="border rounded px-3 py-2 w-32"
-                  />
-                  <select
-                    className="border rounded px-3 py-2 w-32"
-                    value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                  >
-                    <option value="Cash">Cash</option>
-                    <option value="Card">Card</option>
-                  </select>
-
-                  <button
-                    onClick={handleRecordPayment}
-                    className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
-                  >
-                    Record Payment
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-          {/* Receipt View */}
-          {showReceipt && (
-            <div className="col-span-1 bg-white p-6 border rounded shadow">
-              <h3 className="font-semibold mb-4">Receipt</h3>
-              <p><strong>Patient:</strong> {selectedPatient.first_name} {selectedPatient.last_name}</p>
-              <p><strong>Total:</strong> ₱{totalPrice}</p>
-              <p><strong>Payment Method:</strong> {paymentMethod}</p>
-              <p><strong>Amount Received:</strong> ₱{amountReceived}</p>
-              <button onClick={handleCloseReceipt} className="mt-4 bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
-                Close Receipt
-              </button>
+              )}
             </div>
+
+            <button
+              onClick={handleSearch}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              Search
+            </button>
+          </div>
+        </div>
+
+        {/* 🔹 Patient info + results */}
+        <div className="p-6">
+          {selectedPatient ? (
+            <>
+              {/* Print button */}
+              <button
+                onClick={handlePrint}
+                className="mb-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              >
+                🖨️ Print Patient Data
+              </button>
+
+              {/* Content to print */}
+              <div ref={printRef}>
+                <h2 className="text-lg font-bold mb-4">Patient Info:</h2>
+                <p>
+                  <span className="font-semibold">Name:</span>{" "}
+                  {selectedPatient.first_name} {selectedPatient.last_name}
+                </p>
+                <p>
+                  <span className="font-semibold">Birthdate:</span>{" "}
+                  {selectedPatient.birthdate}
+                </p>
+
+                <h3 className="mt-4 text-md font-bold">Medical Conditions:</h3>
+                {selectedPatient.medical_conditions?.length > 0 ? (
+                  <ul className="list-disc pl-6">
+                    {selectedPatient.medical_conditions.map((cond, i) => (
+                      <li key={i}>
+                        {cond.condition_name} ({cond.status}) - {cond.notes}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-500">No medical conditions found.</p>
+                )}
+
+              <h3 className="mt-4 text-md font-bold">Prescriptions:</h3>
+                  {selectedPatient.prescriptions?.length > 0 ? (
+                    <table className="w-full border border-gray-300 bg-gray-100 rounded">
+                      <thead>
+                        <tr className="bg-gray-300 text-left">
+                          <th className="p-2 border">Medication</th>
+                          <th className="p-2 border">Dosage</th>
+                          <th className="p-2 border">Instructions</th>
+                          <th className="p-2 border">Doctor</th> {/* ✅ New column */}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedPatient.prescriptions.map((pres, index) => (
+                          <tr key={index}>
+                            <td className="p-2 border">{pres.medication}</td>
+                            <td className="p-2 border">{pres.dosage}</td>
+                            <td className="p-2 border">{pres.instructions}</td>
+                            <td className="p-2 border">{pres.doctor_name}</td> {/* ✅ Show doctor */}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <p className="text-gray-500">No prescriptions found.</p>
+                  )}
+
+              </div>
+            </>
+          ) : (
+            <p className="text-gray-500">
+              🔍 Search for a patient to view their medical records.
+            </p>
           )}
         </div>
-      </main>
+      </div>
     </div>
   );
 }

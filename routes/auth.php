@@ -9,6 +9,7 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PhysicianAppointmentController;
 use App\Http\Middleware\EnsureUserIsNurse;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\Api\PrescriptionController;
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -55,7 +56,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('nurse.patients.edit');
         Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('nurse.patients.update');
         Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('nurse.patients.destroy');
-
+         Route::get('/patients/{id}', [PatientController::class, 'show']);
+        Route::get('/patients/{id}/prescriptions', [PrescriptionController::class, 'getByPatient']);
         Route::get('/appointments', [AppointmentController::class, 'viewAllAppointments'])->name('nurse.appointments.viewAll');
         Route::get('/patients/{patient}/appointments', action: [AppointmentController::class, 'viewAppointments'])->name('nurse.patients.viewAppointments');
         Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroyAppointment'])->name('nurse.appointments.destroy');

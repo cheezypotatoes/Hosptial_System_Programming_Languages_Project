@@ -9,73 +9,68 @@ use App\Models\Payment;
 use App\Models\Transaction;
 use App\Models\Service;
 use App\Models\Medicine;
-use App\Models\Item;   // ✅ Added Item model
+use App\Models\Item;
+use App\Models\Category; // ✅ Added Category
 
 class CashierController extends Controller
 {
-    // Dashboard view
+    // 🔹 Dashboard view
     public function index()
-{
-    // Fetching pending payments, recent transactions, and all patients
-    $pendingPayments = Payment::where('status', 'processing')->latest()->take(5)->get();
-    $recentTransactions = Transaction::latest()->take(5)->get();
-    $allPatients = Patient::all(); // Fetching all patients
-
-    return Inertia::render('Cashier/CashierDashboard', [
-        'pendingPayments'   => $pendingPayments,
-        'recentTransactions'=> $recentTransactions,
-        'patients'          => $allPatients, // Passing all patients to the view
-    ]);
-}
-
-    // 🔹 Fetch services + medicines + items
-    public function getServicesAndItems()
     {
-        // Fetch services
-        $services = Service::select('id', 'name', 'price')
-            ->get()
-            ->map(function ($s) {
-                return [
-                    'id'    => $s->id,
-                    'name'  => $s->name,
-                    'price' => $s->price,
-                    'type'  => 'service', // mark as service
-                ];
-            });
+        $pendingPayments = Payment::where('status', 'processing')->latest()->take(5)->get();
+        $recentTransactions = Transaction::latest()->take(5)->get();
+        $allPatients = Patient::all();
 
-        // Fetch medicines
-        $medicines = Medicine::select('id', 'name', 'price', 'stock')
-            ->get()
-            ->map(function ($m) {
-                return [
-                    'id'    => $m->id,
-                    'name'  => $m->name,
-                    'price' => $m->price,
-                    'stock' => $m->stock,
-                    'type'  => 'medicine', // mark as medicine
-                ];
-            });
-
-        // Fetch items
-        $items = Item::select('id', 'name', 'price', 'stock')
-            ->get()
-            ->map(function ($i) {
-                return [
-                    'id'    => $i->id,
-                    'name'  => $i->name,
-                    'price' => $i->price,
-                    'stock' => $i->stock,
-                    'type'  => 'item', // mark as item
-                ];
-            });
-
-        // Merge all collections
-        $merged = $services->merge($medicines)->merge($items);
-
-        return response()->json($merged);
+        return Inertia::render('Cashier/CashierDashboard', [
+            'pendingPayments'   => $pendingPayments,
+            'recentTransactions'=> $recentTransactions,
+            'patients'          => $allPatients,
+        ]);
     }
 
-    // 🔹 Search patients (AJAX)
+    // 🔹 Fetch categories (with services + items)
+    public function getCategories()
+    {
+        $categories = Category::with(['services', 'items'])->get();
+        return response()->json($categories);
+    }
+
+    // 🔹 Fetch services + medicines + items (flat list)
+    public function getServicesAndItems()
+    {
+        $services = Service::select('id', 'name', 'price')
+            ->get()
+            ->map(fn($s) => [
+                'id'    => $s->id,
+                'name'  => $s->name,
+                'price' => $s->price,
+                'type'  => 'service',
+            ]);
+
+        $medicines = Medicine::select('id', 'name', 'price', 'stock')
+            ->get()
+            ->map(fn($m) => [
+                'id'    => $m->id,
+                'name'  => $m->name,
+                'price' => $m->price,
+                'stock' => $m->stock,
+                'type'  => 'medicine',
+            ]);
+
+        $items = Item::select('id', 'name', 'price', 'stock')
+            ->get()
+            ->map(fn($i) => [
+                'id'    => $i->id,
+                'name'  => $i->name,
+                'price' => $i->price,
+                'stock' => $i->stock,
+                'type'  => 'item',
+            ]);
+
+        return response()->json($services->merge($medicines)->merge($items));
+    }
+
+    // 🔹 Search patients
     public function searchPatients(Request $request)
     {
         $query = $request->get('q', '');
@@ -122,7 +117,6 @@ class CashierController extends Controller
     // 🔹 Recent transactions
     public function transactions()
     {
-        $transactions = Transaction::latest()->take(10)->get();
-        return response()->json($transactions);
+        return response()->json(Transaction::latest()->take(10)->get());
     }
 }

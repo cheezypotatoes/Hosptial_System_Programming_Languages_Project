@@ -21,12 +21,46 @@ export default function CashierDashboard() {
   const [showReceipt, setShowReceipt] = useState(false);
   const [medicines, setMedicines] = useState([]);
   const [items, setItems] = useState([]);
-
-const handleShowReceipt = () => {
-  if (!selectedPatient) return alert("Please select a patient!");
-  if (cart.length === 0) return alert("Cart is empty!");
-  setShowReceipt(true);
-};
+    const [categories, setCategories] = useState([]);
+    const [servicesAndItems, setServicesAndItems] = useState([]);
+  
+  useEffect(() => {
+    fetch("/cashier/categories")
+      .then((res) => res.json())
+      .then((data) => {
+        setCategories(data);
+        // Flatten services & items into one array
+        const combined = data.flatMap(cat => [
+          ...cat.services.map(s => ({ ...s, type: "service" })),
+          ...cat.items.map(i => ({ ...i, type: "item" }))
+        ]);
+        setServicesAndItems(combined);
+      })
+      .catch((err) => console.error("Error fetching categories:", err));
+  }, []);
+  
+  
+  
+    // Filter patients based on the search input
+  // Derived data (filters)
+  const filteredPatients = patients.filter((p) => {
+    const fullName = `${p.first_name ?? ""} ${p.last_name ?? ""}`.toLowerCase();
+    return fullName.includes(patientSearch.toLowerCase());
+  });
+  
+  
+    // ✅ Filter services/items separately
+    const filteredServicesAndItems = servicesAndItems.filter((entry) =>
+      entry.name.toLowerCase().includes(serviceSearch.toLowerCase().trim())
+    );
+  
+    // Show receipt when ready
+    const handleShowReceipt = () => {
+      if (!selectedPatient) return alert("Please select a patient!");
+      if (cart.length === 0) return alert("Cart is empty!");
+      setShowReceipt(true);
+    };
+  
 
 const handleCloseReceipt = () => setShowReceipt(false);
 
@@ -41,30 +75,6 @@ const handleCloseReceipt = () => setShowReceipt(false);
 
 
 useEffect(() => {
-  // Services
-fetch("http://localhost:8000/services-items")
-  .then((res) => res.json())
-  .then((data) => {
-    console.log("Services, Medicines, and Items fetched:", data); // Debug
-    // Filter by type if you want separate arrays
-    const services = data.filter((item) => item.type === "service");
-    const medicines = data.filter((item) => item.type === "medicine");
-    const items = data.filter((item) => item.type === "item");
-
-    setServices(services);
-    setMedicines(medicines);
-    setItems(items);
-  })
-  .catch((err) => console.error("Error fetching services/items/medicines:", err));
-
-
-  fetch("http://localhost:8000/services")
-    .then((res) => res.json())
-    .then((data) => {
-      console.log("Services fetched:", data); // Debug
-      setServices(Array.isArray(data) ? data : data.data || []);
-    })
-    .catch((err) => console.error("Error fetching services:", err));
 
 // Patients
 fetch(`http://localhost:8000/nurse/cashier/patients`)
@@ -91,13 +101,6 @@ fetch(`http://localhost:8000/nurse/cashier/patients`)
     .catch(console.error);
 }, []);
 
-
-// Filter patients by search (case-insensitive)
-const filteredPatients = patients.filter((p) => {
-  const fullName = `${p.first_name ?? ""} ${p.last_name ?? ""}`.toLowerCase();
-  const searchTerm = search.toLowerCase().trim();
-  return fullName.includes(searchTerm) || p.user_id?.toString() === searchTerm;
-});
 
 
 
