@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
 
-export default function AppointmentDetails({ appointment }) {
+export default function AppointmentDetails({ appointment, role }) {
   const [notes, setNotes] = useState(appointment.notes || '');
   const [medications, setMedications] = useState(appointment.medications || []);
-  const [services, setServices] = useState(appointment.services || []);
+  const [services, setServices] = useState(
+    appointment.services
+      ? appointment.services.map(s => ({ ...s, result: s.result || '' }))
+      : []
+  );
 
   const { data, setData, post, processing } = useForm({
     notes,
@@ -12,13 +16,16 @@ export default function AppointmentDetails({ appointment }) {
     services,
   });
 
+  // Sync state with form data
   useEffect(() => {
-    // Initialize medications and services from the appointment prop if they exist
     setMedications(appointment.medications || []);
-    setServices(appointment.services || []);
+    setServices(
+      appointment.services
+        ? appointment.services.map(s => ({ ...s, result: s.result || '' }))
+        : []
+    );
   }, [appointment]);
 
-  // Update form data when state changes
   useEffect(() => {
     setData('notes', notes);
   }, [notes, setData]);
@@ -31,47 +38,60 @@ export default function AppointmentDetails({ appointment }) {
     setData('services', services);
   }, [services, setData]);
 
-  // Handle adding new medication
+  // Add new medication
   const handleAddMedication = () => {
+    if (role === 'nurse') return;  // Prevent adding for nurses
     setMedications([
       ...medications,
       { id: Date.now(), name: '', dosage: '', frequency: '', duration: '', notes: '' },
     ]);
   };
 
-  // Handle adding new service
+  // Add new service
   const handleAddService = () => {
     setServices([
       ...services,
-      { id: Date.now(), name: '', description: '', cost: 0.00 },
+      { id: Date.now(), name: '', description: '', cost: 0.0, result: '' },
     ]);
   };
 
-  // Handle medication input change
+  // Handle changes in medication fields
   const handleMedicationChange = (index, e) => {
+    if (role === 'nurse') return;  // Nurses can't edit medications
     const newMedications = [...medications];
     newMedications[index][e.target.name] = e.target.value;
     setMedications(newMedications);
   };
 
-  // Handle service input change
+  // Handle changes in service fields
   const handleServiceChange = (index, e) => {
     const newServices = [...services];
-    newServices[index][e.target.name] = e.target.value;
-    setServices(newServices);
+    const { name, value } = e.target;
+
+    if (role === 'nurse') {
+      if (name === 'result') {
+        newServices[index][name] = value;  // Nurses can only edit result
+        setServices(newServices);
+      }
+      return;
+    } else {
+      newServices[index][name] = value;
+      setServices(newServices);
+    }
   };
 
-  // Handle removing a medication
+  // Remove medication
   const handleRemoveMedication = (id) => {
+    if (role === 'nurse') return;  // Nurses can't remove medications
     setMedications(medications.filter((med) => med.id !== id));
   };
 
-  // Handle removing a service
+  // Remove service
   const handleRemoveService = (id) => {
     setServices(services.filter((service) => service.id !== id));
   };
 
-  // Handle form submission
+  // Submit the form
   const handleSubmit = () => {
     post(route('physician.appointments.store', appointment.id), {
       notes,
@@ -84,30 +104,43 @@ export default function AppointmentDetails({ appointment }) {
     });
   };
 
+  // Check if field is editable based on role
+  const isEditable = (field) => {
+    if (role === 'nurse') {
+      if (field === 'notes' || field === 'medications') return false;
+      if (field === 'services') return true;
+    }
+    return true;
+  };
+
   return (
-    <div className="p-8 bg-[#14181c] min-h-screen text-black">
-      <div className="max-w-5xl mx-auto bg-[#23272a] shadow-lg rounded-lg p-8">
-        <h1 className="text-3xl font-semibold text-center text-[#3498db] mb-8">
+    <div className="p-8 bg-white min-h-screen text-gray-900">
+      <div className="max-w-5xl mx-auto bg-gray-100 shadow-md rounded-lg p-8">
+        <h1 className="text-3xl font-semibold text-center text-blue-600 mb-8">
           Appointment Details for {appointment.patient.first_name} {appointment.patient.last_name}
         </h1>
 
         {/* Appointment Notes */}
         <div className="space-y-6 mb-6">
-          <div className="text-lg font-semibold text-[#cfd0d4]">Appointment Notes</div>
+          <div className="text-lg font-semibold text-gray-700">Appointment Notes</div>
           <textarea
             value={notes}
-            onChange={(e) => setNotes(e.target.value)} // Sync local state with textarea input
+            onChange={(e) => setNotes(e.target.value)}
             rows="4"
-            className="w-full p-4 border border-[#444c56] bg-[#1e262d] text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db] transition duration-300"
+            disabled={!isEditable('notes')}
+            className={`w-full p-4 border border-gray-300 bg-white text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300
+              ${!isEditable('notes') ? 'opacity-50 cursor-not-allowed' : ''}`}
             placeholder="Enter any additional notes here..."
           />
         </div>
 
         {/* Medications */}
         <div className="space-y-6 mb-6">
-          <div className="text-lg font-semibold text-[#cfd0d4]">Medications</div>
+          <div className="flex justify-between items-center text-lg font-semibold text-gray-700">
+            <span>Medications</span>
+          </div>
           {medications.map((med, index) => (
-            <div key={med.id} className="bg-[#2a2f36] p-6 rounded-lg shadow-sm mb-4 space-y-4 border border-[#444c56]">
+            <div key={med.id} className="bg-white p-6 rounded-lg shadow mb-4 space-y-4 border border-gray-300">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input
                   type="text"
@@ -115,7 +148,9 @@ export default function AppointmentDetails({ appointment }) {
                   value={med.name}
                   onChange={(e) => handleMedicationChange(index, e)}
                   placeholder="Medication Name"
-                  className="w-full px-4 py-3 border border-[#444c56] bg-[#1e262d] text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db] transition duration-300"
+                  disabled={!isEditable('medications')}
+                  className={`w-full px-4 py-3 border border-gray-300 bg-white text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300
+                    ${!isEditable('medications') ? 'opacity-50 cursor-not-allowed' : ''}`}
                 />
                 <input
                   type="text"
@@ -123,7 +158,9 @@ export default function AppointmentDetails({ appointment }) {
                   value={med.dosage}
                   onChange={(e) => handleMedicationChange(index, e)}
                   placeholder="Dosage"
-                  className="w-full px-4 py-3 border border-[#444c56] bg-[#1e262d] text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db] transition duration-300"
+                  disabled={!isEditable('medications')}
+                  className={`w-full px-4 py-3 border border-gray-300 bg-white text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300
+                    ${!isEditable('medications') ? 'opacity-50 cursor-not-allowed' : ''}`}
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -133,7 +170,9 @@ export default function AppointmentDetails({ appointment }) {
                   value={med.frequency}
                   onChange={(e) => handleMedicationChange(index, e)}
                   placeholder="Frequency"
-                  className="w-full px-4 py-3 border border-[#444c56] bg-[#1e262d] text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db] transition duration-300"
+                  disabled={!isEditable('medications')}
+                  className={`w-full px-4 py-3 border border-gray-300 bg-white text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300
+                    ${!isEditable('medications') ? 'opacity-50 cursor-not-allowed' : ''}`}
                 />
                 <input
                   type="text"
@@ -141,7 +180,9 @@ export default function AppointmentDetails({ appointment }) {
                   value={med.duration}
                   onChange={(e) => handleMedicationChange(index, e)}
                   placeholder="Duration"
-                  className="w-full px-4 py-3 border border-[#444c56] bg-[#1e262d] text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db] transition duration-300"
+                  disabled={!isEditable('medications')}
+                  className={`w-full px-4 py-3 border border-gray-300 bg-white text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300
+                    ${!isEditable('medications') ? 'opacity-50 cursor-not-allowed' : ''}`}
                 />
               </div>
               <textarea
@@ -149,31 +190,36 @@ export default function AppointmentDetails({ appointment }) {
                 value={med.notes}
                 onChange={(e) => handleMedicationChange(index, e)}
                 placeholder="Additional Notes"
-                className="w-full p-4 border border-[#444c56] bg-[#1e262d] text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db] transition duration-300"
+                disabled={!isEditable('medications')}
+                className={`w-full p-4 border border-gray-300 bg-white text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300
+                  ${!isEditable('medications') ? 'opacity-50 cursor-not-allowed' : ''}`}
               />
-              {/* Remove Medication Button */}
-              <button
-                onClick={() => handleRemoveMedication(med.id)}
-                className="mt-4 px-6 py-2 bg-red-600 text-black rounded-lg font-semibold hover:bg-red-700 transition duration-200"
-              >
-                Remove Medication
-              </button>
+              {isEditable('medications') && (
+                <button
+                  onClick={() => handleRemoveMedication(med.id)}
+                  className="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition duration-200"
+                >
+                  Remove Medication
+                </button>
+              )}
             </div>
           ))}
-          <button
-            type="button"
-            onClick={handleAddMedication}
-            className="w-full px-6 py-3 bg-[#3498db] text-black rounded-lg font-semibold hover:bg-[#2980b9] transition duration-200"
-          >
-            Add Medication
-          </button>
+          {isEditable('medications') && (
+            <button
+              type="button"
+              onClick={handleAddMedication}
+              className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-200"
+            >
+              Add Medication
+            </button>
+          )}
         </div>
 
         {/* Services */}
         <div className="space-y-6 mb-6">
-          <div className="text-lg font-semibold text-[#cfd0d4]">Services</div>
+          <div className="text-lg font-semibold text-gray-700">Services</div>
           {services.map((service, index) => (
-            <div key={service.id} className="bg-[#2a2f36] p-6 rounded-lg shadow-sm mb-4 space-y-4 border border-[#444c56]">
+            <div key={service.id} className="bg-white p-6 rounded-lg shadow mb-4 space-y-4 border border-gray-300">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input
                   type="text"
@@ -181,7 +227,9 @@ export default function AppointmentDetails({ appointment }) {
                   value={service.name}
                   onChange={(e) => handleServiceChange(index, e)}
                   placeholder="Service Name"
-                  className="w-full px-4 py-3 border border-[#444c56] bg-[#1e262d] text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db] transition duration-300"
+                  disabled={role === 'nurse'}
+                  className={`w-full px-4 py-3 border border-gray-300 bg-white text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300
+                    ${role === 'nurse' ? 'opacity-50 cursor-not-allowed' : ''}`}
                 />
                 <input
                   type="text"
@@ -189,7 +237,9 @@ export default function AppointmentDetails({ appointment }) {
                   value={service.description}
                   onChange={(e) => handleServiceChange(index, e)}
                   placeholder="Service Description"
-                  className="w-full px-4 py-3 border border-[#444c56] bg-[#1e262d] text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db] transition duration-300"
+                  disabled={role === 'nurse'}
+                  className={`w-full px-4 py-3 border border-gray-300 bg-white text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300
+                    ${role === 'nurse' ? 'opacity-50 cursor-not-allowed' : ''}`}
                 />
               </div>
               <input
@@ -198,12 +248,21 @@ export default function AppointmentDetails({ appointment }) {
                 value={service.cost}
                 onChange={(e) => handleServiceChange(index, e)}
                 placeholder="Cost"
-                className="w-full px-4 py-3 border border-[#444c56] bg-[#1e262d] text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db] transition duration-300"
+                disabled={role === 'nurse'}
+                className={`w-full px-4 py-3 border border-gray-300 bg-white text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300
+                  ${role === 'nurse' ? 'opacity-50 cursor-not-allowed' : ''}`}
               />
-              {/* Remove Service Button */}
+              {/* Result field */}
+              <textarea
+                name="result"
+                value={service.result}
+                onChange={(e) => handleServiceChange(index, e)}
+                placeholder="Result"
+                className="w-full p-4 border border-gray-300 bg-white text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
+              />
               <button
                 onClick={() => handleRemoveService(service.id)}
-                className="mt-4 px-6 py-2 bg-red-600 text-black rounded-lg font-semibold hover:bg-red-700 transition duration-200"
+                className="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition duration-200"
               >
                 Remove Service
               </button>
@@ -212,7 +271,7 @@ export default function AppointmentDetails({ appointment }) {
           <button
             type="button"
             onClick={handleAddService}
-            className="w-full px-6 py-3 bg-[#3498db] text-black rounded-lg font-semibold hover:bg-[#2980b9] transition duration-200"
+            className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-200"
           >
             Add Service
           </button>
@@ -223,7 +282,8 @@ export default function AppointmentDetails({ appointment }) {
           <button
             onClick={handleSubmit}
             disabled={processing}
-            className={`px-8 py-4 bg-green-600 text-black rounded-lg font-semibold hover:bg-green-700 transition duration-200 ${processing ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`px-8 py-4 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition duration-200 ${processing ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
           >
             {processing ? 'Saving...' : 'Save Changes'}
           </button>

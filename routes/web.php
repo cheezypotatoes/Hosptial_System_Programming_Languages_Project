@@ -101,10 +101,11 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
         ->name('physician.records');
     Route::post('/physician/update', [PhysicianController::class, 'update'])
         ->name('physician.update');
-    Route::get('/physician/appointments/{patientId}', [PhysicianAppointmentController::class, 'show']);
+    Route::get('/physician/appointments/{patientId}/{appointmentId}', [PhysicianAppointmentController::class, 'show']);
+
+
     Route::post('/physician/appointments/{appointmentId?}', [PhysicianAppointmentController::class, 'store'])
     ->name('physician.appointments.store');
-
 
     // Nurse edit routes
     Route::get('/nurse/edit', [NurseController::class, 'edit'])->name('nurse.edit');
@@ -113,6 +114,8 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
     Route::get('/physician/appointments', [PhysicianAppointmentController::class, 'index'])
         ->name('physician.appointments.index');
+
+    
 
 
     // Nurse patient management routes with middleware applied to the whole group
@@ -126,8 +129,15 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
             Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('nurse.patients.update');
             Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('nurse.patients.destroy');
             
+
+            Route::get('/appointments/{appointment}', [PhysicianAppointmentController::class, 'index'])
+                ->name('physician.appointments.index');
+          
+
+
             Route::get('/appointments', [AppointmentController::class, 'viewAllAppointments'])->name('nurse.appointments.viewAll');
             Route::get('/patients/{patient}/appointments', [AppointmentController::class, 'viewAppointments'])
+
                 ->name('nurse.patients.viewAppointments');
             Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroyAppointment'])
                 ->name('nurse.appointments.destroy');

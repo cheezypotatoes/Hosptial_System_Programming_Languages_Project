@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id(); // Primary key (auto-incrementing)
             $table->foreignId('appointment_id')->constrained('appointments')->onDelete('cascade'); // Foreign key to appointments
             $table->string('name'); // Service name (e.g., X-ray, Blood Test)
+            $table->string('result')->nullable();;
             $table->string('description')->nullable(); // Description of the service
             $table->decimal('cost', 8, 2)->default(0.00); // Cost of the service
             $table->timestamps(); // Created at and updated at timestamps

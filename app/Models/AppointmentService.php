@@ -14,7 +14,8 @@ class AppointmentService extends Model
         'appointment_id', 
         'name', 
         'description', 
-        'cost'
+        'cost',
+        'result'
     ];
 
     /**

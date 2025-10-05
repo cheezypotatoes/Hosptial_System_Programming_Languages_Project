@@ -78,7 +78,7 @@ export default function Appointments({ role, physician, appointments }) {
                       <td className="px-4 py-4 text-sm text-gray-800">{appointment.symptoms}</td>
                       <td className="px-4 py-4 text-sm text-gray-800">
                         <Link
-                          href={`/physician/appointments/${appointment.patient.id}`}
+                          href={`/physician/appointments/${appointment.patient.id}/${appointment.id}`}  // Pass both patientId and appointmentId
                           className="text-blue-500 hover:text-blue-700 font-semibold"
                         >
                           View
