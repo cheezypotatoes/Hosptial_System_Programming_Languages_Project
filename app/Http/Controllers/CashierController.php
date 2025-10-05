@@ -10,18 +10,26 @@ use App\Models\Transaction;
 use App\Models\Service;
 use App\Models\Medicine;
 use App\Models\Item;
-use App\Models\Category; // ✅ Added Category
+use App\Models\Category; 
+
 
 class CashierController extends Controller
 {
     // 🔹 Dashboard view
-    public function index()
+    public function index(Request $request)
     {
+        $user = $request->user();
+        
+    
+        $role = strtolower($user->position); 
+        
         $pendingPayments = Payment::where('status', 'processing')->latest()->take(5)->get();
         $recentTransactions = Transaction::latest()->take(5)->get();
         $allPatients = Patient::all();
 
         return Inertia::render('Cashier/CashierDashboard', [
+             'user' => $user, // Passing full user info
+            'role' => $role, // Passing lowercase position as role
             'pendingPayments'   => $pendingPayments,
             'recentTransactions'=> $recentTransactions,
             'patients'          => $allPatients,

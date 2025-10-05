@@ -4,7 +4,7 @@ import axios from "axios";
 import { router } from "@inertiajs/react";
 
 
-export default function Dispensing({ role}) {
+export default function Dispensing({ role, user}) {
   const [patients, setPatients] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -211,7 +211,7 @@ const handlePrint = () => {
                           <th className="p-2 border">Medication</th>
                           <th className="p-2 border">Dosage</th>
                           <th className="p-2 border">Instructions</th>
-                          <th className="p-2 border">Doctor</th> {/* ✅ New column */}
+                          <th className="p-2 border">Doctor</th> 
                         </tr>
                       </thead>
                       <tbody>
@@ -220,7 +220,7 @@ const handlePrint = () => {
                             <td className="p-2 border">{pres.medication}</td>
                             <td className="p-2 border">{pres.dosage}</td>
                             <td className="p-2 border">{pres.instructions}</td>
-                            <td className="p-2 border">{pres.doctor_name}</td> {/* ✅ Show doctor */}
+                            <td className="p-2 border">{pres.doctor_name}</td> 
                           </tr>
                         ))}
                       </tbody>

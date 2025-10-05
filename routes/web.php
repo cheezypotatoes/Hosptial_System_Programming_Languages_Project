@@ -156,18 +156,16 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 
             // Cashier routes
-                Route::prefix('cashier')->group(function () {
-                    Route::get('/dashboard', [CashierController::class, 'index'])->name('cashier.dashboard');
-                          Route::get('/cashier/categories', [CashierController::class, 'getCategories'])->name('cashier.categories');
-                    Route::get('/services-items', [CashierController::class, 'getServicesAndItems'])->name('cashier.services.items');
-                    Route::get('/cashier/patients', [CashierController::class, 'searchPatients'])->name('cashier.patients');
-                    Route::post('/bill', [CashierController::class, 'generateBill'])->name('cashier.bill');
-                    Route::post('/payment', [CashierController::class, 'recordPayment'])->name('cashier.payment');
-                    Route::get('/transactions', [CashierController::class, 'transactions'])->name('cashier.transactions');
+                            Route::prefix('cashier')->group(function () {
+                Route::get('/dashboard', [CashierController::class, 'index'])->name('cashier.dashboard');
+                Route::get('/categories', [CashierController::class, 'getCategories'])->name('cashier.categories');
+                Route::get('/services-items', [CashierController::class, 'getServicesAndItems'])->name('cashier.services.items');
+                Route::get('/patients', [CashierController::class, 'searchPatients'])->name('cashier.patients');
+                Route::post('/bill', [CashierController::class, 'generateBill'])->name('cashier.bill');
+                Route::post('/payment', [CashierController::class, 'recordPayment'])->name('cashier.payment');
+                Route::get('/transactions', [CashierController::class, 'transactions'])->name('cashier.transactions');
+            });
 
-
-            
-                });
 
 
         });

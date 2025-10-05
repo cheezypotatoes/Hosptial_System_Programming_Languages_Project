@@ -17,14 +17,13 @@ const Sidebar = ({ role, activeLabel, handleLogout }) => {
       { href: route('dispensing'), label: "Dispensing", icon: <FaPills /> },
     ],
     nurse: [
-           
-      
       { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
       { href: route("nurse.appointments.viewAll"), label: "Appointments", icon: <MdDashboard /> },
       { href: route("nurse.patients.index"), label: "Patient Management", icon: <MdPerson /> },
        // { href: route('nurse.assistant.dashboard'), label: "Nurse Assistant", icon: <FaNotesMedical /> },
       { href: route('dispensing'), label: "Dispensing", icon: <FaPills /> },
     ],
+    
     assistant: [
       { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
       { href: route("nurse.patients.index"), label: "Patient Management", icon: <MdPerson /> },
@@ -34,13 +33,19 @@ const Sidebar = ({ role, activeLabel, handleLogout }) => {
       { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
       { href: route('cashier.dashboard'), label: "Billing", icon: <FaFileInvoiceDollar /> },
     ],
+
     doctor: [
       { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
       { href: route("physician.appointments.index"), label: "View All Appointments", icon: <MdDashboard /> },
       { href: route("physician.records"), label: "Physician Record", icon: <MdOutlinePersonPin /> },
     ],
     default: [
-      { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
+       { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
+      { href: route("nurse.appointments.viewAll"), label: "Appointments", icon: <MdDashboard /> },
+      { href: route("nurse.patients.index"), label: "Patient Management", icon: <MdPerson /> },
+       // { href: route('nurse.assistant.dashboard'), label: "Nurse Assistant", icon: <FaNotesMedical /> },
+      { href: route('dispensing'), label: "Dispensing", icon: <FaPills /> },
+
     ],
   };
 

@@ -47,12 +47,16 @@ class DispensingController extends Controller
         return response()->json(['message' => 'Medicine dispensed successfully.']);
     }
 
-    public function index()
+    public function index(Request  $request)
 {
-    $nurse = Auth::user();
+    
+        $user = $request->user();
+        $role = strtolower($user->position); 
+        
+  
     return Inertia::render('Dispensing', [
-        'role' => $nurse->role ?? 'nurse',
-        'nurseName' => $nurse->name,
+            'user' => $user, // Passing full user info
+            'role' => $role,
     ]);
 }
     public function logs()
