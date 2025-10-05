@@ -65,33 +65,38 @@ class AppointmentController extends Controller
 
 
     // View appointments for a patient
-public function viewAppointments(Request $request, Patient $patient)
-{
-    $user = $request->user();
-        
+    public function viewAppointments(Request $request, Patient $patient)
+    {
+        $user = $request->user();
+            
         // Get the position of the user and convert it to lowercase
-    $role = strtolower($user->position);
-    // Eager load the 'doctor' relation to get doctor details
-    $appointments = $patient->appointments()->with('doctor')->get();
+        $role = strtolower($user->position);
 
-    // Loop through the appointments to add patient and doctor details
-    $appointments = $appointments->map(function ($appointment) {
-        // Get the full name of the patient
-        $appointment->patient_full_name = $appointment->patient->first_name . ' ' . $appointment->patient->last_name;
+        // Eager load appointments with doctor, services, and medications
+        $appointments = $patient->appointments()
+            ->with(['doctor', 'services', 'medications'])  // Load doctor, services, and medications
+            ->get();
 
-        // Get the first name and last name of the doctor
-        $appointment->doctor_first_name = $appointment->doctor->first_name;
-        $appointment->doctor_last_name = $appointment->doctor->last_name;
+        // Loop through the appointments to add patient and doctor details
+        $appointments = $appointments->map(function ($appointment) {
+            // Get the full name of the patient
+            $appointment->patient_full_name = $appointment->patient->first_name . ' ' . $appointment->patient->last_name;
 
-        return $appointment;
-    });
+            // Get the first name and last name of the doctor
+            $appointment->doctor_first_name = $appointment->doctor->first_name;
+            $appointment->doctor_last_name = $appointment->doctor->last_name;
 
-    return Inertia::render('Nurse/ViewAllAppointments', [
-        'role' => $role,
-        'patient' => $patient,
-        'appointments' => $appointments,
-    ]);
-}
+            return $appointment;
+        });
+
+
+        // Return the appointments data to the view
+        return Inertia::render('Nurse/ViewSpecificPatientAppointments', [
+            'role' => $role,
+            'patient' => $patient,
+            'appointments' => $appointments,
+        ]);
+    }
 
 
 
