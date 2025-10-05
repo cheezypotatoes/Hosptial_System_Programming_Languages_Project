@@ -1,37 +1,45 @@
 import React from 'react';
 import { useForm } from '@inertiajs/react';
 import Sidebar from '@/Components/Sidebar';
-import ActionMenu from '@/Components/ActionMenu'; // Import ActionMenu
+import AppointmentActionMenu from '@/Components/AppointmentActionMenu'; // ✅ use new component
 
 export default function ViewSpecificPatientAppointments({ patient, appointments, role }) {
   const { delete: destroy } = useForm();
 
-  // Handle delete functionality
+  // Delete appointment handler
   function handleDelete(id) {
-    destroy(route('nurse.appointments.destroy', id));
+    if (confirm("Are you sure you want to delete this appointment?")) {
+      destroy(route('nurse.appointments.destroy', id));
+    }
   }
+
+  // View appointment info (placeholder)
+  function handleViewInfo(appointmentId) {
+
+    window.location.href = `/physician/appointments/${patient.id}/${appointmentId}`;
+  }
+
+  
 
   function handleLogout(e) {
     e.preventDefault();
     Inertia.post(route('/logout'));
   }
 
-  const activeLabel = "Appointment Management"; // highlight the active menu item
+  const activeLabel = "Appointment Management";
 
   return (
     <div className="flex min-h-screen bg-[#E6F0FA] font-sans text-[#1E3A8A]">
-      {/* Sidebar Component */}
       <Sidebar role={role} activeLabel={activeLabel} handleLogout={handleLogout} />
 
-      {/* Main Content */}
       <main className="flex-1 p-8">
         <div className="bg-white p-6 rounded-2xl shadow-lg">
-          {/* Header with Patient Information */}
+          {/* Patient Info Header */}
           <h1 className="text-3xl font-bold mb-4 text-center text-gray-800">
             Appointments for {patient.first_name} {patient.last_name}
           </h1>
           <p className="text-xl text-center text-gray-600 mb-8">
-            Patient ID: {patient.id} | Gender: {patient.gender} | Age: {new Date(patient.dob).toLocaleDateString()}
+            Patient ID: {patient.id} | Gender: {patient.gender} | DOB: {new Date(patient.dob).toLocaleDateString()}
           </p>
 
           {/* Appointments Table */}
@@ -57,12 +65,10 @@ export default function ViewSpecificPatientAppointments({ patient, appointments,
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-800">{appointment.symptoms}</td>
                       <td className="px-4 py-4 text-sm text-gray-800">
-                        <ActionMenu
-                          patientId={appointment.id}
-                          onEdit={() => console.log(`Editing appointment with ID: ${appointment.id}`)}
+                        <AppointmentActionMenu
+                          appointmentId={appointment.id}
+                          onViewInfo={handleViewInfo}
                           onDelete={handleDelete}
-                          onMakeAppointment={() => console.log(`Making appointment for patient ID: ${appointment.id}`)}
-                          onViewAppointments={() => console.log(`Viewing appointment with ID: ${appointment.id}`)}
                         />
                       </td>
                     </tr>
@@ -95,7 +101,9 @@ export default function ViewSpecificPatientAppointments({ patient, appointments,
                     appointments[0].services.map((service) => (
                       <tr key={service.id}>
                         <td className="px-4 py-2 text-sm text-gray-800">{service.name}</td>
-                        <td className="px-4 py-2 text-sm text-gray-800">{new Date(service.created_at).toLocaleDateString()}</td>
+                        <td className="px-4 py-2 text-sm text-gray-800">
+                          {new Date(service.created_at).toLocaleDateString()}
+                        </td>
                         <td className="px-4 py-2 text-sm text-gray-800">{service.description}</td>
                       </tr>
                     ))

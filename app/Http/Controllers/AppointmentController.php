@@ -98,6 +98,8 @@ class AppointmentController extends Controller
         ]);
     }
 
+    
+
 
 
     public function viewAllAppointments(Request $request)

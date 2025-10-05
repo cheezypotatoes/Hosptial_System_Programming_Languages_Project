@@ -22,7 +22,7 @@ class PhysicianAppointmentController extends Controller
         
         // Get the position of the user and convert it to lowercase
         $role = strtolower($user->position); // this is the `role` you're passing
-        
+       
         // Get the currently authenticated user (physician)
         $physician = $request->user();
 
@@ -40,65 +40,92 @@ class PhysicianAppointmentController extends Controller
         ]);
     }
 
-    public function show($patientId)
+public function show(Request $request, $patientId, $appointmentId)
 {
-    // Fetch appointment for the given patient ID and include related medications and services
+    $user = $request->user();
+    
+    // Get the position of the user and convert it to lowercase
+    $role = strtolower($user->position);
+    
+    // Fetch the appointment for the given patientId and appointmentId, including related medications and services
     $appointment = Appointment::with('patient', 'doctor', 'medications', 'services')  // Eager load medications and services
         ->where('patient_id', $patientId)  // Filter by patient_id
+        ->where('id', $appointmentId)  // Filter by appointment_id
         ->firstOrFail();  // Ensure we get only one or fail if not found
 
     // Return the appointment details along with medications and services to the Inertia page
     return Inertia::render('Physician/AppointmentDetails', [
         'appointment' => $appointment,  // Pass appointment data to the view
+        'role' => $role,
     ]);
-
-
 }
 
 public function store(Request $request, $appointmentId = null)
 {
-    // Log the incoming request data for medications and services
-    $medications = $request->input('medications');
-    $services = $request->input('services');
+    $medications = $request->input('medications', []);
+    $services = $request->input('services', []);
 
-    // Check if an appointment ID is provided, and fetch the existing appointment if found
     $appointment = $appointmentId ? Appointment::find($appointmentId) : new Appointment();
-    
+
     if ($appointmentId && !$appointment) {
         return redirect()->route('physician.appointments.index')
-                        ->with('error', 'Appointment not found.');
+                         ->with('error', 'Appointment not found.');
     }
 
-    // Update or create the appointment with notes
     if ($request->has('notes')) {
         $appointment->notes = $request->input('notes');
     }
-    $appointment->save(); // Save the appointment
+    $appointment->save(); // Save the appointment (create or update)
+
+    // Clear existing medications and services if updating
+    if ($appointmentId) {
+        $appointment->medications()->delete();
+        $appointment->services()->delete();
+    }
 
     // Store medications
     foreach ($medications as $medication) {
         AppointmentMedication::create([
-            'appointment_id' => $appointmentId, 
+            'appointment_id' => $appointment->id,
             'name' => $medication['name'],
             'dosage' => $medication['dosage'],
             'frequency' => $medication['frequency'],
             'duration' => $medication['duration'],
-            'notes' => $medication['notes'],
+            'notes' => $medication['notes'] ?? null,
         ]);
     }
 
-    // Store services
+    // Store services with result field
     foreach ($services as $service) {
         AppointmentService::create([
-            'appointment_id' => $appointmentId, 
+            'appointment_id' => $appointment->id,
             'name' => $service['name'],
-            'description' => $service['description'],
+            'description' => $service['description'] ?? null,
             'cost' => $service['cost'] ?? 0.00,
+            'result' => $service['result'] ?? null,  // Add this line
         ]);
     }
 
-    // Redirect with a success message
-    return redirect()->route('physician.appointments.index', $appointment->patient_id)
-                     ->with('success', 'Appointment updated successfully');
-    }
+     $user = $request->user();
+        
+        // Get the position of the user and convert it to lowercase
+        $role = strtolower($user->position); // this is the `role` you're passing
+        
+        // Get the count of today's appointments (or modify as needed)
+        $appointmentsTodayCount = Appointment::whereDate('checkup_date', now()->toDateString())->count();
+        
+        // Or if you want to count upcoming appointments
+        $upcomingAppointmentsCount = Appointment::where('checkup_date', '>', now())->count();
+
+
+
+
+    return Inertia::render('Profile/Dashboard', [
+            'user' => $user, // Passing full user info
+            'role' => $role, // Passing lowercase position as role
+            'appointmentsTodayCount' => $appointmentsTodayCount,
+            'upcomingAppointmentsCount' => $upcomingAppointmentsCount,
+        ]);
+}
+
 }

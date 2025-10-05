@@ -42,10 +42,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/physician/appointments', [PhysicianAppointmentController::class, 'index'])
         ->name('physician.appointments.index');
     
-    Route::get('/physician/appointments/{patientId}', [PhysicianAppointmentController::class, 'show']);
+   Route::get('/physician/appointments/{patientId}/{appointmentId}', [PhysicianAppointmentController::class, 'show']);
+
     Route::post('/physician/appointments/{appointmentId?}', [PhysicianAppointmentController::class, 'store'])
     ->name('physician.appointments.store');
-
+    
+ 
 
     // Nurse patient management routes with middleware applied to all
     Route::prefix('nurse')->middleware(EnsureUserIsNurse::class)->group(function () {
@@ -55,6 +57,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('nurse.patients.edit');
         Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('nurse.patients.update');
         Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('nurse.patients.destroy');
+        
+         Route::get('/appointments/{appointment}', [PhysicianAppointmentController::class, 'index'])
+                ->name('physician.appointments.index');
+
 
         Route::get('/appointments', [AppointmentController::class, 'viewAllAppointments'])->name('nurse.appointments.viewAll');
         Route::get('/patients/{patient}/appointments', action: [AppointmentController::class, 'viewAppointments'])->name('nurse.patients.viewAppointments');
