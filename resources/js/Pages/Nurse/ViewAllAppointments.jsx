@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useForm } from '@inertiajs/react';
 import Sidebar from '@/Components/Sidebar';
-import ActionMenu from '@/Components/ActionMenu'; // Import ActionMenu
+import ActionMenuSimple from '@/Components/ActionMenuSimple'; // ✅ updated import
 
 export default function ViewAllAppointments({ appointments, role }) {
   const { delete: destroy } = useForm();
@@ -11,27 +11,20 @@ export default function ViewAllAppointments({ appointments, role }) {
   function handleDelete(id) {
     destroy(route('nurse.appointments.destroy', id));
   }
-  
 
   // Redirect to View appointment details
-  function handleViewAppointment(id) {
-    console.log(`Viewing appointment with ID: ${id}`); // For now, log the view action
-    // window.location.href = route('nurse.appointments.view', id);
+  function handleViewAppointment(appointmentId) {
+    const appointment = appointments.find((a) => a.id === appointmentId);
+    if (!appointment) return;
+
+    const patientId = appointment.patient?.id || appointment.patient_id;
+    console.log(`Viewing appointment ${appointmentId} for patient ${patientId}`);
+
+    // Navigate to the appointment view page
+    window.location.href = `/physician/appointments/${patientId}/${appointmentId}`;
   }
 
-  // Redirect to Edit appointment page
-  function handleEditAppointment(id) {
-    console.log(`Editing appointment with ID: ${id}`); // For now, log the edit action
-    // window.location.href = route('nurse.appointments.edit', id);
-  }
-
-  // Handle making an appointment
-  function handleMakeAppointment(id) {
-    console.log(`Making appointment for patient ID: ${id}`); // For now, log the make appointment action
-    // window.location.href = route('nurse.appointments.create', id);
-  }
-
-  const activeLabel = "Appointment Management"; // highlight the active menu item
+  const activeLabel = 'Appointment Management'; // highlight the active menu item
 
   // Filter appointments based on search term
   const filteredAppointments = appointments.filter(
@@ -92,16 +85,13 @@ export default function ViewAllAppointments({ appointments, role }) {
                       <td className="px-4 py-4 text-sm text-gray-800">
                         {new Date(appointment.checkup_date).toLocaleString()}
                       </td>
-            
                       <td className="px-4 py-4 text-sm text-gray-800">{appointment.symptoms}</td>
                       <td className="px-4 py-4 text-sm text-gray-800">
-                        {/* ActionMenu Component for each appointment */}
-                        <ActionMenu
-                          patientId={appointment.id}
-                          onEdit={handleEditAppointment}
+                        {/* ✅ Simplified Action Menu (only View + Delete) */}
+                        <ActionMenuSimple
+                          appointmentId={appointment.id}
                           onDelete={handleDelete}
-                          onMakeAppointment={handleMakeAppointment}
-                          onViewAppointments={handleViewAppointment}
+                          onView={handleViewAppointment}
                         />
                       </td>
                     </tr>
