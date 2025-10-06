@@ -87,7 +87,8 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
             // Authenticated routes
             Route::middleware('auth')->group(function () {
 
-
+                Route::get('/patients/{id}/prescriptions', [PatientController::class, 'getPrescriptions']);
+Route::get('/patients/{id}/medical-conditions', [PatientController::class, 'getMedicalConditions']);
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 

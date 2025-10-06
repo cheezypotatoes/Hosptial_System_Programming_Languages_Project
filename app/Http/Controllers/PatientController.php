@@ -94,4 +94,81 @@ class PatientController extends Controller
             ->route('nurse.patients.index')
             ->with('success', 'Patient updated successfully!');
     }
+
+    public function getPrescriptions($id)
+{
+    // Fetch the patient by ID
+    $patient = Patient::find($id);
+
+    // Check if the patient exists
+    if (!$patient) {
+        return response()->json(['message' => 'Patient not found'], 404);
+    }
+
+    // Fetch all appointments for the patient
+    $appointments = $patient->appointments;
+
+    // Initialize an array to hold the medications (prescriptions)
+    $prescriptions = [];
+
+    // Loop through appointments and get medications for each
+    foreach ($appointments as $appointment) {
+        // Fetch medications associated with the appointment
+        $medications = $appointment->medications;
+
+        // Fetch the doctor using the doctor_id from the appointment
+        $doctor = $appointment->doctor; // assumes doctor_id → User model
+
+        // If medications exist, add them to the prescriptions array
+        foreach ($medications as $medication) {
+            $prescriptions[] = [
+                'medication'       => $medication->name ?? null,         // Medication name
+                'dosage'           => $medication->dosage ?? null,       // Dosage
+                'instructions'     => $medication->notes ?? null,        // Notes or instructions
+                'doctor_name'      => $doctor ? "{$doctor->first_name} {$doctor->last_name}" : null, // Doctor's full name
+                'date_prescribed'  => $appointment->checkup_date 
+                    ? \Carbon\Carbon::parse($appointment->checkup_date)->format('Y-m-d') 
+                    : null, // ✅ Added prescribed date (formatted)
+            ];
+        }
+    }
+
+    // If no prescriptions are found, return null
+    if (empty($prescriptions)) {
+        return response()->json(null);
+    }
+
+    // Return the prescriptions as JSON response
+    return response()->json($prescriptions);
+}
+
+    public function getMedicalConditions($id)
+    {
+        // Find the patient
+        $patient = Patient::find($id);
+
+        if (!$patient) {
+            return response()->json(['message' => 'Patient not found'], 404);
+        }
+
+        // Fetch all appointments related to the patient
+        // Only select the fields we need: symptoms and checkup_date
+        $appointments = $patient->appointments()
+            ->select('symptoms', 'checkup_date')
+            ->whereNotNull('symptoms')
+            ->orderByDesc('checkup_date')
+            ->get();
+
+        // Transform the data to match frontend expectations
+        $medicalConditions = $appointments->map(function ($appointment) {
+            return [
+                'symptom' => $appointment->symptoms,
+                'date' => $appointment->checkup_date
+                    ? \Carbon\Carbon::parse($appointment->checkup_date)->format('Y-m-d')
+                    : null,
+            ];
+        });
+
+        return response()->json($medicalConditions);
+    }
 }
