@@ -12,14 +12,15 @@ class Service extends Model
     protected $fillable = [
         'name',
         'description',
-        'result',
         'price',
         'category_id',
     ];
 
-  public function category()
-{
-    return $this->belongsTo(Category::class);
-}
-
+    /**
+     * Relationship: A service belongs to one category.
+     */
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
 }

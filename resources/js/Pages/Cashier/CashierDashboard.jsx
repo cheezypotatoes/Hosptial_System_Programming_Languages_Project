@@ -262,13 +262,6 @@ const handleRecordPayment = async () => {
       <span>₱ {totalPrice.toFixed(2)}</span>
     </div>
   )}
-
-  <button
-    onClick={handleGenerateBill}
-    className="mt-3 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-  >
-    Generate Bill
-  </button>
 </div>
 
             {/* Process Payments */}
@@ -413,82 +406,110 @@ const handleRecordPayment = async () => {
         </div>
 
         {/* Receipt Modal */}
-        {showReceipt && selectedPatient && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg w-96 max-h-[80vh] overflow-y-auto shadow-lg">
-              <div className="text-center mb-4">
-                <img src="/images/New_Logo.png" alt="Company Logo" className="mx-auto w-32 mb-2" />
-                <h2 className="text-lg font-bold">Jorge & Co Medical Center</h2>
-                <p className="text-sm">University of Mindanao, Matina Davao City</p>
-                <p className="text-xs text-gray-500">{new Date().toLocaleString()}</p>
-              </div>
+        {/* Receipt Modal */}
+{showReceipt && selectedPatient && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div
+      className="bg-white p-6 rounded-lg w-96 max-h-[80vh] overflow-y-auto shadow-lg"
+      id="receipt-content"
+    >
+      {/* 🧾 Receipt Header */}
+      <div className="text-center mb-4">
+        <img src="/images/New_Logo.png" alt="Company Logo" className="mx-auto w-32 mb-2" />
+        <h2 className="text-lg font-bold">Jorge & Co Medical Center</h2>
+        <p className="text-sm">University of Mindanao, Matina Davao City</p>
+        <p className="text-xs text-gray-500">{new Date().toLocaleString()}</p>
+      </div>
 
-              <div className="mb-2">
-                <p><strong>Cashier/Nurse:</strong> {user?.first_name} {user?.last_name}</p>
-                <p><strong>Patient:</strong> {selectedPatient.first_name} {selectedPatient.last_name}</p>
-                <p><strong>Patient Balance:</strong> ₱{Number(selectedPatient.balance ?? 0).toFixed(2)}</p>
-                <p><strong>Payment Method:</strong> {paymentMethod}</p>
-                <p><strong>Cash Recieve:</strong> {amountReceived}</p>
-              </div>
+      {/* Receipt Details */}
+      <div className="mb-2 text-sm">
+        <p><strong>Cashier/Nurse:</strong> {user?.first_name} {user?.last_name}</p>
+        <p><strong>Patient:</strong> {selectedPatient.first_name} {selectedPatient.last_name}</p>
+        <p><strong>Patient Balance:</strong> ₱{Number(selectedPatient.balance ?? 0).toFixed(2)}</p>
+        <p><strong>Payment Method:</strong> {paymentMethod}</p>
+        <p><strong>Cash Received:</strong> ₱{Number(amountReceived).toFixed(2)}</p>
+      </div>
 
-              <hr className="my-2" />
-              
-              <table className="w-full border-collapse text-sm">
-                <thead>
-                  <tr>
-                    <th className="border px-2 py-1">Item/Service</th>
-                    <th className="border px-2 py-1">Qty</th>
-                    <th className="border px-2 py-1">Price</th>
-                    <th className="border px-2 py-1">Subtotal</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {cart.map((item) => {
-                    const price = Number(item.price) || 0;
-                    const qty = Number(item.quantity) || 1;
-                    return (
-                      <tr key={item.id}>
-                        <td className="border px-2 py-1">{item.name}</td>
-                        <td className="border px-2 py-1">{qty}</td>
-                        <td className="border px-2 py-1">₱{price.toFixed(2)}</td>
-                        <td className="border px-2 py-1">₱{(price * qty).toFixed(2)}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+      <hr className="my-2" />
 
-              <div className="flex justify-between mt-2 font-semibold text-sm">
-                <span>Total:</span>
-                <span>₱{cart.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0).toFixed(2)}</span>
-              </div>
+      {/* Items Table */}
+      <table className="w-full border-collapse text-sm">
+        <thead>
+          <tr>
+            <th className="border px-2 py-1">Item/Service</th>
+            <th className="border px-2 py-1">Qty</th>
+            <th className="border px-2 py-1">Price</th>
+            <th className="border px-2 py-1">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {cart.map((item) => {
+            const price = Number(item.price) || 0;
+            const qty = Number(item.quantity) || 1;
+            return (
+              <tr key={item.id}>
+                <td className="border px-2 py-1">{item.name}</td>
+                <td className="border px-2 py-1">{qty}</td>
+                <td className="border px-2 py-1">₱{price.toFixed(2)}</td>
+                <td className="border px-2 py-1">₱{(price * qty).toFixed(2)}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
 
-              <div className="mt-4 flex justify-end gap-2">
-                <button onClick={() => setShowReceipt(false)} className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">Close</button>
-             <button
-                      disabled={!selectedPatient || cart.length === 0 || !amountReceived}
-                      onClick={() =>
-                        handleRecordPayment({
-                          patient_id: selectedPatient?.user_id,
-                          payment_method: paymentMethod,
-                          amount_received: amountReceived,
-                          total_price: totalPrice,
-                        })
-                      }
-                      className={`px-4 py-2 rounded text-white ${
-                        !selectedPatient || cart.length === 0 || !amountReceived
-                          ? "bg-gray-400 cursor-not-allowed"
-                          : "bg-green-600 hover:bg-green-700"
-                      }`}
-                    >
-                      Record Payment
-                    </button>
+      {/* Total and Change */}
+      <div className="flex justify-between mt-2 font-semibold text-sm">
+        <span>Total:</span>
+        <span>₱{totalPrice.toFixed(2)}</span>
+      </div>
 
+      <div className="flex justify-between text-sm mt-1">
+        <span>Change:</span>
+        <span>₱{(Number(amountReceived) - totalPrice).toFixed(2)}</span>
+      </div>
 
-              </div>
-            </div>
-          </div>
-        )}
+      {/* Buttons (Hidden When Printing) */}
+      <div className="mt-5 flex flex-col gap-2 print:hidden">
+        <div className="flex justify-between gap-2">
+          <button
+            onClick={() => window.print()}
+            className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          >
+            🖨️ Print Receipt
+          </button>
+
+          <button
+            onClick={() => setShowReceipt(false)}
+            className="flex-1 bg-gray-600 text-white py-2 rounded hover:bg-gray-700"
+          >
+            Close
+          </button>
+        </div>
+
+        <button
+          disabled={!selectedPatient || cart.length === 0 || !amountReceived}
+          onClick={() =>
+            handleRecordPayment({
+              patient_id: selectedPatient?.user_id,
+              payment_method: paymentMethod,
+              amount_received: amountReceived,
+              total_price: totalPrice,
+            })
+          }
+          className={`w-full py-2 rounded text-white ${
+            !selectedPatient || cart.length === 0 || !amountReceived
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-green-600 hover:bg-green-700"
+          }`}
+        >
+          Record Payment
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       </main>
     </div>
   );

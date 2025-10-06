@@ -29,20 +29,15 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
             //Api
          
-            Route::get('/services', [ServiceController::class, 'index']);
+            Route::get('/services/list', [ServiceController::class, 'index']);
+            Route::post('/services/store', [ServiceController::class, 'store']);
             Route::get('/patients', [PatientController::class, 'index']);
             Route::get('/pending-payments', [PaymentController::class, 'pending']);
             Route::get('/transactions', [TransactionController::class, 'recent']);
             Route::get('/items', [ItemController::class, 'index']);
 
             //Medicine Routes
-            Route::middleware(['auth'])->group(function () {
-                Route::get('/medicine/inventory', [MedicineController::class, 'index'])->name('medicine.inventory');
-                Route::post('/medicine/store', [MedicineController::class, 'store'])->name('medicine.store');
-
-        
-             
-                });
+         
                 
                 //dispensing
 
@@ -158,6 +153,18 @@ Route::get('/patients/{id}/medical-conditions', [PatientController::class, 'getM
 
 });
 
+Route::middleware(['auth'])->group(function () {
+    // 🖥️ Route to show the React (Inertia) dashboard UI
+    Route::get('/medicine/inventory', function () {
+        return Inertia::render('Medicine/MedicineInventory');
+    })->name('medicine.inventory');
+
+    // ⚙️ Route to return medicine data as JSON
+    Route::get('/medicine/data', [MedicineController::class, 'index'])->name('medicine.data');
+    
+    // 🧾 For adding new medicine
+    Route::post('/medicine/store', [MedicineController::class, 'store'])->name('medicine.store');
+});
 // ---------------------------
 // CASHIER ROUTES
 // ---------------------------
