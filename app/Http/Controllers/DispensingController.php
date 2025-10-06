@@ -11,13 +11,13 @@ use Illuminate\Http\Request;
 
 class DispensingController extends Controller
 {
-    // ✅ API endpoint for categories with services and items
+    // 🔹 Fetch all categories with services and items
     public function categories()
     {
         return Category::with(['services', 'items'])->get();
     }
 
-    // Store a dispensing record
+    // 🔹 Store a dispensing record
     public function store(Request $request)
     {
         $request->validate([
@@ -47,18 +47,26 @@ class DispensingController extends Controller
         return response()->json(['message' => 'Medicine dispensed successfully.']);
     }
 
-    public function index(Request  $request)
-{
-    
+    // 🔹 Render the dispensing page with user info and role
+    public function index(Request $request)
+    {
         $user = $request->user();
-        $role = strtolower($user->position); 
-        
-  
-    return Inertia::render('Dispensing', [
-            'user' => $user, // Passing full user info
-            'role' => $role,
-    ]);
-}
+
+        if (!$user) {
+            // Redirect to login if not authenticated
+            return redirect()->route('login');
+        }
+
+        $role = strtolower($user->position); // Ensure 'position' exists in DB
+
+        // Correct Inertia path matching folder structure
+        return Inertia::render('Dispensing/Dispensing', [
+            'user' => $user, // full user info
+            'role' => $role, // role string
+        ]);
+    }
+
+    // 🔹 Get the latest 10 dispense logs
     public function logs()
     {
         return Dispense::latest()->take(10)->get();

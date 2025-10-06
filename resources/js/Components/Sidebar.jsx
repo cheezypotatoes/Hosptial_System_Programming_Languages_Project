@@ -2,10 +2,13 @@ import React from 'react';
 import { MdDashboard, MdPerson, MdOutlinePersonPin, MdInventory } from "react-icons/md";
 import { FaFileInvoiceDollar, FaPills, FaNotesMedical } from "react-icons/fa";
 import { BiLogOutCircle } from "react-icons/bi";
+
+import { route } from 'ziggy-js';
 import Logo from "@/../images/New_Logo.png";
 
-const Sidebar = ({ role, activeLabel, handleLogout }) => {
+const Sidebar = ({ role, activeLabel, handleLogout,  }) => {
   // Define dynamic menu items based on role
+
   const menuItems = {
     admin: [
       { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
@@ -22,6 +25,7 @@ const Sidebar = ({ role, activeLabel, handleLogout }) => {
       { href: route("nurse.patients.index"), label: "Patient Management", icon: <MdPerson /> },
        // { href: route('nurse.assistant.dashboard'), label: "Nurse Assistant", icon: <FaNotesMedical /> },
       { href: route('dispensing'), label: "Dispensing", icon: <FaPills /> },
+      
     ],
     
     assistant: [
@@ -31,7 +35,8 @@ const Sidebar = ({ role, activeLabel, handleLogout }) => {
     ],
     cashier: [
       { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
-      { href: route('cashier.dashboard'), label: "Billing", icon: <FaFileInvoiceDollar /> },
+      { href: route('cashier.dashboard', undefined, false, Ziggy), label: "Billing", icon: <FaFileInvoiceDollar /> },
+
     ],
 
     doctor: [
@@ -45,12 +50,14 @@ const Sidebar = ({ role, activeLabel, handleLogout }) => {
       { href: route("nurse.patients.index"), label: "Patient Management", icon: <MdPerson /> },
        // { href: route('nurse.assistant.dashboard'), label: "Nurse Assistant", icon: <FaNotesMedical /> },
       { href: route('dispensing'), label: "Dispensing", icon: <FaPills /> },
+       { href: route('cashier.dashboard'), label: "Billing", icon: <FaFileInvoiceDollar /> },
 
     ],
   };
 
   // Select the menu items based on the role, or default if no role matches
-  const currentMenu = menuItems[role] || menuItems['default'];
+  const normalizedRole = role?.toLowerCase();
+  const currentMenu = menuItems[normalizedRole] || menuItems['default'];
 
   return (
     <aside className="w-64 bg-[#1E40AF] shadow-lg flex flex-col" aria-label="Primary Navigation">

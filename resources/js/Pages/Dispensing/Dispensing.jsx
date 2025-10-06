@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import Sidebar from "../../Components/Sidebar";
 import axios from "axios";
-import { router } from "@inertiajs/react";
+import { router, useForm } from "@inertiajs/react";
 
 
 export default function Dispensing({ role, user}) {
+  const { post } = useForm();
+  
   const [patients, setPatients] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -12,13 +14,16 @@ export default function Dispensing({ role, user}) {
   const printRef = useRef(); 
 
   const activeLabel = "Dispensing";
+    console.log("Logged-in role:", role); // e.g., "admin", "staff"
+  console.log("User info:", user);
 
-  function handleLogout(e) {
+ function handleLogout(e) {
     e.preventDefault();
     if (window.confirm("Are you sure you want to logout?")) {
-      router.post(route("logout"));
+      post(route("logout"));
     }
   }
+
 
 
   // 🔹 Fetch all patients
@@ -87,7 +92,13 @@ export default function Dispensing({ role, user}) {
 const handlePrint = () => {
   const logoPath = "/images/New_Logo.png";
   const companyName = "Jorge & Co Medical Center";
-    const companyAddress = "University of Mindanao, Matina Davao City";
+  const companyAddress = "University of Mindanao, Matina Davao City";
+
+  // Get nurse name from logged-in user
+  const nurseName = user ? `${user.first_name} ${user.last_name}` : "N/A";
+
+  // Get current date/time
+  const currentDate = new Date().toLocaleString(); // e.g., "10/6/2025, 1:15:30 PM"
 
   const content = printRef.current.innerHTML;
   const printWindow = window.open("", "", "width=900,height=650");
@@ -104,6 +115,7 @@ const handlePrint = () => {
           th, td { padding: 8px; text-align: left; }
           .header { text-align: center; margin-bottom: 20px; }
           .header img { width: 160px; display: block; margin: 0 auto 5px; }
+          .footer { margin-top: 20px; font-size: 14px; }
         </style>
       </head>
       <body>
@@ -112,7 +124,14 @@ const handlePrint = () => {
           <h2>${companyName}</h2>
           <p>${companyAddress}</p>
         </div>
+      <div class="footer">
+          <p><strong>Nurse:</strong> ${nurseName}</p>
+          <p><strong>Date:</strong> ${currentDate}</p>
+        </div>
+
         ${content}
+
+      </div>
       </body>
     </html>
   `);
@@ -234,6 +253,7 @@ const handlePrint = () => {
           ) : (
             <p className="text-gray-500">
               🔍 Search for a patient to view their medical records.
+              {/* <h1 className="text-3xl font-bold mb-6 text-[#1E40AF]">Welcome, {user.first_name}!</h1> */}
             </p>
           )}
         </div>

@@ -47,15 +47,12 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
                 //dispensing
 
           
-                Route::middleware(['auth'])->group(function () {
-                    Route::get('/dispensing', [DispensingController::class, 'index'])->name('dispensing');
-                });
-                Route::get('/dispensing', function () { return Inertia::render('Dispensing/Dispensing'); })->name('dispensing');
-
-                 Route::get('/categories', [DispensingController::class, 'categories'])->name('categories'); 
+               Route::middleware(['auth'])->group(function () {
+                Route::get('/dispensing', [DispensingController::class, 'index'])->name('dispensing');
+                Route::get('/categories', [DispensingController::class, 'categories'])->name('categories');
                 Route::post('/dispense/store', [DispensingController::class, 'store'])->name('dispense.store');
                 Route::get('/dispense/logs', [DispensingController::class, 'logs'])->name('dispense.logs');
-                Route::get('/categories', [DispensingController::class, 'categories'])->name('categories');
+            });
 
                 //patient prescription
                 
@@ -94,19 +91,27 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Physician edit routes
-    Route::get('/physician/edit', [PhysicianController::class, 'edit'])->name('physician.edit');
-    // Physician Records routes
-    Route::get('/physician/records', [PhysicianController::class, 'records'])
-        ->name('physician.records');
-    Route::post('/physician/update', [PhysicianController::class, 'update'])
-        ->name('physician.update');
-    Route::get('/physician/appointments/{patientId}/{appointmentId}', [PhysicianAppointmentController::class, 'show']);
+        // Physician edit routes
+        Route::get('/physician/edit', [PhysicianController::class, 'edit'])->name('physician.edit');
 
+        // Physician Records routes
+        Route::get('/physician/records', [PhysicianController::class, 'records'])->name('physician.records');
 
-    Route::post('/physician/appointments/{appointmentId?}', [PhysicianAppointmentController::class, 'store'])
-    ->name('physician.appointments.store');
+        // Search patients via query param
+        Route::get('/physician/records/search', [PhysicianController::class, 'records'])
+            ->name('physician.records.search'); // optional: separate route for search
 
+        // Update physician profile
+        Route::post('/physician/update', [PhysicianController::class, 'update'])->name('physician.update');
+
+        // Show a specific appointment for a patient
+        Route::get('/physician/appointments/{patientId}/{appointmentId}', [PhysicianAppointmentController::class, 'show'])
+            ->name('physician.appointments.show');
+
+        // Store appointment (create or update)
+        Route::post('/physician/appointments/{appointmentId?}', [PhysicianAppointmentController::class, 'store'])
+            ->name('physician.appointments.store');
+            
     // Nurse edit routes
     Route::get('/nurse/edit', [NurseController::class, 'edit'])->name('nurse.edit');
     Route::post('/nurse/edit', [NurseController::class, 'update'])->name('nurse.update');
@@ -154,22 +159,46 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 
 
+// Cashier
+  
 
-            // Cashier routes
-                            Route::prefix('cashier')->group(function () {
-                Route::get('/dashboard', [CashierController::class, 'index'])->name('cashier.dashboard');
-                Route::get('/categories', [CashierController::class, 'getCategories'])->name('cashier.categories');
-                Route::get('/services-items', [CashierController::class, 'getServicesAndItems'])->name('cashier.services.items');
-                Route::get('/patients', [CashierController::class, 'searchPatients'])->name('cashier.patients');
-                Route::post('/bill', [CashierController::class, 'generateBill'])->name('cashier.bill');
-                Route::post('/payment', [CashierController::class, 'recordPayment'])->name('cashier.payment');
-                Route::get('/transactions', [CashierController::class, 'transactions'])->name('cashier.transactions');
-            });
 
+    
+    // Pending payments (optional: you can reuse Payment::where)
+    Route::get('/pending-payments', function () {
+        return response()->json(\App\Models\Payment::where('status', 'processing')->latest()->take(10)->get());
+    });
+});
+
+  Route::middleware(['auth'])->group(function () {
+    // Dashboard
+      Route::get('/nurse/cashier/dashboard', [CashierController::class, 'index'])->name('cashier.dashboard');
+    // Fetch categories
+    Route::get('/cashier/categories', [CashierController::class, 'getCategories']);
+
+    // Fetch services + items
+    Route::get('/cashier/services-items', [CashierController::class, 'getServicesAndItems']);
+
+    // Search patients
+    Route::get('/nurse/cashier/patients', [CashierController::class, 'searchPatients']);
+
+    // Generate bill
+    Route::post('/cashier/generate-bill', [CashierController::class, 'generateBill']);
+
+    // Record payment
+    Route::post('/cashier/record-payment', [CashierController::class, 'recordPayment']);
+
+    // Recent transactions
+    Route::get('/cashier/transactions', [CashierController::class, 'transactions']);
+
+    // Pending payments (optional: you can reuse Payment::where)
+    Route::get('/pending-payments', function () {
+        return response()->json(\App\Models\Payment::where('status', 'processing')->latest()->take(10)->get());
+    });
+});
 
 
         });
-});
 
 
 require __DIR__.'/auth.php';

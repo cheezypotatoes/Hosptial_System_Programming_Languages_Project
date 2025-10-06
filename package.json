@@ -23,9 +23,11 @@
         "vite": "^7.0.4"
     },
     "dependencies": {
+        "@inertiajs/inertia": "^0.11.1",
         "lucide-react": "^0.544.0",
         "rc-select": "^14.16.8",
         "react-icons": "^5.5.0",
-        "recharts": "^3.2.1"
+        "recharts": "^3.2.1",
+        "ziggy-js": "^2.6.0"
     }
 }

@@ -28,8 +28,8 @@ class CashierController extends Controller
         $allPatients = Patient::all();
 
         return Inertia::render('Cashier/CashierDashboard', [
-             'user' => $user, // Passing full user info
-            'role' => $role, // Passing lowercase position as role
+             'user' => $user,
+            'role' => $role , 
             'pendingPayments'   => $pendingPayments,
             'recentTransactions'=> $recentTransactions,
             'patients'          => $allPatients,
