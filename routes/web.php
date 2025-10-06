@@ -156,46 +156,29 @@ Route::get('/patients/{id}/medical-conditions', [PatientController::class, 'getM
                 ->name('nurse.assistant.dashboard');
 
 
-   
-
-
-
-// Cashier
-  
-
-
-    
-    // Pending payments (optional: you can reuse Payment::where)
-    Route::get('/pending-payments', function () {
-        return response()->json(\App\Models\Payment::where('status', 'processing')->latest()->take(10)->get());
-    });
 });
 
-  Route::middleware(['auth'])->group(function () {
-    // Dashboard
-      Route::get('/nurse/cashier/dashboard', [CashierController::class, 'index'])->name('cashier.dashboard');
-    // Fetch categories
-    Route::get('/cashier/categories', [CashierController::class, 'getCategories']);
+// ---------------------------
+// CASHIER ROUTES
+// ---------------------------
+Route::middleware(['auth'])->prefix('nurse/cashier')->group(function () {
 
-    // Fetch services + items
-    Route::get('/cashier/services-items', [CashierController::class, 'getServicesAndItems']);
-
-    // Search patients
-    Route::get('/nurse/cashier/patients', [CashierController::class, 'searchPatients']);
-
-    // Generate bill
-    Route::post('/cashier/generate-bill', [CashierController::class, 'generateBill']);
-
-    // Record payment
-    Route::post('/cashier/record-payment', [CashierController::class, 'recordPayment']);
-
-    // Recent transactions
-    Route::get('/cashier/transactions', [CashierController::class, 'transactions']);
-
-    // Pending payments (optional: you can reuse Payment::where)
+    Route::get('/dashboard', [CashierController::class, 'index'])->name('cashier.dashboard');
     Route::get('/pending-payments', function () {
-        return response()->json(\App\Models\Payment::where('status', 'processing')->latest()->take(10)->get());
+        return response()->json(
+            \App\Models\Payment::where('status', 'processing')->latest()->take(10)->get()
+        );
     });
+    Route::get('/categories', [CashierController::class, 'getCategories']);
+    Route::get('/services-items', [CashierController::class, 'getServicesAndItems']);
+    Route::get('/patients', [CashierController::class, 'searchPatients']);
+    Route::post('/generate-bill', [CashierController::class, 'generateBill']);
+
+    // ✅ Keep this only here
+    Route::post('/record-payment', [CashierController::class, 'recordPayment'])
+        ->name('cashier.recordPayment');
+
+    Route::get('/transactions', [CashierController::class, 'transactions']);
 });
 
 
