@@ -10,6 +10,7 @@ use App\Http\Controllers\PhysicianAppointmentController;
 use App\Http\Middleware\EnsureUserIsNurse;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\Api\PrescriptionController;
+use App\Http\Controllers\MedicineInventoryAddController;
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -27,6 +28,16 @@ Route::middleware('guest')->group(function () {
 
 // Authenticated routes
 Route::middleware('auth')->group(function () {
+
+
+    Route::get('/medicine-inventory', action: [MedicineInventoryAddController::class, 'index'])->name('medicine.index');
+    Route::post('/medicine/store', [MedicineInventoryAddController::class, 'storeMedicine'])->name('medicine.store');
+    Route::post('/service/store', [MedicineInventoryAddController::class, 'storeService'])->name('service.store');
+    Route::post('/item/store', [MedicineInventoryAddController::class, 'storeItem'])->name('item.store');
+
+Route::post('/medicine/add', [MedicineInventoryAddController::class, 'storeMedicine'])->name('medicine.add.store');
+Route::post('/service/add', [MedicineInventoryAddController::class, 'storeService'])->name('service.add.store');
+Route::post('/item/add', [MedicineInventoryAddController::class, 'storeItem'])->name('item.add.store');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');

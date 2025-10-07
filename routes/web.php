@@ -26,6 +26,7 @@ use App\Http\Controllers\SessionController;
 use App\Http\Controllers\DispensingController;
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\PharmacistController;
+use App\Http\Controllers\MedicineInventoryAddController;
 // Middleware
 use App\Http\Middleware\EnsureUserIsNurse;
 
@@ -103,7 +104,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/dispense/logs', [DispensingController::class, 'logs'])->name('dispense.logs');
 
     // Medicine Inventory
-    Route::get('/medicine/inventory', fn() => Inertia::render('Medicine/MedicineInventory'))->name('medicine.inventory');
+    Route::get('/medicine/inventory', [MedicineInventoryAddController::class, 'index'])
+    ->name('medicine.inventory');
     Route::get('/medicine/data', [MedicineController::class, 'index'])->name('medicine.data');
     Route::post('/medicine/store', [MedicineController::class, 'store'])->name('medicine.store');
 

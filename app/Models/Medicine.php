@@ -13,5 +13,6 @@ class Medicine extends Model
         'name',
         'price',
         'stock',
+        'expiry',
     ];
 }
