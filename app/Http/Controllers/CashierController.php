@@ -19,63 +19,69 @@ class CashierController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        
-    
-        $role = strtolower($user->position); 
-        
-        $pendingPayments = Payment::where('status', 'processing')->latest()->take(5)->get();
-        $recentTransactions = Transaction::latest()->take(5)->get();
-        $allPatients = Patient::all();
+        $role = strtolower($user->position);
+
+        // Fetch all patients with their appointments
+        $patients = Patient::with('appointments')->get()->map(function ($patient) {
+            return [
+                'id' => $patient->id,
+                'first_name' => $patient->first_name,
+                'last_name' => $patient->last_name,
+                'full_name' => $patient->full_name,
+                'appointments' => $patient->appointments->map(function ($appointment) {
+                    return [
+                        'id' => $appointment->id,
+                        'checkup_date' => $appointment->checkup_date?->format('Y-m-d H:i'),
+                        'fee' => $appointment->fee ?? 350, // default fee if null
+                        'balance' => $appointment->fee ?? 350, // placeholder, can compute from payments table
+                        'problem' => $appointment->problem,
+                        'symptoms' => $appointment->symptoms,
+                        'notes' => $appointment->notes,
+                    ];
+                })->toArray(),
+            ];
+        })->toArray();
+
+        // Fetch all services from DB
+        $services = Service::all()->map(function ($s) {
+            return [
+                'id' => $s->id,
+                'name' => $s->name,
+                'price' => $s->price ?? 350, // default to 350 if null
+                'type' => 'service',
+            ];
+        })->toArray();
+
+        // Fetch all medicines from DB
+        $medicines = Medicine::all()->map(function ($m) {
+            return [
+                'id' => $m->id,
+                'name' => $m->name,
+                'price' => $m->price ?? 350, // default to 350 if null
+                'type' => 'medicine',
+            ];
+        })->toArray();
+
+        // Fetch all items from DB
+        $items = Item::all()->map(function ($i) {
+            return [
+                'id' => $i->id,
+                'name' => $i->name,
+                'price' => $i->price ?? 0, // use item's price
+                'stock_quantity' => $i->stock_quantity,
+                'type' => 'item',
+            ];
+        })->toArray();
+
+        // Combine services + medicines + items
+        $servicesAndItems = array_merge($services, $medicines, $items);
 
         return Inertia::render('Cashier/CashierDashboard', [
-             'user' => $user,
-            'role' => $role , 
-            'pendingPayments'   => $pendingPayments,
-            'recentTransactions'=> $recentTransactions,
-            'patients'          => $allPatients,
+            'user' => $user,
+            'role' => $role,
+            'patients' => $patients,
+            'servicesAndItems' => $servicesAndItems,
         ]);
-    }
-
-    // 🔹 Fetch categories (with services + items)
-    public function getCategories()
-    {
-        $categories = Category::with(['services', 'items'])->get();
-        return response()->json($categories);
-    }
-
-    // 🔹 Fetch services + medicines + items (flat list)
-    public function getServicesAndItems()
-    {
-        $services = Service::select('id', 'name', 'price')
-            ->get()
-            ->map(fn($s) => [
-                'id'    => $s->id,
-                'name'  => $s->name,
-                'price' => $s->price,
-                'type'  => 'service',
-            ]);
-
-        $medicines = Medicine::select('id', 'name', 'price', 'stock')
-            ->get()
-            ->map(fn($m) => [
-                'id'    => $m->id,
-                'name'  => $m->name,
-                'price' => $m->price,
-                'stock' => $m->stock,
-                'type'  => 'medicine',
-            ]);
-
-        $items = Item::select('id', 'name', 'price', 'stock')
-            ->get()
-            ->map(fn($i) => [
-                'id'    => $i->id,
-                'name'  => $i->name,
-                'price' => $i->price,
-                'stock' => $i->stock,
-                'type'  => 'item',
-            ]);
-
-        return response()->json($services->merge($medicines)->merge($items));
     }
 
     // 🔹 Search patients

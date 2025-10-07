@@ -1,99 +1,35 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Sidebar from "../../Components/Sidebar";
 
-export default function CashierDashboard({ role, user }) {
+export default function CashierDashboard({ role, user, patients, servicesAndItems }) {
   const [quantity, setQuantity] = useState(1);
   const [cart, setCart] = useState([]);
   const [amountReceived, setAmountReceived] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [showReceipt, setShowReceipt] = useState(false);
 
-  const [patients, setPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
-  const [servicesAndItems, setServicesAndItems] = useState([]);
-  const [selectedService, setSelectedService] = useState("");
+  const [selectedService, setSelectedService] = useState(""); // default empty string
+  const [customPrice, setCustomPrice] = useState("");
 
   const activeLabel = "Billing";
   const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // MOCK DATA
-  const mockCategories = [
-    {
-      id: 1,
-      name: "Consultation",
-      services: [
-        { id: 101, name: "General Checkup", price: 500 },
-        { id: 102, name: "Specialist Consultation", price: 1200 }
-      ],
-      items: [
-        { id: 201, name: "Vitamin C", price: 100 },
-        { id: 202, name: "Painkiller", price: 50 }
-      ]
-    },
-    {
-      id: 2,
-      name: "Laboratory",
-      services: [
-        { id: 103, name: "Blood Test", price: 800 },
-        { id: 104, name: "Urine Test", price: 300 }
-      ],
-      items: [
-        { id: 203, name: "Glucose Strip", price: 200 },
-        { id: 204, name: "Syringe", price: 20 }
-      ]
-    }
-  ];
-
-  useEffect(() => {
-    // Flatten services and items
-    const combined = mockCategories.flatMap((cat) => [
-      ...(cat.services || []).map((s) => ({ ...s, type: "service" })),
-      ...(cat.items || []).map((i) => ({ ...i, type: "item" }))
-    ]);
-    setServicesAndItems(combined);
-
-    // Mock patients with appointments
-    setPatients([
-      { 
-        user_id: "P001", 
-        first_name: "Juan", 
-        last_name: "Dela Cruz", 
-        appointments: [
-          { id: "A001", date: "2025-10-01", balance: 0 },
-          { id: "A002", date: "2025-10-05", balance: 150 }
-        ]
-      },
-      { 
-        user_id: "P002", 
-        first_name: "Maria", 
-        last_name: "Santos", 
-        appointments: [
-          { id: "A003", date: "2025-10-03", balance: 200 }
-        ]
-      },
-      { 
-        user_id: "P003", 
-        first_name: "Pedro", 
-        last_name: "Reyes", 
-        appointments: [
-          { id: "A004", date: "2025-10-02", balance: 150 }
-        ]
-      }
-    ]);
-  }, []);
-
+  // Select patient
   const handleSelectPatient = (patient) => {
-    if (selectedPatient?.user_id === patient.user_id) return; // prevent re-reset
+    if (selectedPatient?.id === patient.id) return;
     setSelectedPatient(patient);
     setSelectedAppointment(null);
     setCart([]);
     setAmountReceived("");
   };
 
+  // Select appointment
   const handleSelectAppointment = (appointmentId) => {
     if (!selectedPatient) return;
-    const appointment = selectedPatient.appointments.find((a) => a.id === appointmentId);
+    const appointment = selectedPatient.appointments.find(
+      (a) => String(a.id) === String(appointmentId)
+    );
     if (appointment) {
       setSelectedAppointment(appointment);
       setCart([]);
@@ -101,27 +37,37 @@ export default function CashierDashboard({ role, user }) {
     }
   };
 
+  // Add to cart
   const handleAddToCart = () => {
     if (!selectedService) return alert("Please select a service/item");
 
-    const service = servicesAndItems.find((s) => s.id.toString() === selectedService);
+    const service = servicesAndItems.find((s) => `${s.type}_${s.id}` === selectedService);
     if (!service) return;
 
-    const existingIndex = cart.findIndex((c) => c.id === service.id);
+    const price = customPrice ? parseFloat(customPrice) : parseFloat(service.price);
+    const uniqueKey = `${service.type}_${service.id}`;
+
+    const existingIndex = cart.findIndex((c) => `${c.type}_${c.id}` === uniqueKey);
     if (existingIndex >= 0) {
       const updatedCart = [...cart];
       updatedCart[existingIndex].quantity += quantity;
+      updatedCart[existingIndex].price = price;
       setCart(updatedCart);
     } else {
-      setCart([...cart, { ...service, quantity }]);
+      setCart([...cart, { ...service, quantity, price }]);
     }
 
+    // Reset select safely
     setSelectedService("");
     setQuantity(1);
+    setCustomPrice("");
   };
 
-  const handleRemoveFromCart = (id) => setCart(cart.filter((c) => c.id !== id));
+  const handleRemoveFromCart = (type, id) => {
+    setCart(cart.filter((c) => !(c.type === type && c.id === id)));
+  };
 
+  // Receipt preview
   const handleShowMockReceipt = () => {
     if (!selectedPatient) return alert("Please select a patient!");
     if (!selectedAppointment) return alert("Please select an appointment!");
@@ -129,10 +75,10 @@ export default function CashierDashboard({ role, user }) {
     if (!amountReceived) return alert("Please enter the amount received!");
     if (Number(amountReceived) < totalPrice)
       return alert("Amount received cannot be less than the total bill!");
-
     setShowReceipt(true);
   };
 
+  // Record payment
   const handleRecordPayment = () => {
     if (!selectedPatient) return alert("Select a patient!");
     if (!selectedAppointment) return alert("Select an appointment!");
@@ -140,13 +86,11 @@ export default function CashierDashboard({ role, user }) {
     if (!amountReceived || Number(amountReceived) < totalPrice)
       return alert("Invalid amount received!");
 
-    // Update appointment balance
     const updatedAppointment = { ...selectedAppointment };
-    updatedAppointment.balance = (updatedAppointment.balance ?? 0) + totalPrice - Number(amountReceived);
-
+    updatedAppointment.balance =
+      (updatedAppointment.balance ?? 0) + totalPrice - Number(amountReceived);
     setSelectedAppointment(updatedAppointment);
 
-    // Update patient appointments
     const updatedPatient = { ...selectedPatient };
     updatedPatient.appointments = updatedPatient.appointments.map((a) =>
       a.id === updatedAppointment.id ? updatedAppointment : a
@@ -154,11 +98,10 @@ export default function CashierDashboard({ role, user }) {
     setSelectedPatient(updatedPatient);
 
     alert(
-      `Payment recorded for ${selectedPatient.first_name} ${selectedPatient.last_name} (Appointment: ${updatedAppointment.date}):\n` +
-      `Total: ₱${totalPrice}\nReceived: ₱${amountReceived}\nNew Balance: ₱${updatedAppointment.balance}`
+      `Payment recorded for ${selectedPatient.full_name} (Appointment: ${updatedAppointment.checkup_date}):\n` +
+        `Total: ₱${totalPrice.toFixed(2)}\nReceived: ₱${Number(amountReceived).toFixed(2)}\nNew Balance: ₱${updatedAppointment.balance.toFixed(2)}`
     );
 
-    // Reset cart and amount
     setCart([]);
     setAmountReceived("");
     setShowReceipt(false);
@@ -181,15 +124,25 @@ export default function CashierDashboard({ role, user }) {
             {selectedPatient && selectedAppointment && (
               <div className="border rounded p-4 mb-4">
                 <h2 className="font-semibold">Patient Info</h2>
-                <p><strong>Name:</strong> {selectedPatient.first_name} {selectedPatient.last_name}</p>
-                <p><strong>Appointment Date:</strong> {selectedAppointment.date}</p>
+                <p>
+                  <strong>Name:</strong> {selectedPatient.full_name}
+                </p>
+                <p>
+                  <strong>Appointment Date:</strong> {selectedAppointment.checkup_date}
+                </p>
 
                 <div className="mt-2 space-y-1">
-                  <p><strong>Previous Balance:</strong> ₱{selectedAppointment.balance?.toFixed(2) ?? 0}</p>
-                  <p><strong>Current Cart Total:</strong> ₱{totalPrice.toFixed(2)}</p>
+                  <p>
+                    <strong>Previous Balance:</strong> ₱
+                    {Number(selectedAppointment.balance ?? 0).toFixed(2)}
+                  </p>
+                  <p>
+                    <strong>Current Cart Total:</strong> ₱{totalPrice.toFixed(2)}
+                  </p>
                   <hr className="my-1 border-gray-300" />
                   <p className="font-semibold text-blue-800">
-                    <strong>Total Bill:</strong> ₱{(selectedAppointment.balance + totalPrice).toFixed(2)}
+                    <strong>Total Bill:</strong> ₱
+                    {(Number(selectedAppointment.balance ?? 0) + totalPrice).toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -199,7 +152,7 @@ export default function CashierDashboard({ role, user }) {
             <div>
               <h2 className="font-semibold mb-2">Add Services / Items</h2>
 
-              <div className="flex items-center gap-4 mb-2">
+              <div className="flex items-center gap-2 mb-2">
                 <select
                   className="border rounded px-3 py-2 flex-1"
                   value={selectedService}
@@ -207,8 +160,8 @@ export default function CashierDashboard({ role, user }) {
                 >
                   <option value="">Select Service/Item</option>
                   {servicesAndItems.map((s) => (
-                    <option key={`${s.type}-${s.id}`} value={s.id}>
-                      {s.name} - ₱{s.price}
+                    <option key={`${s.type}_${s.id}`} value={`${s.type}_${s.id}`}>
+                      {s.name} - ₱{s.price} ({s.type})
                     </option>
                   ))}
                 </select>
@@ -221,6 +174,14 @@ export default function CashierDashboard({ role, user }) {
                   className="border rounded px-3 py-2 w-20"
                 />
 
+                <input
+                  type="number"
+                  placeholder="Price"
+                  value={customPrice}
+                  onChange={(e) => setCustomPrice(e.target.value)}
+                  className="border rounded px-3 py-2 w-24"
+                />
+
                 <button
                   onClick={handleAddToCart}
                   className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
@@ -230,46 +191,55 @@ export default function CashierDashboard({ role, user }) {
               </div>
 
               {/* Cart Items */}
-              {cart.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex justify-between items-center py-1 border-b last:border-b-0"
-                >
-                  <span>{item.name} x {item.quantity}</span>
-                  <span>₱ {Number(item.price * item.quantity).toFixed(2)}</span>
-                  <button
-                    onClick={() => handleRemoveFromCart(item.id)}
-                    className="text-red-600"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-
-              {/* Total */}
               {cart.length > 0 && (
-                <div className="flex justify-between items-center mt-3 font-semibold text-blue-800">
-                  <span>Total Amount:</span>
-                  <span>₱ {totalPrice.toFixed(2)}</span>
-                </div>
-              )}
+                <div className="border rounded p-2">
+                  {cart.map((item) => (
+                    <div
+                      key={`${item.type}_${item.id}`}
+                      className="flex justify-between items-center py-1 border-b last:border-b-0"
+                    >
+                      <span>
+                        {item.name} x {item.quantity} ({item.type})
+                      </span>
+                      <span>₱ {Number(item.price * item.quantity).toFixed(2)}</span>
+                      <button
+                        onClick={() => handleRemoveFromCart(item.type, item.id)}
+                        className="text-red-600"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
 
-              {/* Payment Buttons */}
-              {cart.length > 0 && selectedAppointment && (
-                <div className="flex gap-4 mt-4">
-                  <button
-                    onClick={handleShowMockReceipt}
-                    className="flex-1 py-2 rounded text-white bg-gray-600 hover:bg-gray-700"
-                  >
-                    Show Receipt
-                  </button>
+                  {/* Total */}
+                  <div className="flex justify-between items-center mt-3 font-semibold text-blue-800">
+                    <span>Total Amount:</span>
+                    <span>₱ {totalPrice.toFixed(2)}</span>
+                  </div>
 
-                  <button
-                    onClick={handleRecordPayment}
-                    className="flex-1 py-2 rounded text-white bg-green-600 hover:bg-green-700"
-                  >
-                    Record Payment & Update Balance
-                  </button>
+                  {/* Payment */}
+                  <div className="flex gap-4 mt-4">
+                    <input
+                      type="number"
+                      placeholder="Amount Received"
+                      value={amountReceived}
+                      onChange={(e) => setAmountReceived(e.target.value)}
+                      className="border rounded px-3 py-2 w-40"
+                    />
+                    <button
+                      onClick={handleShowMockReceipt}
+                      className="flex-1 py-2 rounded text-white bg-gray-600 hover:bg-gray-700"
+                    >
+                      Show Receipt
+                    </button>
+
+                    <button
+                      onClick={handleRecordPayment}
+                      className="flex-1 py-2 rounded text-white bg-green-600 hover:bg-green-700"
+                    >
+                      Record Payment & Update Balance
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -282,32 +252,33 @@ export default function CashierDashboard({ role, user }) {
               <h2 className="font-semibold mb-3">Select Patient</h2>
               {patients.map((p) => (
                 <div
-                  key={p.user_id}
+                  key={p.id}
                   className={`p-2 border rounded cursor-pointer mb-2 ${
-                    selectedPatient?.user_id === p.user_id
+                    selectedPatient?.id === p.id
                       ? "bg-blue-200 border-blue-400"
                       : "hover:bg-blue-100"
                   }`}
                   onClick={() => handleSelectPatient(p)}
                 >
-                  <p className="font-semibold">{p.first_name} {p.last_name}</p>
-                  <p className="text-sm text-gray-600">ID: {p.user_id}</p>
+                  <p className="font-semibold">{p.full_name}</p>
                 </div>
               ))}
 
               {/* Appointment Dropdown */}
-              {selectedPatient && (
+              {selectedPatient && selectedPatient.appointments.length > 0 && (
                 <div className="mt-2">
-                  <label className="block text-xs font-semibold mb-1">Select Appointment:</label>
+                  <label className="block text-xs font-semibold mb-1">
+                    Select Appointment:
+                  </label>
                   <select
                     className="border rounded px-2 py-1 w-full"
-                    value={selectedAppointment?.id || ""}
+                    value={selectedAppointment?.id ?? ""}
                     onChange={(e) => handleSelectAppointment(e.target.value)}
                   >
                     <option value="">-- Choose Appointment --</option>
                     {selectedPatient.appointments.map((a) => (
-                      <option key={a.id} value={a.id}>
-                        {a.date} - Balance: ₱{a.balance.toFixed(2)}
+                      <option key={a.id} value={String(a.id)}>
+                        {a.checkup_date} - ₱{Number(a.balance ?? 0).toFixed(2)}
                       </option>
                     ))}
                   </select>
