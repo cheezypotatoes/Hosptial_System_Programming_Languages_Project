@@ -7,6 +7,9 @@ use App\Models\AppointmentService;
 use App\Models\AppointmentMedication;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use App\Models\Medicine;
+use App\Models\Service;
+
 
 class PhysicianAppointmentController extends Controller
 {
@@ -48,15 +51,20 @@ public function show(Request $request, $patientId, $appointmentId)
     $role = strtolower($user->position);
     
     // Fetch the appointment for the given patientId and appointmentId, including related medications and services
-    $appointment = Appointment::with('patient', 'doctor', 'medications', 'services')  // Eager load medications and services
-        ->where('patient_id', $patientId)  // Filter by patient_id
-        ->where('id', $appointmentId)  // Filter by appointment_id
-        ->firstOrFail();  // Ensure we get only one or fail if not found
+    $appointment = Appointment::with('patient', 'doctor', 'medications', 'services')
+        ->where('patient_id', $patientId)
+        ->where('id', $appointmentId)
+        ->firstOrFail();
 
-    // Return the appointment details along with medications and services to the Inertia page
+    // Fetch all medicine and service names for autocomplete
+    $medicineNames = Medicine::pluck('name'); // Collection of medicine names
+    $serviceNames = Service::pluck('name');   // Collection of service names
+    // Return the appointment details along with medications, services, and autocomplete data
     return Inertia::render('Physician/AppointmentDetails', [
-        'appointment' => $appointment,  // Pass appointment data to the view
+        'appointment' => $appointment,
         'role' => $role,
+        'medicineNames' => $medicineNames,
+        'serviceNames' => $serviceNames,
     ]);
 }
 
