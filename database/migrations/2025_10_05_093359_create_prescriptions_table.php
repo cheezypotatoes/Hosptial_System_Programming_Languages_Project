@@ -9,7 +9,7 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-  public function up()
+public function up()
 {
     Schema::create('prescriptions', function (Blueprint $table) {
         $table->id();
@@ -21,9 +21,12 @@ return new class extends Migration
         $table->string('dosage')->nullable();
         $table->text('instructions')->nullable();
         $table->date('prescribed_date');
+        $table->string('status')->default('pending');
+        $table->timestamp('dispensed_at')->nullable(); 
         $table->timestamps();
     });
 }
+
 
 
     /**

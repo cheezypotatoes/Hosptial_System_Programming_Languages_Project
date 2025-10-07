@@ -14,10 +14,12 @@ return new class extends Migration
             $table->foreignId('patient_id')->constrained()->onDelete('cascade');
             $table->foreignId('doctor_id')->constrained('users')->onDelete('cascade');
             $table->dateTime('checkup_date');
+            $table->text('problem')->nullable();      
+            $table->text('history')->nullable();
+            $table->text('symptoms')->nullable();      
             $table->text('notes')->nullable();
             $table->decimal('fee', 8, 2)->default(0.00);
-            $table->text('symptoms')->nullable();       // Symptoms reported
-         
+           
 
             $table->timestamps();
         });

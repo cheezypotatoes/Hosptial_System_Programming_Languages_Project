@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\AppointmentMedication;
+use App\Models\AppointmentService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
@@ -18,6 +20,9 @@ class DatabaseSeeder extends Seeder
         UserSeeder::class,
         PatientSeeder::class,
         AppointmentSeeder::class,
+        PrescriptionSeeder::class,
+        AppointmentMedication::class,
+        AppointmentService::class,
     ]);
         // Create a default test user
         User::create([
