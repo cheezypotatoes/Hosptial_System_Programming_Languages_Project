@@ -10,7 +10,7 @@ use App\Models\Transaction;
 use App\Models\Service;
 use App\Models\Medicine;
 use App\Models\Item;
-use App\Models\Category; 
+use App\Models\Appointment; 
 
 
 class CashierController extends Controller
@@ -111,22 +111,44 @@ class CashierController extends Controller
 
     // 🔹 Record payment
     public function recordPayment(Request $request)
-    {
-        $payment = Payment::findOrFail($request->payment_id);
-        $payment->update([
-            'status'         => 'paid',
-            'payment_method' => $request->payment_method,
-            'amount_received'=> $request->amount_received,
-        ]);
+{
+    // Validate incoming data
+    $validated = $request->validate([
+        'appointment_id' => 'required|integer|exists:appointments,id',
+        'patient_id' => 'required|integer|exists:patients,id',
+        'amount_received' => 'required|numeric|min:0',
+        'payment_method' => 'required|string',
+    ]);
 
-        Transaction::create([
-            'patient_id' => $payment->patient_id,
-            'amount'     => $payment->amount,
-            'status'     => 'paid',
-        ]);
+    // Find the appointment
+    $appointment = \App\Models\Appointment::findOrFail($validated['appointment_id']);
 
-        return response()->json(['success' => true]);
+    $currentFee = $appointment->fee ?? 0;
+    $amountPaid = $validated['amount_received'];
+
+    // Validate amount paid
+    if ($amountPaid <= 0) {
+        return redirect()->back()->withErrors(['amount_received' => 'Amount received must be greater than 0']);
     }
+
+    // Deduct the payment from the fee
+    $newFee = $currentFee - $amountPaid;
+    $change = $newFee < 0 ? abs($newFee) : 0;
+    $appointment->fee = max(0, $newFee);
+    $appointment->save();
+
+    // Return with payment data
+    return redirect()->back()->with([
+        'success' => 'Payment recorded successfully!',
+        'payment_data' => [
+            'appointment_id' => $appointment->id,
+            'patient_id' => $validated['patient_id'],
+            'amount_received' => $amountPaid,
+            'new_fee' => $appointment->fee,
+            'change' => $change,
+        ]
+    ]);
+}
 
     // 🔹 Recent transactions
     public function transactions()

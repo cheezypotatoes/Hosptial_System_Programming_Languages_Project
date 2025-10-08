@@ -11,8 +11,10 @@ use App\Http\Middleware\EnsureUserIsNurse;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\Api\PrescriptionController;
 use App\Http\Controllers\MedicineInventoryAddController;
-
+use App\Http\Controllers\CashierController;
 use Illuminate\Support\Facades\Route;
+
+
 use Inertia\Inertia;
 
 // Guest routes
@@ -62,6 +64,18 @@ Route::post('/item/add', [MedicineInventoryAddController::class, 'storeItem'])->
     Route::get('/patients/{id}/prescriptions', [PatientController::class, 'getPrescriptions']);
 Route::get('/patients/{id}/medical-conditions', [PatientController::class, 'getMedicalConditions']);
  
+
+
+    Route::prefix('cashier')->group(function () {
+            Route::get('/dashboard', [CashierController::class, 'index'])->name('cashier.dashboard');
+            Route::get('/categories', [CashierController::class, 'getCategories']);
+            Route::get('/services-items', [CashierController::class, 'getServicesAndItems']);
+            Route::get('/patients', [CashierController::class, 'searchPatients']);
+            Route::post('/generate-bill', [CashierController::class, 'generateBill']);
+            Route::post('/record-payment', [CashierController::class, 'recordPayment'])->name('cashier.recordPayment');
+            Route::get('/transactions', [CashierController::class, 'transactions']);
+          
+        });
 
     // Nurse patient management routes with middleware applied to all
     Route::prefix('nurse')->middleware(EnsureUserIsNurse::class)->group(function () {

@@ -1,30 +1,38 @@
 import React, { useState } from "react";
 import Sidebar from "../../Components/Sidebar";
+import { router } from "@inertiajs/react";
 
 export default function CashierDashboard({ role, user, patients, servicesAndItems }) {
   const [quantity, setQuantity] = useState(1);
   const [cart, setCart] = useState([]);
   const [amountReceived, setAmountReceived] = useState("");
+  const [amountForFee, setAmountForFee] = useState("");
   const [showReceipt, setShowReceipt] = useState(false);
-
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
-  const [selectedService, setSelectedService] = useState(""); // default empty string
+  const [selectedService, setSelectedService] = useState("");
   const [customPrice, setCustomPrice] = useState("");
+  const [showZeroFeeOnly, setShowZeroFeeOnly] = useState(false);
+  const [processing, setProcessing] = useState(false);
 
   const activeLabel = "Billing";
   const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // Select patient
+  const filteredPatients = showZeroFeeOnly
+    ? patients.filter((p) =>
+        p.appointments.some((a) => Number(a.fee) === 0)
+      )
+    : patients;
+
   const handleSelectPatient = (patient) => {
     if (selectedPatient?.id === patient.id) return;
     setSelectedPatient(patient);
     setSelectedAppointment(null);
     setCart([]);
     setAmountReceived("");
+    setAmountForFee("");
   };
 
-  // Select appointment
   const handleSelectAppointment = (appointmentId) => {
     if (!selectedPatient) return;
     const appointment = selectedPatient.appointments.find(
@@ -34,10 +42,10 @@ export default function CashierDashboard({ role, user, patients, servicesAndItem
       setSelectedAppointment(appointment);
       setCart([]);
       setAmountReceived("");
+      setAmountForFee("");
     }
   };
 
-  // Add to cart
   const handleAddToCart = () => {
     if (!selectedService) return alert("Please select a service/item");
 
@@ -57,7 +65,6 @@ export default function CashierDashboard({ role, user, patients, servicesAndItem
       setCart([...cart, { ...service, quantity, price }]);
     }
 
-    // Reset select safely
     setSelectedService("");
     setQuantity(1);
     setCustomPrice("");
@@ -67,7 +74,6 @@ export default function CashierDashboard({ role, user, patients, servicesAndItem
     setCart(cart.filter((c) => !(c.type === type && c.id === id)));
   };
 
-  // Receipt preview
   const handleShowMockReceipt = () => {
     if (!selectedPatient) return alert("Please select a patient!");
     if (!selectedAppointment) return alert("Please select an appointment!");
@@ -78,52 +84,105 @@ export default function CashierDashboard({ role, user, patients, servicesAndItem
     setShowReceipt(true);
   };
 
-  // Record payment
   const handleRecordPayment = () => {
-    if (!selectedPatient) return alert("Select a patient!");
-    if (!selectedAppointment) return alert("Select an appointment!");
-    if (cart.length === 0) return alert("Cart is empty!");
-    if (!amountReceived || Number(amountReceived) < totalPrice)
-      return alert("Invalid amount received!");
+    if (!selectedPatient) return alert("Please select a patient!");
+    if (!selectedAppointment) return alert("Please select an appointment!");
+    
+    // Only check for fee payment, not cart
+    if (!amountForFee) return alert("Please enter the amount for fee payment!");
+    
+    const currentFee = Number(selectedAppointment.fee ?? 0);
+    const amountPaid = Number(amountForFee);
+    
+    // Check if amount received is valid
+    if (amountPaid <= 0) return alert("Amount received must be greater than 0!");
+    
+    // Calculate new fee after payment
+    const newFee = currentFee - amountPaid;
+    const change = newFee < 0 ? Math.abs(newFee) : 0;
+    const finalFee = Math.max(0, newFee);
 
-    const updatedAppointment = { ...selectedAppointment };
-    updatedAppointment.balance =
-      (updatedAppointment.balance ?? 0) + totalPrice - Number(amountReceived);
-    setSelectedAppointment(updatedAppointment);
+    const payload = {
+      appointment_id: selectedAppointment.id,
+      patient_id: selectedPatient.id,
+      amount_received: amountPaid,
+      payment_method: "Cash",
+    };
 
-    const updatedPatient = { ...selectedPatient };
-    updatedPatient.appointments = updatedPatient.appointments.map((a) =>
-      a.id === updatedAppointment.id ? updatedAppointment : a
-    );
-    setSelectedPatient(updatedPatient);
+    console.log("📤 Sending payload:", payload);
+    console.log(`Current Fee: ₱${currentFee.toFixed(2)}`);
+    console.log(`Amount Paid: ₱${amountPaid.toFixed(2)}`);
+    console.log(`New Fee: ₱${finalFee.toFixed(2)}`);
+    console.log(`Change: ₱${change.toFixed(2)}`);
 
-    alert(
-      `Payment recorded for ${selectedPatient.full_name} (Appointment: ${updatedAppointment.checkup_date}):\n` +
-        `Total: ₱${totalPrice.toFixed(2)}\nReceived: ₱${Number(amountReceived).toFixed(2)}\nNew Balance: ₱${updatedAppointment.balance.toFixed(2)}`
-    );
+    setProcessing(true);
 
-    setCart([]);
-    setAmountReceived("");
-    setShowReceipt(false);
+    router.post('/cashier/record-payment', payload, {
+      onSuccess: (page) => {
+
+        // Find the updated patient
+        const updatedPatient = page.props.patients.find(p => p.id === selectedPatient.id);
+
+        // Find the updated appointment
+        const updatedAppointment = updatedPatient.appointments.find(a => a.id === selectedAppointment.id);
+
+        // Update local states
+        setSelectedPatient(updatedPatient);
+        setSelectedAppointment(updatedAppointment);
+
+        // Clear fee input
+        setAmountForFee("");
+        setProcessing(false);
+
+        console.log("✅ Success:", page);
+        
+        // Check if there's payment data in the response
+        if (page.props.payment_data) {
+          const { new_fee, change, amount_received } = page.props.payment_data;
+          
+          let message = `Payment recorded successfully!\n`;
+          message += `Amount Received: ₱${amount_received.toFixed(2)}\n`;
+          message += `New Fee/Balance: ₱${new_fee.toFixed(2)}`;
+          
+          if (change > 0) {
+            message += `\nChange: ₱${change.toFixed(2)}`;
+          }
+          
+          alert(message);
+        } else {
+          alert("Payment recorded successfully!");
+        }
+        
+        // Clear only the fee payment input
+        setAmountForFee("");
+        setProcessing(false);
+        
+        // Refresh patient data to show updated fees
+        router.reload({ only: ['patients'] });
+      },
+      onError: (errors) => {
+        console.error("❌ Error:", errors);
+        const errorMessage = errors?.message || Object.values(errors).flat().join(', ') || "Unknown error occurred";
+        alert("Failed to record payment: " + errorMessage);
+        setProcessing(false);
+      }
+    });
   };
 
   return (
     <div className="flex h-screen bg-[#E6F0FA] font-sans text-[#1E3A8A]">
       <Sidebar role={role} activeLabel={activeLabel} />
 
-      <main className="flex-1 flex flex-col">
-        {/* Header */}
+      <main className="flex-1 flex flex-col overflow-hidden">
         <header className="flex items-center justify-between p-4 border-b">
           <h1 className="text-xl font-bold">Cashier Dashboard</h1>
         </header>
 
-        <div className="p-6 grid grid-cols-3 gap-6">
-          {/* Left Section */}
-          <div className="col-span-2 space-y-6">
-            {/* Patient Info */}
+        <div className="p-6 grid grid-cols-3 gap-6 overflow-y-auto">
+          <div className="col-span-2 space-y-6 max-h-full overflow-y-auto pr-2">
             {selectedPatient && selectedAppointment && (
-              <div className="border rounded p-4 mb-4">
-                <h2 className="font-semibold">Patient Info</h2>
+              <div className="border rounded p-4 mb-4 bg-white">
+                <h2 className="font-semibold text-lg mb-3">Patient Info</h2>
                 <p>
                   <strong>Name:</strong> {selectedPatient.full_name}
                 </p>
@@ -131,26 +190,33 @@ export default function CashierDashboard({ role, user, patients, servicesAndItem
                   <strong>Appointment Date:</strong> {selectedAppointment.checkup_date}
                 </p>
 
-                <div className="mt-2 space-y-1">
-                  <p>
-                    <strong>Previous Balance:</strong> ₱
-                    {Number(selectedAppointment.balance ?? 0).toFixed(2)}
-                  </p>
-                  <p>
-                    <strong>Current Cart Total:</strong> ₱{totalPrice.toFixed(2)}
-                  </p>
-                  <hr className="my-1 border-gray-300" />
-                  <p className="font-semibold text-blue-800">
-                    <strong>Total Bill:</strong> ₱
-                    {(Number(selectedAppointment.balance ?? 0) + totalPrice).toFixed(2)}
+                <div className="mt-4 p-3 bg-blue-50 rounded">
+                  <p className="text-xl font-bold text-blue-800">
+                    Current Fee/Balance: ₱{Number(selectedAppointment.fee ?? 0).toFixed(2)}
                   </p>
                 </div>
+
+                {cart.length > 0 && (
+                  <div className="mt-3 p-3 bg-yellow-50 rounded border border-yellow-200">
+                    <p className="text-sm font-semibold text-yellow-800">
+                      Services Total: ₱{cart.filter(item => item.type === 'service').reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}
+                    </p>
+                    <p className="text-sm font-semibold text-yellow-800">
+                      Medicines Total: ₱{cart.filter(item => item.type === 'medicine').reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}
+                    </p>
+                    <p className="text-sm font-semibold text-yellow-800 border-t border-yellow-300 pt-1 mt-1">
+                      Cart Total: ₱{totalPrice.toFixed(2)}
+                    </p>
+                    <p className="text-xs text-yellow-700 mt-1">
+                      * Cart items are not recorded in database
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Add Services / Items */}
             <div>
-              <h2 className="font-semibold mb-2">Add Services / Items</h2>
+              <h2 className="font-semibold mb-2">Add Services / Items (For Reference)</h2>
 
               <div className="flex items-center gap-2 mb-2">
                 <select
@@ -190,38 +256,73 @@ export default function CashierDashboard({ role, user, patients, servicesAndItem
                 </button>
               </div>
 
-              {/* Cart Items */}
               {cart.length > 0 && (
-                <div className="border rounded p-2">
-                  {cart.map((item) => (
-                    <div
-                      key={`${item.type}_${item.id}`}
-                      className="flex justify-between items-center py-1 border-b last:border-b-0"
-                    >
-                      <span>
-                        {item.name} x {item.quantity} ({item.type})
-                      </span>
-                      <span>₱ {Number(item.price * item.quantity).toFixed(2)}</span>
-                      <button
-                        onClick={() => handleRemoveFromCart(item.type, item.id)}
-                        className="text-red-600"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
+                <div className="border rounded p-2 bg-white">
+                  <div className="mb-3 pb-2 border-b">
+                    <h3 className="font-semibold text-blue-700">Services:</h3>
+                    {cart.filter(item => item.type === 'service').length > 0 ? (
+                      cart.filter(item => item.type === 'service').map((item) => (
+                        <div
+                          key={`${item.type}_${item.id}`}
+                          className="flex justify-between items-center py-1"
+                        >
+                          <span>
+                            {item.name} x {item.quantity}
+                          </span>
+                          <span>₱ {Number(item.price * item.quantity).toFixed(2)}</span>
+                          <button
+                            onClick={() => handleRemoveFromCart(item.type, item.id)}
+                            className="text-red-600"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400 py-1">No services</p>
+                    )}
+                    <p className="text-sm font-semibold text-blue-700 mt-1">
+                      Subtotal: ₱{cart.filter(item => item.type === 'service').reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}
+                    </p>
+                  </div>
 
-                  {/* Total */}
-                  <div className="flex justify-between items-center mt-3 font-semibold text-blue-800">
-                    <span>Total Amount:</span>
+                  <div className="mb-3 pb-2 border-b">
+                    <h3 className="font-semibold text-green-700">Medicines:</h3>
+                    {cart.filter(item => item.type === 'medicine').length > 0 ? (
+                      cart.filter(item => item.type === 'medicine').map((item) => (
+                        <div
+                          key={`${item.type}_${item.id}`}
+                          className="flex justify-between items-center py-1"
+                        >
+                          <span>
+                            {item.name} x {item.quantity}
+                          </span>
+                          <span>₱ {Number(item.price * item.quantity).toFixed(2)}</span>
+                          <button
+                            onClick={() => handleRemoveFromCart(item.type, item.id)}
+                            className="text-red-600"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400 py-1">No medicines</p>
+                    )}
+                    <p className="text-sm font-semibold text-green-700 mt-1">
+                      Subtotal: ₱{cart.filter(item => item.type === 'medicine').reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}
+                    </p>
+                  </div>
+
+                  <div className="flex justify-between items-center mt-3 font-semibold text-blue-800 text-lg">
+                    <span>Cart Total (Reference):</span>
                     <span>₱ {totalPrice.toFixed(2)}</span>
                   </div>
 
-                  {/* Payment */}
                   <div className="flex gap-4 mt-4">
                     <input
                       type="number"
-                      placeholder="Amount Received"
+                      placeholder="Amount Received (for receipt)"
                       value={amountReceived}
                       onChange={(e) => setAmountReceived(e.target.value)}
                       className="border rounded px-3 py-2 w-40"
@@ -232,25 +333,75 @@ export default function CashierDashboard({ role, user, patients, servicesAndItem
                     >
                       Show Receipt
                     </button>
-
-                    <button
-                      onClick={handleRecordPayment}
-                      className="flex-1 py-2 rounded text-white bg-green-600 hover:bg-green-700"
-                    >
-                      Record Payment & Update Balance
-                    </button>
                   </div>
                 </div>
               )}
+
+              <div className="border-t-4 border-green-500 mt-6 pt-6">
+                <h2 className="font-semibold mb-2 text-green-700">Pay Appointment Fee</h2>
+                
+                {selectedAppointment && (
+                  <div className="border rounded p-4 bg-green-50">
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-semibold mb-2">
+                          Amount to Pay (Fee Only)
+                        </label>
+                        <input
+                          type="number"
+                          placeholder="Enter amount for fee payment"
+                          value={amountForFee}
+                          onChange={(e) => setAmountForFee(e.target.value)}
+                          className="border rounded px-3 py-2 w-full"
+                          min="0"
+                          step="0.01"
+                        />
+                        <p className="text-xs text-gray-600 mt-1">
+                          Current Fee Balance: ₱{Number(selectedAppointment.fee ?? 0).toFixed(2)}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={handleRecordPayment}
+                        disabled={processing || !amountForFee}
+                        className="w-full py-3 rounded text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 font-semibold"
+                      >
+                        {processing ? "Processing..." : "Record Fee Payment"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {!selectedAppointment && (
+                  <p className="text-gray-500 italic">Please select a patient and appointment first</p>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Right Section */}
           <div className="space-y-6">
-            {/* Select Patient */}
             <div className="border rounded p-4 max-h-96 overflow-y-auto">
-              <h2 className="font-semibold mb-3">Select Patient</h2>
-              {patients.map((p) => (
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="font-semibold">Select Patient</h2>
+                <button
+                  onClick={() => setShowZeroFeeOnly(!showZeroFeeOnly)}
+                  className={`px-3 py-1 text-sm rounded ${
+                    showZeroFeeOnly
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-300 text-blue-900 hover:bg-gray-400"
+                  }`}
+                >
+                  {showZeroFeeOnly ? "Show All" : "Show ₱0 Fees"}
+                </button>
+              </div>
+
+              {showZeroFeeOnly && (
+                <p className="text-xs text-blue-700 mb-2 italic">
+                  Showing only patients with ₱0 fee appointments
+                </p>
+              )}
+
+              {filteredPatients.map((p) => (
                 <div
                   key={p.id}
                   className={`p-2 border rounded cursor-pointer mb-2 ${
@@ -264,7 +415,6 @@ export default function CashierDashboard({ role, user, patients, servicesAndItem
                 </div>
               ))}
 
-              {/* Appointment Dropdown */}
               {selectedPatient && selectedPatient.appointments.length > 0 && (
                 <div className="mt-2">
                   <label className="block text-xs font-semibold mb-1">
@@ -278,7 +428,7 @@ export default function CashierDashboard({ role, user, patients, servicesAndItem
                     <option value="">-- Choose Appointment --</option>
                     {selectedPatient.appointments.map((a) => (
                       <option key={a.id} value={String(a.id)}>
-                        {a.checkup_date} - ₱{Number(a.balance ?? 0).toFixed(2)}
+                        {a.checkup_date} - Fee: ₱{Number(a.fee ?? 0).toFixed(2)}
                       </option>
                     ))}
                   </select>

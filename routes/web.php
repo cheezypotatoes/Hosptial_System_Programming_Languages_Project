@@ -113,6 +113,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/generate-bill', [CashierController::class, 'generateBill']);
             Route::post('/record-payment', [CashierController::class, 'recordPayment'])->name('cashier.recordPayment');
             Route::get('/transactions', [CashierController::class, 'transactions']);
+          
         });
 
 
