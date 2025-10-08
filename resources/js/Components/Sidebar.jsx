@@ -7,7 +7,6 @@ import { route } from 'ziggy-js';
 import Logo from "@/../images/New_Logo.png";
 
 const Sidebar = ({ role, activeLabel, handleLogout,  }) => {
-  // Define dynamic menu items based on role
 
   const menuItems = {
     inventory: [
@@ -46,7 +45,6 @@ const Sidebar = ({ role, activeLabel, handleLogout,  }) => {
     ],
   };
 
-  // Select the menu items based on the role, or default if no role matches
   const normalizedRole = role?.toLowerCase();
   const currentMenu = menuItems[normalizedRole] || menuItems['default'];
 
