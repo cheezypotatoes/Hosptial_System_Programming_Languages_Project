@@ -28,7 +28,7 @@ class Patient extends Model
         'birthdate' => 'date:Y-m-d',
     ];
 
-    /** Relationships **/
+    /** ---------------- Relationships ---------------- **/
 
     public function appointments()
     {
@@ -45,22 +45,20 @@ class Patient extends Model
         return $this->hasMany(Prescription::class, 'patient_id');
     }
 
-    // Appointment medications through appointments
     public function appointmentMedications()
     {
         return $this->hasManyThrough(
-            AppointmentMedication::class, // final model
-            Appointment::class,           // intermediate model
-            'patient_id',                 // FK on appointments
-            'appointment_id',             // FK on appointment_medications
-            'id',                         // local key on patients
-            'id'                          // local key on appointments
+            AppointmentMedication::class,
+            Appointment::class,
+            'patient_id',
+            'appointment_id',
+            'id',
+            'id'
         );
     }
 
-    /** Accessors **/
+    /** ---------------- Accessors ---------------- **/
 
-    // Current active medical conditions
     public function getCurrentMedicalConditionsAttribute()
     {
         return $this->medicalConditions()
@@ -77,7 +75,6 @@ class Patient extends Model
             ->toArray();
     }
 
-    // Current appointment medications (all, can add date filtering if needed)
     public function getCurrentAppointmentMedicationsAttribute()
     {
         return $this->appointmentMedications
@@ -92,15 +89,20 @@ class Patient extends Model
             ->toArray();
     }
 
-    // Full name accessor
     public function getFullNameAttribute(): string
     {
         return "{$this->first_name} {$this->last_name}";
     }
 
-    // Mutator for contact number
+    /** ---------------- Mutators ---------------- **/
+
+    // Sanitize and limit contact number to 11 digits
     public function setContactNumAttribute($value): void
     {
-        $this->attributes['contact_num'] = preg_replace('/\D/', '', $value);
+        // Remove non-digit characters
+        $digits = preg_replace('/\D/', '', $value);
+
+        // Limit to 11 digits max
+        $this->attributes['contact_num'] = substr($digits, 0, 11);
     }
 }

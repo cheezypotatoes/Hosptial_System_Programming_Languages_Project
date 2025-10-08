@@ -5,20 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Service extends Model
+class PaymentItem extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'description',
+        'payment_id',
+        'item_type',
+        'item_id',
+        'quantity',
         'price',
-        'category_id', 
     ];
 
-
-    public function category()
+    public function payment()
     {
-        return $this->belongsTo(Category::class, 'category_id');
+        return $this->belongsTo(Payment::class);
     }
 }

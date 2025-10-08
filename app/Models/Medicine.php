@@ -11,8 +11,14 @@ class Medicine extends Model
 
     protected $fillable = [
         'name',
-        'price',
         'stock',
         'expiry',
+        'price',
+        'description',
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
 }

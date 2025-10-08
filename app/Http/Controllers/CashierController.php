@@ -10,7 +10,7 @@ use App\Models\Transaction;
 use App\Models\Service;
 use App\Models\Medicine;
 use App\Models\Item;
-use App\Models\Category; 
+
 
 
 class CashierController extends Controller
@@ -110,27 +110,52 @@ class CashierController extends Controller
     }
 
     // 🔹 Record payment
-    public function recordPayment(Request $request)
-    {
-        $payment = Payment::findOrFail($request->payment_id);
-        $payment->update([
-            'status'         => 'paid',
-            'payment_method' => $request->payment_method,
-            'amount_received'=> $request->amount_received,
-        ]);
+// 🔹 Record payment & remove patient
+public function recordPayment(Request $request)
+{
+    // Validate request
+    $request->validate([
+        'patient_id' => 'required|exists:patients,id',
+        'total' => 'required|numeric',
+        'amount_received' => 'required|numeric',
+        'payment_method' => 'required|string',
+        'items' => 'required|array',
+    ]);
 
-        Transaction::create([
-            'patient_id' => $payment->patient_id,
-            'amount'     => $payment->amount,
-            'status'     => 'paid',
-        ]);
+    // Create payment
+    $payment = Payment::create([
+        'patient_id' => $request->patient_id,
+        'amount' => $request->total,
+        'amount_received' => $request->amount_received,
+        'payment_method' => $request->payment_method,
+        'status' => 'paid',
+    ]);
 
-        return response()->json(['success' => true]);
+    // Insert payment items
+    foreach ($request->items as $item) {
+        $payment->paymentItems()->create([
+            'item_type' => $item['type'],
+            'item_id' => $item['id'],
+            'quantity' => $item['quantity'],
+            'price' => $item['price'],
+        ]);
     }
 
-    // 🔹 Recent transactions
-    public function transactions()
-    {
-        return response()->json(Transaction::latest()->take(10)->get());
+    // Create transaction record
+    Transaction::create([
+        'patient_id' => $payment->patient_id,
+        'amount' => $payment->amount,
+        'status' => 'paid',
+    ]);
+
+    // Remove the patient from the database
+    $patient = Patient::find($request->patient_id);
+    if ($patient) {
+        $patient->delete();
     }
+
+    return response()->json(['success' => true, 'payment_id' => $payment->id]);
+}
+
+
 }

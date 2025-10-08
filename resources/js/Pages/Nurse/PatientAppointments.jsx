@@ -3,6 +3,7 @@ import { Link, useForm } from "@inertiajs/react";
 
 export default function PatientAppointments({ patient, appointments }) {
     const { delete: destroy } = useForm();
+    const { post } = useForm();
 
     function handleDelete(appointmentId) {
         if (confirm("Are you sure you want to delete this appointment?")) {
@@ -10,6 +11,12 @@ export default function PatientAppointments({ patient, appointments }) {
         }
     }
 
+  function handleLogout(e) {
+    e.preventDefault();
+    if (window.confirm("Are you sure you want to logout?")) {
+      post(route("logout"));
+    }
+  }
     const activeLabel = "Appointment";
 
     return (

@@ -1,8 +1,9 @@
 import React from "react";
-import { Link, useForm } from "@inertiajs/react";
+import { Link, useForm, router } from "@inertiajs/react";
+import Swal from "sweetalert2";
 
 export default function Create() {
-  const { data, setData, post, processing, errors } = useForm({
+  const { data, setData, post, processing, errors, reset } = useForm({
     first_name: "",
     last_name: "",
     birthdate: "",
@@ -13,8 +14,48 @@ export default function Create() {
 
   function handleSubmit(e) {
     e.preventDefault();
-    post(route("nurse.patients.index"));
+
+    // Validate contact number (must be 11 digits)
+    if (!/^\d{11}$/.test(data.contact_num)) {
+      Swal.fire({
+        title: "Invalid Contact Number!",
+        text: "Please enter a valid 11-digit phone number.",
+        icon: "warning",
+        confirmButtonColor: "#d33",
+      });
+      return;
+    }
+
+    post(route("nurse.patients.store"), {
+      onSuccess: () => {
+        Swal.fire({
+          title: "Success!",
+          text: "Patient has been added successfully.",
+          icon: "success",
+          confirmButtonColor: "#3085d6",
+        }).then(() => {
+          router.visit(route("nurse.patients.index")); // Redirect after success
+        });
+        reset();
+      },
+      onError: () => {
+        Swal.fire({
+          title: "Error!",
+          text: "Please check all required fields and try again.",
+          icon: "error",
+          confirmButtonColor: "#d33",
+        });
+      },
+    });
   }
+
+  // Handle contact number input (only digits, up to 11)
+  const handleContactChange = (e) => {
+    const value = e.target.value.replace(/\D/g, ""); // allow only digits
+    if (value.length <= 11) {
+      setData("contact_num", value);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -25,7 +66,7 @@ export default function Create() {
             href={route("nurse.patients.index")}
             className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
           >
-            <span className="mr-2 text-xxl">&#8592;</span> 
+            <span className="mr-2 text-xxl">&#8592;</span>
           </Link>
         </div>
 
@@ -40,6 +81,7 @@ export default function Create() {
               value={data.first_name}
               onChange={(e) => setData("first_name", e.target.value)}
               className="w-full border rounded-lg px-3 py-2"
+              required
             />
             {errors.first_name && (
               <p className="text-red-500 text-sm">{errors.first_name}</p>
@@ -54,6 +96,7 @@ export default function Create() {
               value={data.last_name}
               onChange={(e) => setData("last_name", e.target.value)}
               className="w-full border rounded-lg px-3 py-2"
+              required
             />
             {errors.last_name && (
               <p className="text-red-500 text-sm">{errors.last_name}</p>
@@ -68,6 +111,7 @@ export default function Create() {
               value={data.birthdate}
               onChange={(e) => setData("birthdate", e.target.value)}
               className="w-full border rounded-lg px-3 py-2"
+              required
             />
             {errors.birthdate && (
               <p className="text-red-500 text-sm">{errors.birthdate}</p>
@@ -81,6 +125,7 @@ export default function Create() {
               value={data.gender}
               onChange={(e) => setData("gender", e.target.value)}
               className="w-full border rounded-lg px-3 py-2"
+              required
             >
               <option value="">Select Gender</option>
               <option value="Male">Male</option>
@@ -94,12 +139,16 @@ export default function Create() {
 
           {/* Contact Number */}
           <div>
-            <label className="block text-left font-medium">Contact Number</label>
+            <label className="block text-left font-medium">
+              Contact Number (11 digits)
+            </label>
             <input
               type="text"
               value={data.contact_num}
-              onChange={(e) => setData("contact_num", e.target.value)}
+              onChange={handleContactChange}
               className="w-full border rounded-lg px-3 py-2"
+              placeholder="e.g., 09123456789"
+              required
             />
             {errors.contact_num && (
               <p className="text-red-500 text-sm">{errors.contact_num}</p>
@@ -114,6 +163,7 @@ export default function Create() {
               onChange={(e) => setData("address", e.target.value)}
               className="w-full border rounded-lg px-3 py-2"
               rows="3"
+              required
             />
             {errors.address && (
               <p className="text-red-500 text-sm">{errors.address}</p>

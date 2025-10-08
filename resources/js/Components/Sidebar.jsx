@@ -10,14 +10,9 @@ const Sidebar = ({ role, activeLabel, handleLogout,  }) => {
   // Define dynamic menu items based on role
 
   const menuItems = {
-    admin: [
+    inventory: [
       { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
-      { href: route("nurse.patients.index"), label: "Patient Management", icon: <MdPerson /> },
-      { href: route("physician.records"), label: "Physician Record", icon: <MdOutlinePersonPin /> },
-      { href: route('cashier.dashboard'), label: "Billing", icon: <FaFileInvoiceDollar /> },
       { href: route('medicine.inventory'), label: "Medicine Inventory", icon: <MdInventory /> },
-      // { href: route('nurse.assistant.dashboard'), label: "Nurse Assistant", icon: <FaNotesMedical /> },
-      { href: route('dispensing'), label: "Dispensing", icon: <FaPills /> },
     ],
     nurse: [
       { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
@@ -28,11 +23,6 @@ const Sidebar = ({ role, activeLabel, handleLogout,  }) => {
       
     ],
     
-    assistant: [
-      { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
-      { href: route("nurse.patients.index"), label: "Patient Management", icon: <MdPerson /> },
-      { href: route('dispensing'), label: "Dispensing", icon: <FaPills /> },
-    ],
     cashier: [
       { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
       { href: route('cashier.dashboard', undefined, false, Ziggy), label: "Billing", icon: <FaFileInvoiceDollar /> },

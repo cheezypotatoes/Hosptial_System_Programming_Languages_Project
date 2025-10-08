@@ -18,7 +18,7 @@ use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\TransactionController;
-use App\Http\Controllers\Api\MedicineController;
+use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\Api\PrescriptionController;
 use App\Http\Controllers\MedicalConditionController;
 use App\Http\Controllers\AppointmentController;
@@ -26,7 +26,8 @@ use App\Http\Controllers\SessionController;
 use App\Http\Controllers\DispensingController;
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\PharmacistController;
-use App\Http\Controllers\MedicineInventoryAddController;
+use App\Http\Controllers\DispenseController;
+use App\Models\Category;
 // Middleware
 use App\Http\Middleware\EnsureUserIsNurse;
 
@@ -56,6 +57,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/patients/{patient}/prescriptions', [PharmacistController::class, 'patientPrescriptions']);
     Route::post('/pharmacist/dispense/{id}', [PharmacistController::class, 'dispense']);
 });
+
 /*
 |--------------------------------------------------------------------------
 | Session Routes
@@ -78,17 +80,6 @@ Route::get('/items', [ItemController::class, 'index']);
 
 /*
 |--------------------------------------------------------------------------
-| Medicine Routes
-|--------------------------------------------------------------------------
-*/
-Route::prefix('medicines')->group(function () {
-    Route::get('/list', [MedicineController::class, 'index']);
-    Route::post('/', [MedicineController::class, 'store']);
-    Route::post('/dispense', [MedicineController::class, 'dispense']);
-});
-
-/*
-|--------------------------------------------------------------------------
 | Authenticated Routes
 |--------------------------------------------------------------------------
 */
@@ -98,16 +89,41 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Dispensing
+   Route::middleware(['auth'])->group(function () {
     Route::get('/dispensing', [DispensingController::class, 'index'])->name('dispensing');
+   Route::get('/dispensing/patients/{id}', [DispensingController::class, 'show'])->name('dispensing.patients.show');
     Route::get('/categories', [DispensingController::class, 'categories'])->name('categories');
     Route::post('/dispense/store', [DispensingController::class, 'store'])->name('dispense.store');
     Route::get('/dispense/logs', [DispensingController::class, 'logs'])->name('dispense.logs');
+});
 
-    // Medicine Inventory
-    Route::get('/medicine/inventory', [MedicineInventoryAddController::class, 'index'])
-    ->name('medicine.inventory');
-    Route::get('/medicine/data', [MedicineController::class, 'index'])->name('medicine.data');
-    Route::post('/medicine/store', [MedicineController::class, 'store'])->name('medicine.store');
+Route::middleware(['auth'])->prefix('/medicine')->group(function () {
+    // ✅ Inertia page for viewing inventory
+    Route::get('/inventory', [MedicineController::class, 'inventoryPage'])->name('medicine.inventory');
+    Route::get('/add', [MedicineController::class, 'inventoryPage'])->name('medicine.add');
+    Route::post('/store', [MedicineController::class, 'store'])->name('medicine.store');
+    Route::post('/dispense', [MedicineController::class, 'dispense'])->name('medicine.dispense');
+});
+
+
+
+// Service routes
+Route::prefix('/service')->group(function () {
+    Route::post('/store', [ServiceController::class, 'store'])->name('service.store');
+});
+
+// Item routes
+Route::prefix('/item')->group(function () {
+    Route::post('/store', [ItemController::class, 'store'])->name('item.store');
+});
+
+// Get Categories for dropdown
+Route::get('/categories', function () {
+    return response()->json([
+        'success' => true,
+        'categories' => Category::select('id', 'name')->get()
+    ]);
+});
 
     // Physician Routes
     Route::prefix('physician')->group(function () {
@@ -140,13 +156,15 @@ Route::middleware('auth')->group(function () {
 
         // Assistant
         Route::get('/assistant', [AssistantController::class, 'dashboard'])->name('nurse.assistant.dashboard');
+       
+    });
 
-        /*
+    /*
         |--------------------------------------------------------------------------
         | Cashier Routes (Inside Nurse)
         |--------------------------------------------------------------------------
         */
-        Route::prefix('cashier')->group(function () {
+    Route::prefix('nurse/cashier')->group(function () {
             Route::get('/dashboard', [CashierController::class, 'index'])->name('cashier.dashboard');
             Route::get('/categories', [CashierController::class, 'getCategories']);
             Route::get('/services-items', [CashierController::class, 'getServicesAndItems']);
@@ -155,8 +173,6 @@ Route::middleware('auth')->group(function () {
             Route::post('/record-payment', [CashierController::class, 'recordPayment'])->name('cashier.recordPayment');
             Route::get('/transactions', [CashierController::class, 'transactions']);
         });
-    });
-
     // Patient API Routes
     Route::get('/patients', [PatientsController::class, 'index']);
     Route::get('/patients/{id}', [PatientsController::class, 'show']);

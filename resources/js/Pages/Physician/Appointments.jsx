@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useForm } from '@inertiajs/react';
 import { Link } from '@inertiajs/react';
 import Sidebar from '@/Components/Sidebar';
 
 export default function Appointments({ role, physician, appointments }) {
   const [searchTerm, setSearchTerm] = useState('');
+ const { post } = useForm();
 
   // Filter appointments based on the search term (by patient name)
   const filteredAppointments = appointments.filter((appointment) =>

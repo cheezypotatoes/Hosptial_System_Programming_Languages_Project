@@ -6,7 +6,14 @@ import PatientRow from "../../Components/PatientRow";
 export default function PatientManagement({ patients, role }) {
   const { delete: destroy } = useForm();
   const [searchTerm, setSearchTerm] = useState("");
+  const { post } = useForm();
 
+   function handleLogout(e) {
+    e.preventDefault();
+    if (window.confirm("Are you sure you want to logout?")) {
+      post(route("logout"));
+    }
+  }
   // Delete function
   function handleDelete(id) {
     if (confirm("Are you sure you want to delete this patient?")) {
@@ -24,12 +31,12 @@ export default function PatientManagement({ patients, role }) {
   }
 
   function handleViewAppointments(id) {
-    window.location.href = route('nurse.patients.viewAppointments', id); // This is the route where appointments are viewed
+    window.location.href = route('nurse.patients.viewAppointments', id); 
   }
 
 
 
-  const activeLabel = "Patient Management"; // highlight the active menu item
+  const activeLabel = "Patient Management"; 
 
   // Filter patients based on search term
   const filteredPatients = patients.filter(
@@ -48,7 +55,7 @@ export default function PatientManagement({ patients, role }) {
     <div className="flex min-h-screen bg-[#E6F0FA] font-sans text-[#1E3A8A]">
       {/* Sidebar Component */}
   
-      <Sidebar role={role} activeLabel={activeLabel} handleLogout={handleLogout} />
+   <Sidebar role={role} activeLabel={activeLabel} handleLogout={handleLogout} />
 
       {/* Main Content */}
       <main className="flex-1 p-8">
