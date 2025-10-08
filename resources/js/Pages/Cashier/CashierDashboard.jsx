@@ -74,15 +74,138 @@ export default function CashierDashboard({ role, user, patients, servicesAndItem
     setCart(cart.filter((c) => !(c.type === type && c.id === id)));
   };
 
-  const handleShowMockReceipt = () => {
-    if (!selectedPatient) return alert("Please select a patient!");
-    if (!selectedAppointment) return alert("Please select an appointment!");
-    if (cart.length === 0) return alert("Cart is empty!");
-    if (!amountReceived) return alert("Please enter the amount received!");
-    if (Number(amountReceived) < totalPrice)
-      return alert("Amount received cannot be less than the total bill!");
-    setShowReceipt(true);
-  };
+  const handleShowReceipt = () => {
+  if (!selectedPatient) return alert("Please select a patient!");
+  if (!selectedAppointment) return alert("Please select an appointment!");
+  if (cart.length === 0) return alert("Cart is empty!");
+  if (!amountReceived) return alert("Please enter the amount received!");
+  if (Number(amountReceived) < totalPrice) return alert("Amount received cannot be less than the total bill!");
+
+  const companyName = "Jorge & Co Medical Center";
+  const companyAddress = "University of Mindanao, Matina Davao City";
+  const nurseName = user ? `${user.first_name} ${user.last_name}` : "N/A";
+  const currentDate = new Date().toLocaleString();
+  const totalBill = (Number(selectedAppointment?.balance ?? 0) + totalPrice).toFixed(2);
+
+  // Create the HTML content for the receipt
+  const content = `
+    <div style="padding: 20px;">
+      <div style="font-size: 14px;">
+        <p><strong>Patient Name:</strong> ${selectedPatient.full_name}</p>
+        <p><strong>Appointment Date:</strong> ${selectedAppointment.checkup_date}</p>
+        <p><strong>Current Fee/Balance:</strong> ₱${Number(selectedAppointment.fee ?? 0).toFixed(2)}</p>
+        
+        <h3>Services & Items:</h3>
+        <ul>
+          ${cart.map(item => `
+            <li>${item.name} x ${item.quantity} - ₱${(item.price * item.quantity).toFixed(2)}</li>
+          `).join('')}
+        </ul>
+
+        <p><strong>Total:</strong> ₱${totalBill}</p>
+        <p><strong>Amount Received:</strong> ₱${Number(amountReceived).toFixed(2)}</p>
+        <p><strong>Change:</strong> ₱${(Number(amountReceived) - totalBill).toFixed(2)}</p>
+        
+        <p><strong>Nurse:</strong> ${nurseName}</p>
+        <p><strong>Date:</strong> ${currentDate}</p>
+      </div>
+    </div>
+  `;
+
+  // Open a print window and write the receipt HTML
+  const printWindow = window.open("", "", "width=900,height=650");
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Receipt</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          h2, h3 { margin: 2px 0; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          table, th, td { border: 1px solid #333; }
+          th, td { padding: 8px; text-align: left; }
+          .header { text-align: center; margin-bottom: 20px; }
+          .header img { width: 160px; display: block; margin: 0 auto 5px; }
+          .footer { margin-top: 20px; font-size: 14px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <img src="/images/New_Logo.png" alt="Company Logo">
+          <h2>${companyName}</h2>
+          <p>${companyAddress}</p>
+        </div>
+        ${content}
+        <div class="footer">
+          <p><strong>Nurse:</strong> ${nurseName}</p>
+          <p><strong>Date:</strong> ${currentDate}</p>
+        </div>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.print();
+};
+
+const generateFeePaymentReceipt = (amountPaid, currentFee, finalFee, change) => {
+  const companyName = "Jorge & Co Medical Center";
+  const companyAddress = "University of Mindanao, Matina Davao City";
+  const nurseName = user ? `${user.first_name} ${user.last_name}` : "N/A";
+  const currentDate = new Date().toLocaleString();
+
+  const feePaymentReceipt = `
+    <div style="padding: 20px;">
+      <div style="font-size: 14px;">
+        <h2>Fee Payment Receipt</h2>
+        <p><strong>Patient Name:</strong> ${selectedPatient.full_name}</p>
+        <p><strong>Appointment Date:</strong> ${selectedAppointment.checkup_date}</p>
+        <p><strong>Original Fee:</strong> ₱${currentFee.toFixed(2)}</p>
+        <p><strong>Amount Paid:</strong> ₱${amountPaid.toFixed(2)}</p>
+        <p><strong>New Fee/Balance:</strong> ₱${finalFee.toFixed(2)}</p>
+        <p><strong>Change:</strong> ₱${change.toFixed(2)}</p>
+
+        <p><strong>Nurse:</strong> ${nurseName}</p>
+        <p><strong>Date:</strong> ${currentDate}</p>
+      </div>
+    </div>
+  `;
+
+  // Open a print window for the fee payment receipt
+  const printWindow = window.open("", "", "width=900,height=650");
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Fee Payment Receipt</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          h2 { margin: 2px 0; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          table, th, td { border: 1px solid #333; }
+          th, td { padding: 8px; text-align: left; }
+          .header { text-align: center; margin-bottom: 20px; }
+          .header img { width: 160px; display: block; margin: 0 auto 5px; }
+          .footer { margin-top: 20px; font-size: 14px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <img src="/images/New_Logo.png" alt="Company Logo">
+          <h2>${companyName}</h2>
+          <p>${companyAddress}</p>
+        </div>
+        ${feePaymentReceipt}
+        <div class="footer">
+          <p><strong>Nurse:</strong> ${nurseName}</p>
+          <p><strong>Date:</strong> ${currentDate}</p>
+        </div>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.print();
+};
+
+
 
   const handleRecordPayment = () => {
     if (!selectedPatient) return alert("Please select a patient!");
@@ -135,6 +258,8 @@ export default function CashierDashboard({ role, user, patients, servicesAndItem
         setProcessing(false);
 
         console.log("✅ Success:", page);
+
+        generateFeePaymentReceipt(amountPaid, currentFee, finalFee, change);
         
         // Check if there's payment data in the response
         if (page.props.payment_data) {
@@ -328,7 +453,7 @@ export default function CashierDashboard({ role, user, patients, servicesAndItem
                       className="border rounded px-3 py-2 w-40"
                     />
                     <button
-                      onClick={handleShowMockReceipt}
+                      onClick={handleShowReceipt}
                       className="flex-1 py-2 rounded text-white bg-gray-600 hover:bg-gray-700"
                     >
                       Show Receipt
@@ -338,44 +463,46 @@ export default function CashierDashboard({ role, user, patients, servicesAndItem
               )}
 
               <div className="border-t-4 border-green-500 mt-6 pt-6">
-                <h2 className="font-semibold mb-2 text-green-700">Pay Appointment Fee</h2>
-                
-                {selectedAppointment && (
-                  <div className="border rounded p-4 bg-green-50">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-semibold mb-2">
-                          Amount to Pay (Fee Only)
-                        </label>
-                        <input
-                          type="number"
-                          placeholder="Enter amount for fee payment"
-                          value={amountForFee}
-                          onChange={(e) => setAmountForFee(e.target.value)}
-                          className="border rounded px-3 py-2 w-full"
-                          min="0"
-                          step="0.01"
-                        />
-                        <p className="text-xs text-gray-600 mt-1">
-                          Current Fee Balance: ₱{Number(selectedAppointment.fee ?? 0).toFixed(2)}
-                        </p>
-                      </div>
+  <h2 className="font-semibold mb-2 text-green-700">Pay Appointment Fee</h2>
 
-                      <button
-                        onClick={handleRecordPayment}
-                        disabled={processing || !amountForFee}
-                        className="w-full py-3 rounded text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 font-semibold"
-                      >
-                        {processing ? "Processing..." : "Record Fee Payment"}
-                      </button>
-                    </div>
-                  </div>
-                )}
+  {selectedAppointment ? (
+    selectedAppointment.fee > 0 ? (
+      <div className="border rounded p-4 bg-green-50">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold mb-2">
+              Amount to Pay (Fee Only)
+            </label>
+            <input
+              type="number"
+              placeholder="Enter amount for fee payment"
+              value={amountForFee}
+              onChange={(e) => setAmountForFee(e.target.value)}
+              className="border rounded px-3 py-2 w-full"
+              min="0"
+              step="0.01"
+            />
+            <p className="text-xs text-gray-600 mt-1">
+              Current Fee Balance: ₱{Number(selectedAppointment.fee ?? 0).toFixed(2)}
+            </p>
+          </div>
 
-                {!selectedAppointment && (
-                  <p className="text-gray-500 italic">Please select a patient and appointment first</p>
-                )}
-              </div>
+          <button
+            onClick={handleRecordPayment}
+            disabled={processing || !amountForFee}
+            className="w-full py-3 rounded text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 font-semibold"
+          >
+            {processing ? "Processing..." : "Record Fee Payment"}
+          </button>
+        </div>
+      </div>
+    ) : (
+      <p className="text-red-500">This appointment has no fee to pay.</p>
+    )
+  ) : (
+    <p className="text-gray-500 italic">Please select a patient and appointment first</p>
+  )}
+</div>
             </div>
           </div>
 
@@ -383,16 +510,6 @@ export default function CashierDashboard({ role, user, patients, servicesAndItem
             <div className="border rounded p-4 max-h-96 overflow-y-auto">
               <div className="flex justify-between items-center mb-3">
                 <h2 className="font-semibold">Select Patient</h2>
-                <button
-                  onClick={() => setShowZeroFeeOnly(!showZeroFeeOnly)}
-                  className={`px-3 py-1 text-sm rounded ${
-                    showZeroFeeOnly
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-300 text-blue-900 hover:bg-gray-400"
-                  }`}
-                >
-                  {showZeroFeeOnly ? "Show All" : "Show ₱0 Fees"}
-                </button>
               </div>
 
               {showZeroFeeOnly && (
