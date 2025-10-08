@@ -66,37 +66,62 @@ class AppointmentController extends Controller
 
     // View appointments for a patient
     public function viewAppointments(Request $request, Patient $patient)
-    {
-        $user = $request->user();
-            
-        // Get the position of the user and convert it to lowercase
-        $role = strtolower($user->position);
+{
+    $user = $request->user();
+    $role = strtolower($user->position);
 
-        // Eager load appointments with doctor, services, and medications
-        $appointments = $patient->appointments()
-            ->with(['doctor', 'services', 'medications'])  // Load doctor, services, and medications
-            ->get();
+    // Eager load all related models
+    $appointments = $patient->appointments()
+        ->with([
+            'doctor',
+            'patient',
+            'medications',
+            'services'
+        ])
+        ->get();
 
-        // Loop through the appointments to add patient and doctor details
-        $appointments = $appointments->map(function ($appointment) {
-            // Get the full name of the patient
-            $appointment->patient_full_name = $appointment->patient->first_name . ' ' . $appointment->patient->last_name;
+    // Map each appointment to include related details in a clean structure
+    $appointments = $appointments->map(function ($appointment) {
+        return [
+            'id' => $appointment->id,
+            'checkup_date' => $appointment->checkup_date,
+            'notes' => $appointment->notes,
+            'fee' => $appointment->fee,
+            'problem' => $appointment->problem,
+            'symptoms' => $appointment->symptoms,
+            'patient_full_name' => $appointment->patient->first_name . ' ' . $appointment->patient->last_name,
+            'doctor_first_name' => $appointment->doctor?->first_name,
+            'doctor_last_name' => $appointment->doctor?->last_name,
+            'medications' => $appointment->medications->map(function ($m) {
+                return [
+                    'id' => $m->id,
+                    'name' => $m->name,
+                    'dosage' => $m->dosage,
+                    'frequency' => $m->frequency,
+                    'duration' => $m->duration,
+                    'notes' => $m->notes,
+                ];
+            }),
+            'services' => $appointment->services->map(function ($s) {
+                return [
+                    'id' => $s->id,
+                    'name' => $s->name,
+                    'description' => $s->description,
+                    'cost' => $s->cost,
+                    'result' => $s->result,
+                ];
+            }),
+        ];
+    });
 
-            // Get the first name and last name of the doctor
-            $appointment->doctor_first_name = $appointment->doctor->first_name;
-            $appointment->doctor_last_name = $appointment->doctor->last_name;
+  
 
-            return $appointment;
-        });
-
-
-        // Return the appointments data to the view
-        return Inertia::render('Nurse/ViewSpecificPatientAppointments', [
-            'role' => $role,
-            'patient' => $patient,
-            'appointments' => $appointments,
-        ]);
-    }
+    return Inertia::render('Nurse/ViewSpecificPatientAppointments', [
+        'role' => $role,
+        'patient' => $patient,
+        'appointments' => $appointments,
+    ]);
+}
 
     
 

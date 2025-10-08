@@ -9,7 +9,7 @@ export default function Dispensing({ role, user }) {
   const [search, setSearch] = useState("");
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
-  const [selectedDate, setSelectedDate] = useState("All"); // ✅ date filter
+  const [selectedDate, setSelectedDate] = useState("All");
   const printRef = useRef();
 
   const activeLabel = "Dispensing";
@@ -45,24 +45,34 @@ export default function Dispensing({ role, user }) {
     axios
       .get(`/patients/${found.id}/prescriptions`)
       .then((res) => {
+        const prescriptions = Array.isArray(res.data) ? res.data : [];
         axios
           .get(`/patients/${found.id}/medical-conditions`)
           .then((condRes) => {
+            const medical_conditions = Array.isArray(condRes.data) ? condRes.data : [];
             setSelectedPatient({
               ...found,
-              prescriptions: res.data,
-              medical_conditions: condRes.data,
+              prescriptions,
+              medical_conditions,
             });
             setSuggestions([]);
-            setSelectedDate("All"); // reset filter on new search
+            setSelectedDate("All");
           })
           .catch(() => {
-            setSelectedPatient({ ...found, prescriptions: res.data, medical_conditions: [] });
+            setSelectedPatient({
+              ...found,
+              prescriptions,
+              medical_conditions: [],
+            });
             setSuggestions([]);
           });
       })
       .catch(() => {
-        setSelectedPatient(found);
+        setSelectedPatient({
+          ...found,
+          prescriptions: [],
+          medical_conditions: [],
+        });
         setSuggestions([]);
       });
   };
@@ -83,7 +93,6 @@ export default function Dispensing({ role, user }) {
     const logoPath = "/images/New_Logo.png";
     const companyName = "Jorge & Co Medical Center";
     const companyAddress = "University of Mindanao, Matina Davao City";
-
     const nurseName = user ? `${user.first_name} ${user.last_name}` : "N/A";
     const currentDate = new Date().toLocaleString();
 
@@ -124,26 +133,38 @@ export default function Dispensing({ role, user }) {
     printWindow.print();
   };
 
-  // ✅ Get all unique dates from prescriptions + symptoms
+  // ✅ Collect all unique dates safely
   const allDates = selectedPatient
     ? Array.from(
         new Set([
-          ...(selectedPatient.prescriptions?.map((p) => p.date_prescribed) || []),
-          ...(selectedPatient.medical_conditions?.map((c) => c.date) || []),
+          ...(Array.isArray(selectedPatient.prescriptions)
+            ? selectedPatient.prescriptions.map((p) => p.date_prescribed)
+            : []),
+          ...(Array.isArray(selectedPatient.medical_conditions)
+            ? selectedPatient.medical_conditions.map((c) => c.date)
+            : []),
         ])
       )
     : [];
 
-  // ✅ Apply filter to both prescriptions and symptoms
+  // ✅ Safely filtered prescriptions and symptoms
   const filteredPrescriptions =
     selectedDate === "All"
-      ? selectedPatient?.prescriptions || []
-      : selectedPatient?.prescriptions?.filter((p) => p.date_prescribed === selectedDate) || [];
+      ? Array.isArray(selectedPatient?.prescriptions)
+        ? selectedPatient.prescriptions
+        : []
+      : Array.isArray(selectedPatient?.prescriptions)
+        ? selectedPatient.prescriptions.filter((p) => p.date_prescribed === selectedDate)
+        : [];
 
   const filteredConditions =
     selectedDate === "All"
-      ? selectedPatient?.medical_conditions || []
-      : selectedPatient?.medical_conditions?.filter((c) => c.date === selectedDate) || [];
+      ? Array.isArray(selectedPatient?.medical_conditions)
+        ? selectedPatient.medical_conditions
+        : []
+      : Array.isArray(selectedPatient?.medical_conditions)
+        ? selectedPatient.medical_conditions.filter((c) => c.date === selectedDate)
+        : [];
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -237,7 +258,9 @@ export default function Dispensing({ role, user }) {
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-gray-500">No symptoms history found for this date.</p>
+                  <p className="text-gray-500">
+                    No symptoms history found for this date.
+                  </p>
                 )}
 
                 {/* ✅ Filtered Prescriptions */}
@@ -266,12 +289,16 @@ export default function Dispensing({ role, user }) {
                     </tbody>
                   </table>
                 ) : (
-                  <p className="text-gray-500">No prescriptions found for this date.</p>
+                  <p className="text-gray-500">
+                    No prescriptions found for this date.
+                  </p>
                 )}
               </div>
             </>
           ) : (
-            <p className="text-gray-500">🔍 Search for a patient to view their medical records.</p>
+            <p className="text-gray-500">
+              🔍 Search for a patient to view their medical records.
+            </p>
           )}
         </div>
       </div>
