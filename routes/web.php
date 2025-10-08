@@ -103,6 +103,19 @@ Route::middleware('auth')->group(function () {
     Route::post('/dispense/store', [DispensingController::class, 'store'])->name('dispense.store');
     Route::get('/dispense/logs', [DispensingController::class, 'logs'])->name('dispense.logs');
 
+
+
+    Route::prefix('cashier')->group(function () {
+            Route::get('/dashboard', [CashierController::class, 'index'])->name('cashier.dashboard');
+            Route::get('/categories', [CashierController::class, 'getCategories']);
+            Route::get('/services-items', [CashierController::class, 'getServicesAndItems']);
+            Route::get('/patients', [CashierController::class, 'searchPatients']);
+            Route::post('/generate-bill', [CashierController::class, 'generateBill']);
+            Route::post('/record-payment', [CashierController::class, 'recordPayment'])->name('cashier.recordPayment');
+            Route::get('/transactions', [CashierController::class, 'transactions']);
+        });
+
+
     // Medicine Inventory
     Route::get('/medicine/inventory', [MedicineInventoryAddController::class, 'index'])
     ->name('medicine.inventory');
@@ -146,15 +159,7 @@ Route::middleware('auth')->group(function () {
         | Cashier Routes (Inside Nurse)
         |--------------------------------------------------------------------------
         */
-        Route::prefix('cashier')->group(function () {
-            Route::get('/dashboard', [CashierController::class, 'index'])->name('cashier.dashboard');
-            Route::get('/categories', [CashierController::class, 'getCategories']);
-            Route::get('/services-items', [CashierController::class, 'getServicesAndItems']);
-            Route::get('/patients', [CashierController::class, 'searchPatients']);
-            Route::post('/generate-bill', [CashierController::class, 'generateBill']);
-            Route::post('/record-payment', [CashierController::class, 'recordPayment'])->name('cashier.recordPayment');
-            Route::get('/transactions', [CashierController::class, 'transactions']);
-        });
+        
     });
 
     // Patient API Routes

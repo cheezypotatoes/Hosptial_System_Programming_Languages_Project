@@ -2,12 +2,18 @@ import React from 'react';
 import { MdDashboard, MdPerson, MdOutlinePersonPin, MdInventory } from "react-icons/md";
 import { FaFileInvoiceDollar, FaPills, FaNotesMedical } from "react-icons/fa";
 import { BiLogOutCircle } from "react-icons/bi";
-
+import { router } from "@inertiajs/react"; // ✅ added for logout
 import { route } from 'ziggy-js';
 import Logo from "@/../images/New_Logo.png";
 
-const Sidebar = ({ role, activeLabel, handleLogout,  }) => {
-  // Define dynamic menu items based on role
+const Sidebar = ({ role, activeLabel }) => {
+
+  // ✅ Added logout function here
+  const handleLogout = () => {
+  
+    router.post(route('logout')); // Laravel's default logout route
+    
+  };
 
   const menuItems = {
     admin: [
@@ -16,18 +22,14 @@ const Sidebar = ({ role, activeLabel, handleLogout,  }) => {
       { href: route("physician.records"), label: "Physician Record", icon: <MdOutlinePersonPin /> },
       { href: route('cashier.dashboard'), label: "Billing", icon: <FaFileInvoiceDollar /> },
       { href: route('medicine.inventory'), label: "Medicine Inventory", icon: <MdInventory /> },
-      // { href: route('nurse.assistant.dashboard'), label: "Nurse Assistant", icon: <FaNotesMedical /> },
       { href: route('dispensing'), label: "Dispensing", icon: <FaPills /> },
     ],
     nurse: [
       { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
       { href: route("nurse.appointments.viewAll"), label: "Appointments", icon: <MdDashboard /> },
       { href: route("nurse.patients.index"), label: "Patient Management", icon: <MdPerson /> },
-       // { href: route('nurse.assistant.dashboard'), label: "Nurse Assistant", icon: <FaNotesMedical /> },
       { href: route('dispensing'), label: "Dispensing", icon: <FaPills /> },
-      
     ],
-    
     assistant: [
       { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
       { href: route("nurse.patients.index"), label: "Patient Management", icon: <MdPerson /> },
@@ -36,30 +38,26 @@ const Sidebar = ({ role, activeLabel, handleLogout,  }) => {
     cashier: [
       { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
       { href: route('cashier.dashboard', undefined, false, Ziggy), label: "Billing", icon: <FaFileInvoiceDollar /> },
-
     ],
-
     doctor: [
       { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
       { href: route("physician.appointments.index"), label: "View All Appointments", icon: <MdDashboard /> },
       { href: route("physician.records"), label: "Physician Record", icon: <MdOutlinePersonPin /> },
     ],
-    pharmacist:[
-        { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
-         { href: route("pharmacist.index"), label: "Pharmacist", icon: <MdOutlinePersonPin /> },
+    pharmacist: [
+      { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
+      { href: route("pharmacist.index"), label: "Pharmacist", icon: <MdOutlinePersonPin /> },
     ],
     default: [
-       { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
+      { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
       { href: route("nurse.appointments.viewAll"), label: "Appointments", icon: <MdDashboard /> },
       { href: route("nurse.patients.index"), label: "Patient Management", icon: <MdPerson /> },
-       // { href: route('nurse.assistant.dashboard'), label: "Nurse Assistant", icon: <FaNotesMedical /> },
       { href: route('dispensing'), label: "Dispensing", icon: <FaPills /> },
-       { href: route('cashier.dashboard'), label: "Billing", icon: <FaFileInvoiceDollar /> },
-    { href: route("pharmacist.index"), label: "Pharmacist", icon: <MdOutlinePersonPin /> },
+      { href: route('cashier.dashboard'), label: "Billing", icon: <FaFileInvoiceDollar /> },
+      { href: route("pharmacist.index"), label: "Pharmacist", icon: <MdOutlinePersonPin /> },
     ],
   };
 
-  // Select the menu items based on the role, or default if no role matches
   const normalizedRole = role?.toLowerCase();
   const currentMenu = menuItems[normalizedRole] || menuItems['default'];
 
@@ -90,7 +88,6 @@ const Sidebar = ({ role, activeLabel, handleLogout,  }) => {
         ))}
       </nav>
 
-      {/* Logout link fixed at bottom */}
       <div className="p-4 border-t border-blue-700 flex-shrink-0">
         <button
           onClick={handleLogout}
