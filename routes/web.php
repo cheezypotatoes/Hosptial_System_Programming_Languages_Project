@@ -25,10 +25,8 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\DispensingController;
 use App\Http\Controllers\CashierController;
-use App\Http\Controllers\PharmacistController;
-use App\Http\Controllers\DispenseController;
+use App\Http\Controllers\PharmacistController; 
 use App\Models\Category;
-// Middleware
 use App\Http\Middleware\EnsureUserIsNurse;
 
 /*
