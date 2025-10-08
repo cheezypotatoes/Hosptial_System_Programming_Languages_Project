@@ -101,7 +101,7 @@ export default function MedicineInventoryAdd({
         <table className="w-full border-collapse border bg-white shadow rounded mb-6">
           <thead>
             <tr className="bg-gray-200">
-              {["Medicine Name", "Stock", "Expiry Date", "Status"].map((h) => (
+              {["Medicine Name", "Stock", "Price", "Expiry Date", "Status"].map((h) => (
                 <th key={h} className="border px-4 py-2 text-left">{h}</th>
               ))}
             </tr>
@@ -113,6 +113,7 @@ export default function MedicineInventoryAdd({
                 <tr key={i} className="odd:bg-white even:bg-gray-50">
                   <td className="border px-4 py-2">{m.name}</td>
                   <td className="border px-4 py-2">{m.stock}</td>
+                  <td className="border px-4 py-2">₱{m.price ?? 0}</td>
                   <td className="border px-4 py-2">{m.expiry}</td>
                   <td
                     className={`border px-4 py-2 ${
@@ -232,7 +233,22 @@ export default function MedicineInventoryAdd({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Expiry Date</label>
+                    <label className="block text-sm font-semibold mb-1">
+                      Price (₱)
+                    </label>
+                    <input
+                      type="number"
+                      value={data.price}
+                      onChange={(e) => setData("price", e.target.value)}
+                      className="w-full border rounded px-3 py-2"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">
+                      Expiry Date
+                    </label>
                     <input
                       type="date"
                       value={data.expiry}

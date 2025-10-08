@@ -41,6 +41,8 @@ class MedicineInventoryAddController extends Controller
             'category' => $item->category?->name ?? 'Uncategorized',
         ]);
 
+   
+
     return Inertia::render('Medicine/MedicineInventory', [
         'user' => [
             'id' => $user->id ?? null,
@@ -62,10 +64,11 @@ class MedicineInventoryAddController extends Controller
     $validated = $request->validate([
         'name' => 'required|string|max:255',
         'stock' => 'required|integer|min:0',
+        'price' => 'required|numeric|min:0', 
         'expiry' => 'nullable|date',
     ]);
 
-    // Only default if null or empty
+    // Default expiry if empty
     if (empty($validated['expiry'])) {
         $validated['expiry'] = now()->toDateString();
     }

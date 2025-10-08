@@ -11,6 +11,7 @@ return new class extends Migration {
             $table->id();
             $table->string('name');
             $table->integer('stock')->default(0);
+            $table->decimal('price', 10, 2)->default(0);
             $table->date('expiry');
             $table->timestamps();
         });
