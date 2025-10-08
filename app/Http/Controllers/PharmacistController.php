@@ -75,21 +75,18 @@ public function patientPrescriptions($patientId)
         return response()->json(['success' => false, 'message' => 'Patient not found.'], 404);
     }
 
-    $prescriptions = Prescription::with('patient')
-        ->where('patient_id', $patientId)
-        ->get()
-        ->map(function ($pres) {
-            return [
-                'id' => $pres->id,
-                'patient_name' => $pres->patient->first_name . ' ' . $pres->patient->last_name,
-                'medicine_name' => $pres->medication,
-                'dosage' => $pres->dosage,
-                'instructions' => $pres->instructions,
-                'doctor_name' => $pres->doctor_name,
-                'prescribed_date' => $pres->prescribed_date->format('Y-m-d'),
-                'status' => $pres->status ?? 'pending', // default to pending
-            ];
-        });
+          $prescriptions = Prescription::with('patient')->get()->map(function ($pres) {
+    return [
+        'id' => $pres->id,
+        'patient_name' => $pres->patient?->first_name . ' ' . $pres->patient?->last_name ?? 'Unknown',
+        'medicine_name' => $pres->medication,
+        'dosage' => $pres->dosage,
+        'instructions' => $pres->instructions,
+        'doctor_name' => $pres->doctor_name,
+        'prescribed_date' => $pres->prescribed_date?->format('Y-m-d') ?? null,
+        'status' => $pres->status ?? 'pending',
+    ];
+});
 
     return response()->json([
         'success' => true,

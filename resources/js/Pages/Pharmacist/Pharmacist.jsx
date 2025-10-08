@@ -3,8 +3,8 @@ import axios from "axios";
 import Sidebar from "../../Components/Sidebar";
 
 export default function Pharmacist({ user: initialUser, role: initialRole }) {
-  const [user, setUser] = useState(initialUser);
-  const [role, setRole] = useState(initialRole);
+  const [user] = useState(initialUser); // user comes from Inertia props
+  const [role] = useState(initialRole);
   const [prescriptions, setPrescriptions] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -12,35 +12,22 @@ export default function Pharmacist({ user: initialUser, role: initialRole }) {
   const activeLabel = "Pharmacist Dashboard";
 
   useEffect(() => {
-    fetchUser();
     fetchPrescriptions();
   }, []);
 
-  const fetchUser = async () => {
-    try {
-      const response = await axios.get("http://localhost:8000/api/user", {
-        withCredentials: true,
-      });
-      if (response.data) {
-        setUser(response.data);
-        setRole(response.data.position?.toLowerCase() || "pharmacist");
-      }
-    } catch (error) {
-      console.error("❌ Failed to fetch user:", error);
-    }
-  };
-
   const fetchPrescriptions = async () => {
+    setLoading(true);
     try {
       const response = await axios.get(
-        "http://localhost:8000/pharmacist/prescriptions",
+        "/pharmacist/prescriptions",
         { withCredentials: true }
       );
       if (response.data.success) {
         setPrescriptions(response.data.prescriptions);
       }
     } catch (error) {
-      console.error("❌ Failed to fetch prescriptions:", error);
+      console.error("❌ Failed to load prescriptions. Check server logs.", error);
+      alert("Failed to load prescriptions. Check server logs.");
     } finally {
       setLoading(false);
     }
@@ -48,18 +35,21 @@ export default function Pharmacist({ user: initialUser, role: initialRole }) {
 
   const handleDispense = async (id) => {
     if (!window.confirm("Mark this prescription as dispensed?")) return;
+
     try {
       const response = await axios.post(
-        `http://localhost:8000/pharmacist/dispense/${id}`,
+        `/pharmacist/dispense/${id}`,
         {},
         { withCredentials: true }
       );
+
       if (response.data.success) {
         alert("✅ Prescription dispensed successfully!");
         fetchPrescriptions();
       }
     } catch (error) {
-      console.error("❌ Failed to update prescription status:", error);
+      console.error("❌ Failed to dispense prescription:", error);
+      alert("Failed to dispense prescription.");
     }
   };
 
@@ -68,30 +58,19 @@ export default function Pharmacist({ user: initialUser, role: initialRole }) {
       return;
 
     try {
-      const pendingPrescriptions = prescriptions.filter(
-        (p) =>
-          p.patient_name === patientName && (p.status ?? "pending") === "pending"
+      const pending = prescriptions.filter(
+        (p) => p.patient_name === patientName && (p.status ?? "pending") === "pending"
       );
 
-      for (const pres of pendingPrescriptions) {
-        await axios.post(
-          `http://localhost:8000/pharmacist/dispense/${pres.id}`,
-          {},
-          { withCredentials: true }
-        );
+      for (const pres of pending) {
+        await axios.post(`/pharmacist/dispense/${pres.id}`, {}, { withCredentials: true });
       }
 
-      alert(`✅ All pending prescriptions for ${patientName} have been dispensed!`);
+      alert(`✅ All pending prescriptions for ${patientName} dispensed!`);
       fetchPrescriptions();
     } catch (error) {
       console.error("❌ Failed to dispense prescriptions:", error);
-    }
-  };
-
-  const handleLogout = (e) => {
-    e.preventDefault();
-    if (window.confirm("Are you sure you want to logout?")) {
-      post(route("logout"));
+      alert("Failed to dispense prescriptions.");
     }
   };
 
@@ -102,15 +81,9 @@ export default function Pharmacist({ user: initialUser, role: initialRole }) {
     return acc;
   }, {});
 
-  const filteredPrescriptions = prescriptions.filter(
-    (pres) =>
-      pres.patient_name.toLowerCase().includes(search.toLowerCase()) ||
-      pres.medicine_name.toLowerCase().includes(search.toLowerCase())
-  );
-
   return (
     <div className="flex h-screen bg-[#E6F0FA] font-sans text-[#1E3A8A]">
-      <Sidebar role={role} activeLabel={activeLabel} handleLogout={handleLogout} />
+      <Sidebar role={role} activeLabel={activeLabel} />
 
       <main className="flex-1 p-6 overflow-y-auto">
         <h1 className="text-3xl font-bold mb-2 text-[#1E40AF]">Pharmacist Dashboard</h1>
@@ -159,7 +132,6 @@ export default function Pharmacist({ user: initialUser, role: initialRole }) {
                   </td>
                 </tr>
               ) : search ? (
-                // When searching → group by patient
                 Object.entries(groupedByPatient)
                   .filter(([name]) => name.toLowerCase().includes(search.toLowerCase()))
                   .map(([patientName, presList]) => (
@@ -205,7 +177,6 @@ export default function Pharmacist({ user: initialUser, role: initialRole }) {
                     </React.Fragment>
                   ))
               ) : (
-                // No search → show all individually
                 prescriptions.map((pres) => (
                   <tr key={pres.id} className="odd:bg-white even:bg-gray-50">
                     <td className="border px-4 py-2">{pres.patient_name}</td>
