@@ -3,14 +3,21 @@ import { useForm } from "@inertiajs/react";
 import { Inertia } from "@inertiajs/inertia";
 import Sidebar from "@/Components/Sidebar";
 
-export default function PhysicianRecords({ upcomingAppointments, role, user, patient: initialPatient,searchResults: initialSearchResults, }) {
+export default function PhysicianRecords({
+  upcomingAppointments,
+  role,
+  user,
+  patient: initialPatient,
+  searchResults: initialSearchResults,
+}) {
   const { data, setData } = useForm({ search: "" });
   const [searchResults, setSearchResults] = useState(initialSearchResults || []);
   const [selectedPatient, setSelectedPatient] = useState(initialPatient || null);
   const activeLabel = "Physician Record";
-// Fixed
-const medicalConditions = selectedPatient?.medical_conditions || [];
-const appointmentMeds = selectedPatient?.appointment_medications || [];
+
+  // Fixed
+  const medicalConditions = selectedPatient?.medical_conditions || [];
+  const appointmentMeds = selectedPatient?.appointment_medications || [];
 
   function handleLogout(e) {
     e.preventDefault();
@@ -19,16 +26,14 @@ const appointmentMeds = selectedPatient?.appointment_medications || [];
     }
   }
 
- // DEBUG function
-const logPatientData = (patient, stage) => {
-  console.log(`--- DEBUG [${stage}] ---`);
-  console.log("Patient object:", patient);
-  console.log("Medical conditions:", patient?.medical_conditions);
-  console.log("Prescriptions:", patient?.prescriptions);
-  console.log("Appointment medications:", patient?.appointment_medications);
-  console.log("-----------------------");
-};
-
+  // DEBUG function
+  const logPatientData = (patient, stage) => {
+    console.log(`--- DEBUG [${stage}] ---`);
+    console.log("Patient object:", patient);
+    console.log("Medical conditions:", patient?.medical_conditions);
+    console.log("Appointment medications:", patient?.appointment_medications);
+    console.log("-----------------------");
+  };
 
   // Search patients dynamically
   function handleSearch(e) {
@@ -74,6 +79,24 @@ const logPatientData = (patient, stage) => {
     );
   }
 
+  // Inside your component
+const handleSaveNotes = () => {
+  if (!selectedPatient) return;
+
+  Inertia.post(`/physician/patients/${selectedPatient.id}/notes`, {
+    notes: selectedPatient.notes || "",
+  }, {
+    onSuccess: () => {
+      alert("Notes saved successfully!");
+    },
+    onError: (errors) => {
+      console.error(errors);
+      alert("Failed to save notes.");
+    },
+  });
+};
+
+
   useEffect(() => {
     if (initialPatient) {
       setSelectedPatient(initialPatient);
@@ -83,7 +106,6 @@ const logPatientData = (patient, stage) => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-
       <Sidebar role={role} activeLabel={activeLabel} handleLogout={handleLogout} />
 
       <main className="flex-1 p-6 overflow-y-auto">
@@ -137,15 +159,13 @@ const logPatientData = (patient, stage) => {
             )}
           </section>
 
-    {/* Patient Record */}
-<section className="bg-white p-4 rounded shadow">
+       {/* Patient Record */}
+<section className="bg-white p-4 rounded shadow" id="patient-record">
   <h2 className="font-bold mb-3">Patient Record</h2>
   {selectedPatient ? (
     <div>
       <h3 className="text-lg font-semibold">{selectedPatient.name}</h3>
-      <p>
-        {selectedPatient.age} years old, {selectedPatient.gender}
-      </p>
+      <p>{selectedPatient.age} years old, {selectedPatient.gender}</p>
       <p>Contact: {selectedPatient.contact}</p>
 
       {/* Medical History */}
@@ -164,25 +184,9 @@ const logPatientData = (patient, stage) => {
         </ul>
       </div>
 
-      {/* Prescriptions */}
-      <div className="mt-3">
-        <h4 className="font-semibold">Prescriptions</h4>
-        <ul className="list-disc ml-5">
-          {selectedPatient.prescriptions?.length > 0 ? (
-            selectedPatient.prescriptions.map((p) => (
-              <li key={p.id}>
-                {p.medication} ({p.dosage}) by {p.doctor_name} on {p.prescribed_date}
-              </li>
-            ))
-          ) : (
-            <li>No past prescriptions.</li>
-          )}
-        </ul>
-      </div>
-
       {/* Appointment Medications */}
       <div className="mt-3">
-        <h4 className="font-semibold">Appointment Medications</h4>
+        <h4 className="font-semibold">Prescriptions: </h4>
         <ul className="list-disc ml-5">
           {selectedPatient.appointment_medications?.length > 0 ? (
             selectedPatient.appointment_medications.map((m) => (
@@ -200,15 +204,65 @@ const logPatientData = (patient, stage) => {
       <div className="mt-3">
         <h4 className="font-semibold">Medical Notes</h4>
         <textarea
-          className="w-full border rounded p-2"
-          defaultValue={selectedPatient.notes || ""}
-        ></textarea>
-        <button className="mt-2 bg-blue-600 text-white px-4 py-2 rounded">Save Notes</button>
+          className="w-full border rounded p-2 bg-gray-100"
+          value={selectedPatient.notes || ""}
+          readOnly
+        />
       </div>
+
+      {/* Print Button */}
+      <button
+        className="mt-4 bg-green-600 text-white px-4 py-2 rounded print:hidden"
+        onClick={() => {
+          const logoPath = "/images/New_Logo.png";
+          const companyName = "Jorge & Co Medical Center";
+          const companyAddress = "University of Mindanao, Matina Davao City";
+          const nurseName = user ? `${user.first_name} ${user.last_name}` : "N/A";
+          const currentDate = new Date().toLocaleString();
+
+          const patientRecord = document.getElementById("patient-record").innerHTML;
+
+          const printWindow = window.open("", "", "width=900,height=650");
+          printWindow.document.write(`
+            <html>
+              <head>
+                <title>Patient Record</title>
+                <style>
+                  body { font-family: Arial, sans-serif; padding: 20px; }
+                  h2, h3, h4 { margin: 2px 0; }
+                  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                  table, th, td { border: 1px solid #333; }
+                  th, td { padding: 8px; text-align: left; }
+                  .header { text-align: center; margin-bottom: 20px; }
+                  .header img { width: 160px; display: block; margin: 0 auto 5px; }
+                  .footer { margin-top: 20px; font-size: 14px; }
+                  textarea { border: none; resize: none; width: 100%; }
+                  button { display: none; }
+                </style>
+              </head>
+              <body>
+                <div class="header">
+                  <img src="${logoPath}" alt="Company Logo">
+                  <h2>${companyName}</h2>
+                  <p>${companyAddress}</p>
+                  <p><strong>Nurse:</strong> ${nurseName}</p>
+                  <p><strong>Date:</strong> ${currentDate}</p>
+                </div>
+                ${patientRecord}
+              </body>
+            </html>
+          `);
+          printWindow.document.close();
+          printWindow.focus();
+          printWindow.print();
+          printWindow.close();
+        }}
+      >
+        Print Record
+      </button>
     </div>
   ) : (
     <p>Select a patient to view record.</p>
-    
   )}
 </section>
 

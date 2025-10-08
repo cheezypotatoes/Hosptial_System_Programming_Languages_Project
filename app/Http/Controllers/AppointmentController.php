@@ -11,6 +11,26 @@ use Inertia\Inertia;
 class AppointmentController extends Controller
 {
     // Show form to create appointment for a patient
+
+    public function index(Request $request)
+{
+    $user = $request->user();
+    $role = strtolower($user->position); // e.g., 'nurse'
+
+    // Fetch all patients
+    $patients = Patient::orderBy('created_at', 'desc')->get();
+
+    // Return to Inertia page with patients, role, and user
+    return Inertia::render('Nurse/PatientManagement', [
+        'patients' => $patients,
+        'role' => $role,
+        'user' => $user,
+        'flash' => [
+            'success' => $request->session()->get('success'), // optional flash message
+        ],
+    ]);
+}
+
     public function create(Patient $patient)
 {
     // Fetch users where position is 'Doctor' and eagerly load the physician relationship
@@ -35,32 +55,36 @@ class AppointmentController extends Controller
 
 
     // Store appointment in database
-    public function store(Request $request, Patient $patient)
-    {
-        // Validate the incoming data
-        $request->validate([
-            'doctor_id' => 'required|exists:users,id',
-            'checkup_date' => 'required|date',
-            'symptoms' => 'nullable|string', // Symptoms field is optional
-            'medication' => 'nullable|string', // Medication field is optional
-            'fee' => 'required|numeric|min:0', // Fee must be a positive number
-        ]);
+public function store(Request $request, Patient $patient)
+{
+    $request->validate([
+        'doctor_id' => 'required|exists:users,id',
+        'checkup_date' => 'required|date',
+        'problem' => 'required|string',       
+        'history' => 'nullable|string',       
+        'symptoms' => 'nullable|string', 
+        'notes' => 'nullable|string',     
+        'medication' => 'nullable|string',
+        'fee' => 'required|numeric|min:0',    
+    ]);
 
-        // Create a new appointment with all the necessary details
-        Appointment::create([
-            'patient_id' => $patient->id,
-            'doctor_id' => $request->doctor_id,  // Store the selected doctor ID
-            'checkup_date' => $request->checkup_date,
-            'history' => $request->history,      // Store the medical history
-            'symptoms' => $request->symptoms,    // Store the symptoms
-            'medication' => $request->medication, // Store the medication
-            'fee' => $request->fee,
-        ]);
+    Appointment::create([
+        'patient_id' => $patient->id,
+        'doctor_id' => $request->doctor_id,  
+        'checkup_date' => $request->checkup_date,
+        'problem' => $request->problem,      
+        'history' => $request->history,      
+        'symptoms' => $request->symptoms,    
+        'medication' => $request->medication,
+        'notes'=> $request->notes,
+        'fee' => $request->fee,
+    ]);
 
-        // Redirect back to the patient list with a success message
-        return redirect()->route('nurse.patients.index')
-                        ->with('success', 'Appointment scheduled successfully!');
-    }
+    // Redirect to PatientManagement, flash only the success message
+    return redirect()->route('nurse.patients.index')
+                     ->with('success', 'Appointment scheduled successfully!');
+}
+
 
 
 

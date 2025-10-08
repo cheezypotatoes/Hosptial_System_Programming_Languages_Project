@@ -2,16 +2,25 @@ import React from "react";
 import { useForm } from "@inertiajs/react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Sidebar from '../../Components/Sidebar';
+import { Inertia } from "@inertiajs/inertia";
+import Swal from "sweetalert2";
 
 export default function Dashboard({ user, role, appointmentsTodayCount, upcomingAppointmentsCount , lowStockCount}) {
   const { post } = useForm();
 
-  function handleLogout(e) {
-    e.preventDefault();
-    if (window.confirm("Are you sure you want to logout?")) {
-      post(route("logout"));
-    }
-  }
+const handleLogout = (e) => {
+     e.preventDefault();
+     Swal.fire({
+       title: "Are you sure?",
+       text: "Do you want to logout?",
+       icon: "warning",
+       showCancelButton: true,
+       confirmButtonText: "Yes, logout",
+       cancelButtonText: "Cancel",
+     }).then((result) => {
+       if (result.isConfirmed) post(route("logout"));
+     });
+   };
 
   const performanceData = [
     { day: "Mon", patients: 45 },

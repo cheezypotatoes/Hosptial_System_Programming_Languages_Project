@@ -9,3 +9,8 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

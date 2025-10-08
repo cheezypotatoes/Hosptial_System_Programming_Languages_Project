@@ -2,18 +2,28 @@ import React, { useState } from "react";
 import { Link, useForm } from "@inertiajs/react";
 import Sidebar from "@/Components/Sidebar";
 import PatientRow from "../../Components/PatientRow";
+import Swal from "sweetalert2";
 
-export default function PatientManagement({ patients, role }) {
+export default function PatientManagement({ patients, role, user, flash }) {
   const { delete: destroy } = useForm();
   const [searchTerm, setSearchTerm] = useState("");
   const { post } = useForm();
 
-   function handleLogout(e) {
+  // ✅ Logout
+  const handleLogout = (e) => {
     e.preventDefault();
-    if (window.confirm("Are you sure you want to logout?")) {
-      post(route("logout"));
-    }
-  }
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to logout?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, logout",
+      cancelButtonText: "Cancel",
+    }).then((result) => {
+      if (result.isConfirmed) post(route("logout"));
+    });
+  };
+
   // Delete function
   function handleDelete(id) {
     if (confirm("Are you sure you want to delete this patient?")) {
@@ -23,20 +33,18 @@ export default function PatientManagement({ patients, role }) {
 
   // Redirect to Edit page
   function handleEdit(id) {
-    window.location.href = route('nurse.patients.edit', id);
+    window.location.href = route("nurse.patients.edit", id);
   }
 
   function handleAppointment(id) {
-    window.location.href = route('nurse.patients.makeAppointment', id);
+    window.location.href = route("nurse.patients.makeAppointment", id);
   }
 
   function handleViewAppointments(id) {
-    window.location.href = route('nurse.patients.viewAppointments', id); 
+    window.location.href = route("nurse.patients.viewAppointments", id);
   }
 
-
-
-  const activeLabel = "Patient Management"; 
+  const activeLabel = "Patient Management";
 
   // Filter patients based on search term
   const filteredPatients = patients.filter(
@@ -45,21 +53,20 @@ export default function PatientManagement({ patients, role }) {
       patient.last_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  
-  function handleLogout(e) {
-    e.preventDefault();
-    Inertia.post(route('/logout'));
-  }
-
   return (
     <div className="flex min-h-screen bg-[#E6F0FA] font-sans text-[#1E3A8A]">
       {/* Sidebar Component */}
-  
-   <Sidebar role={role} activeLabel={activeLabel} handleLogout={handleLogout} />
+      <Sidebar role={role} user={user} activeLabel={activeLabel} handleLogout={handleLogout} />
 
       {/* Main Content */}
       <main className="flex-1 p-8">
         <div className="bg-white p-6 rounded-2xl shadow-lg">
+          {flash?.success && (
+            <div className="mb-4 p-3 bg-green-100 text-green-800 rounded">
+              {flash.success}
+            </div>
+          )}
+
           <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Patients List</h1>
 
           {/* Search bar and Add Patient */}
@@ -85,9 +92,20 @@ export default function PatientManagement({ patients, role }) {
               <thead className="bg-gray-100">
                 <tr>
                   {[
-                    "ID", "First Name", "Last Name", "Birthdate", "Gender", "Contact", "Address", "Created At", "Actions"
+                    "ID",
+                    "First Name",
+                    "Last Name",
+                    "Birthdate",
+                    "Gender",
+                    "Contact",
+                    "Address",
+                    "Created At",
+                    "Actions",
                   ].map((col) => (
-                    <th key={col} className="px-4 py-2 border text-left text-sm font-semibold text-gray-700">
+                    <th
+                      key={col}
+                      className="px-4 py-2 border text-left text-sm font-semibold text-gray-700"
+                    >
                       {col}
                     </th>
                   ))}
@@ -100,7 +118,7 @@ export default function PatientManagement({ patients, role }) {
                       key={patient.id}
                       patient={patient}
                       onDelete={handleDelete}
-                      onEdit={handleEdit} // Passing the handleEdit function here
+                      onEdit={handleEdit}
                       onMakeAppointment={handleAppointment}
                       onViewAppointments={handleViewAppointments}
                     />

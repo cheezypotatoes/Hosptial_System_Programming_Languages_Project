@@ -1,22 +1,32 @@
 import React from "react";
 import { Link, useForm } from "@inertiajs/react";
+import { Inertia } from "@inertiajs/inertia";
+import Swal from "sweetalert2";
 
-export default function PatientAppointments({ patient, appointments }) {
+export default function PatientAppointments({ role, patient, appointments }) {
     const { delete: destroy } = useForm();
     const { post } = useForm();
 
+    
     function handleDelete(appointmentId) {
         if (confirm("Are you sure you want to delete this appointment?")) {
             destroy(route("nurse.appointments.destroy", appointmentId));
         }
     }
+   const handleLogout = (e) => {
+     e.preventDefault();
+     Swal.fire({
+       title: "Are you sure?",
+       text: "Do you want to logout?",
+       icon: "warning",
+       showCancelButton: true,
+       confirmButtonText: "Yes, logout",
+       cancelButtonText: "Cancel",
+     }).then((result) => {
+       if (result.isConfirmed) post(route("logout"));
+     });
+   };
 
-  function handleLogout(e) {
-    e.preventDefault();
-    if (window.confirm("Are you sure you want to logout?")) {
-      post(route("logout"));
-    }
-  }
     const activeLabel = "Appointment";
 
     return (

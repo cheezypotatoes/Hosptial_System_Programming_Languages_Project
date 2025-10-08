@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useForm } from '@inertiajs/react';
 import Sidebar from '@/Components/Sidebar';
-import ActionMenuSimple from '@/Components/ActionMenuSimple'; // ✅ updated import
+import ActionMenuSimple from '@/Components/ActionMenuSimple';
+import { Inertia } from "@inertiajs/inertia";
+import Swal from "sweetalert2";
 
 export default function ViewAllAppointments({ appointments, role }) {
   const { delete: destroy } = useForm();
@@ -24,7 +26,7 @@ export default function ViewAllAppointments({ appointments, role }) {
     window.location.href = `/physician/appointments/${patientId}/${appointmentId}`;
   }
 
-  const activeLabel = 'Appointment Management'; // highlight the active menu item
+  const activeLabel = 'Appointments'; // highlight the active menu item
 
   // Filter appointments based on search term
   const filteredAppointments = appointments.filter(
@@ -35,11 +37,19 @@ export default function ViewAllAppointments({ appointments, role }) {
       appointment.doctor_last_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  function handleLogout(e) {
-    e.preventDefault();
-    Inertia.post(route('/logout'));
-  }
-
+   const handleLogout = (e) => {
+     e.preventDefault();
+     Swal.fire({
+       title: "Are you sure?",
+       text: "Do you want to logout?",
+       icon: "warning",
+       showCancelButton: true,
+       confirmButtonText: "Yes, logout",
+       cancelButtonText: "Cancel",
+     }).then((result) => {
+       if (result.isConfirmed) post(route("logout"));
+     });
+   };
   return (
     <div className="flex min-h-screen bg-[#E6F0FA] font-sans text-[#1E3A8A]">
       {/* Sidebar Component */}

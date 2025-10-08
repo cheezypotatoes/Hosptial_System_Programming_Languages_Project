@@ -38,20 +38,25 @@ class PatientController extends Controller
             ->with('success', 'Patient added successfully!');
     }
 
-    public function index()
+    public function index(Request $request)
 {
-    // Fetch the authenticated user's role and convert it to lowercase
-    $role = strtolower(auth()->user()->position);
+    // Get the authenticated user
+    $user = $request->user();
 
     // Fetch all patients
     $patients = Patient::latest()->get();
 
-    // Return the data with the lowercase user role
+    // Return the data with role and user to the frontend
     return inertia('Nurse/PatientManagement', [
         'patients' => $patients,
-        'role' => $role,  // Ensure role is passed to the frontend
+        'role' => strtolower($user->position), // Convert role to lowercase
+        'user' => $user, // Pass the entire user object
+        'flash' => [
+            'success' => session('success'), // Pass any success flash messages
+        ],
     ]);
 }
+
 
     public function destroy(Patient $patient)
     {

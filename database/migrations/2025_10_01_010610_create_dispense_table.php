@@ -9,16 +9,16 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-   public function up()
-{
-    Schema::create('dispenses', function (Blueprint $table) {
-        $table->id();
-        $table->string('patient');
-        $table->foreignId('medicine_id')->constrained('medicines')->onDelete('cascade');
-        $table->integer('quantity');
-        $table->timestamp('dispensed_at')->useCurrent();
-    });
-}
+    public function up()
+    {
+        Schema::create('dispenses', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
+            $table->foreignId('medicine_id')->constrained('medicines')->onDelete('cascade');
+            $table->integer('quantity');
+            $table->timestamp('dispensed_at')->useCurrent();
+        });
+    }
 
 
     /**

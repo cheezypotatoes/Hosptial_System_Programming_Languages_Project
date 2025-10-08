@@ -9,31 +9,30 @@ class Prescription extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     */
-    protected $fillable = [
+     protected $fillable = [
         'patient_id',
-        'doctor_name',
-        'medication',
+        'doctor_name',      
+        'medication',       
         'dosage',
         'instructions',
         'prescribed_date',
+        'status',
+        'dispensed_at',
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     */
-    protected $casts = [
-        'prescribed_date' => 'datetime:Y-m-d',
-    ];
+    // Relations
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class);
+    }
 
-    /**
-     * Relationships
-     */
-  public function patient()
-{
-    return $this->belongsTo(Patient::class, 'patient_id');
-}
+    public function physician()
+    {
+        return $this->belongsTo(User::class, 'physician_id');
+    }
 
+    public function medicine()
+    {
+        return $this->belongsTo(Medicine::class);
+    }
 }

@@ -10,32 +10,23 @@ use Illuminate\Http\Request;
 use App\Models\Medicine;
 use App\Models\Service;
 
-
 class PhysicianAppointmentController extends Controller
 {
     /**
      * Display a listing of the physician's appointments.
-     *
-     * @return \Inertia\Response
      */
     public function index(Request $request)
     {
-
         $user = $request->user();
-        
-        // Get the position of the user and convert it to lowercase
-        $role = strtolower($user->position); // this is the `role` you're passing
-       
-        // Get the currently authenticated user (physician)
+        $role = strtolower($user->position); // role for frontend
+
         $physician = $request->user();
 
-        // Fetch the physician's appointments
         $appointments = Appointment::where('doctor_id', $physician->id)
-            ->with(['patient'])  // Eager load the patient relationship
+            ->with(['patient'])
             ->orderBy('checkup_date', 'desc')
             ->get();
 
-        // Pass the physician and appointments to the Inertia view
         return Inertia::render('Physician/Appointments', [
             'role' => $role,
             'physician' => $physician,
@@ -43,97 +34,85 @@ class PhysicianAppointmentController extends Controller
         ]);
     }
 
-public function show(Request $request, $patientId, $appointmentId)
-{
-    $user = $request->user();
-    
-    // Get the position of the user and convert it to lowercase
-    $role = strtolower($user->position);
-    
-    // Fetch the appointment for the given patientId and appointmentId, including related medications and services
-    $appointment = Appointment::with('patient', 'doctor', 'medications', 'services')
-        ->where('patient_id', $patientId)
-        ->where('id', $appointmentId)
-        ->firstOrFail();
+    /**
+     * Show details of an appointment including medications and services.
+     */
+    public function show(Request $request, $patientId, $appointmentId)
+    {
+        $user = $request->user(); // authenticated physician
+        $role = strtolower($user->position);
 
-    // Fetch all medicine and service names for autocomplete
-    $medicineNames = Medicine::pluck('name'); // Collection of medicine names
-    $serviceNames = Service::pluck('name');   // Collection of service names
-    // Return the appointment details along with medications, services, and autocomplete data
-    return Inertia::render('Physician/AppointmentDetails', [
-        'appointment' => $appointment,
-        'role' => $role,
-        'medicineNames' => $medicineNames,
-        'serviceNames' => $serviceNames,
-    ]);
-}
+        $appointment = Appointment::with('patient', 'doctor', 'medications', 'services')
+            ->where('patient_id', $patientId)
+            ->where('id', $appointmentId)
+            ->firstOrFail();
 
-public function store(Request $request, $appointmentId = null)
-{
-    $medications = $request->input('medications', []);
-    $services = $request->input('services', []);
+        $patient = $appointment->patient; // fetch patient from appointment
 
-    $appointment = $appointmentId ? Appointment::find($appointmentId) : new Appointment();
+        $medicineNames = Medicine::pluck('name');
+        $serviceNames = Service::pluck('name');
 
-    if ($appointmentId && !$appointment) {
-        return redirect()->route('physician.appointments.index')
-                         ->with('error', 'Appointment not found.');
-    }
-
-    if ($request->has('notes')) {
-        $appointment->notes = $request->input('notes');
-    }
-    $appointment->save(); // Save the appointment (create or update)
-
-    // Clear existing medications and services if updating
-    if ($appointmentId) {
-        $appointment->medications()->delete();
-        $appointment->services()->delete();
-    }
-
-    // Store medications
-    foreach ($medications as $medication) {
-        AppointmentMedication::create([
-            'appointment_id' => $appointment->id,
-            'name' => $medication['name'],
-            'dosage' => $medication['dosage'],
-            'frequency' => $medication['frequency'],
-            'duration' => $medication['duration'],
-            'notes' => $medication['notes'] ?? null,
+        return Inertia::render('Physician/AppointmentDetails', [
+            'appointment' => $appointment,
+            'role' => $role,
+            'user' => $patient,          // pass patient here
+            'medicineNames' => $medicineNames,
+            'serviceNames' => $serviceNames,
         ]);
     }
 
-    // Store services with result field
-    foreach ($services as $service) {
-        AppointmentService::create([
-            'appointment_id' => $appointment->id,
-            'name' => $service['name'],
-            'description' => $service['description'] ?? null,
-            'cost' => $service['cost'] ?? 0.00,
-            'result' => $service['result'] ?? null,  // Add this line
-        ]);
+    /**
+     * Store or update appointment details including medications and services.
+     */
+    public function store(Request $request, $appointmentId = null)
+    {
+        $medications = $request->input('medications', []);
+        $services = $request->input('services', []);
+
+        $appointment = $appointmentId ? Appointment::find($appointmentId) : new Appointment();
+
+        if ($appointmentId && !$appointment) {
+            return redirect()->route('physician.appointments.index')
+                             ->with('error', 'Appointment not found.');
+        }
+
+        if ($request->has('notes')) {
+            $appointment->notes = $request->input('notes');
+        }
+
+        $appointment->save(); // create or update
+
+        // Clear existing medications and services if updating
+        if ($appointmentId) {
+            $appointment->medications()->delete();
+            $appointment->services()->delete();
+        }
+
+        // Store medications
+        foreach ($medications as $medication) {
+            if (empty($medication['name'])) {
+                continue; // skip medications with no name
+            }
+
+            AppointmentMedication::create([
+                'appointment_id' => $appointment->id,
+                'name' => $medication['name'],
+                'dosage' => $medication['dosage'],
+                'frequency' => $medication['frequency'],
+                'duration' => $medication['duration'],
+                'notes' => $medication['notes'] ?? null,
+            ]);
+        }
+
+        // Store services
+        foreach ($services as $service) {
+            AppointmentService::create([
+                'appointment_id' => $appointment->id,
+                'name' => $service['name'],
+                'description' => $service['description'] ?? null,
+                'cost' => $service['cost'] ?? 0.00,
+                'result' => $service['result'] ?? null,
+            ]);
+        }
     }
-
-     $user = $request->user();
-        
-        // Get the position of the user and convert it to lowercase
-        $role = strtolower($user->position); // this is the `role` you're passing
-        
-        // Get the count of today's appointments (or modify as needed)
-        $appointmentsTodayCount = Appointment::whereDate('checkup_date', now()->toDateString())->count();
-        
-        // Or if you want to count upcoming appointments
-        $upcomingAppointmentsCount = Appointment::where('checkup_date', '>', now())->count();
-
-
-
-
-    return Inertia::render('Profile/Dashboard', [
-            'user' => $user, // Passing full user info
-            'role' => $role, // Passing lowercase position as role
-            'appointmentsTodayCount' => $appointmentsTodayCount,
-            'upcomingAppointmentsCount' => $upcomingAppointmentsCount,
-        ]);
-}
-
 }

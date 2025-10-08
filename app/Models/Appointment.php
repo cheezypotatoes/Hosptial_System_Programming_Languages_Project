@@ -14,10 +14,12 @@ class Appointment extends Model
         'patient_id',
         'doctor_id',
         'checkup_date',
+        'problem',  
+        'history',
+        'symptoms', 
         'notes',
         'fee',
-        'problem',      // New field for problem
-        'symptoms',     // New field for symptoms
+    
     ];
 
     protected $casts = [
