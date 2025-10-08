@@ -95,8 +95,8 @@ export default function Register() {
               <option value="Doctor">Doctor</option>
               <option value="Cashier">Cashier</option>
               <option value="Pharmacist">Pharmacist</option>
-              <option value="LabTech">LabTech</option>
               <option value="Nurse">Nurse</option>
+              <option value="Inventory">Inventory</option>
             </select>
             {errors.position && (
               <p className="text-red-500 text-sm mt-1">{errors.position}</p>

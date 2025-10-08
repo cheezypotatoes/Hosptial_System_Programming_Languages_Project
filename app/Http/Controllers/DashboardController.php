@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Appointment;
+use App\Models\Medicine; // <-- Import Medicine model
 
 class DashboardController extends Controller
 {
@@ -13,20 +14,24 @@ class DashboardController extends Controller
         $user = $request->user();
         
         // Get the position of the user and convert it to lowercase
-        $role = strtolower($user->position); // this is the `role` you're passing
+        $role = strtolower($user->position); 
         
-        // Get the count of today's appointments (or modify as needed)
+        // Count today's appointments
         $appointmentsTodayCount = Appointment::whereDate('checkup_date', now()->toDateString())->count();
         
-        // Or if you want to count upcoming appointments
+        // Count upcoming appointments
         $upcomingAppointmentsCount = Appointment::where('checkup_date', '>', now())->count();
 
-        // Pass the role (lowercase position) to the view
+        // Count medicines with stock <= 20
+        $lowStockCount = Medicine::where('stock', '<=', 15)->count();
+
+        // Pass data to Inertia
         return Inertia::render('Profile/Dashboard', [
-            'user' => $user, // Passing full user info
-            'role' => $role, // Passing lowercase position as role
+            'user' => $user, 
+            'role' => $role, 
             'appointmentsTodayCount' => $appointmentsTodayCount,
             'upcomingAppointmentsCount' => $upcomingAppointmentsCount,
+            'lowStockCount' => $lowStockCount, 
         ]);
     }
 }

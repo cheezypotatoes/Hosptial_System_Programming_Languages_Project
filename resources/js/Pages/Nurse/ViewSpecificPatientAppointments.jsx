@@ -1,25 +1,20 @@
 import React from 'react';
-import { useForm } from '@inertiajs/react';
+import { useForm, Link } from '@inertiajs/react'; // ✅ Import Link
 import Sidebar from '@/Components/Sidebar';
-import AppointmentActionMenu from '@/Components/AppointmentActionMenu'; // ✅ use new component
+import AppointmentActionMenu from '@/Components/AppointmentActionMenu';
 
 export default function ViewSpecificPatientAppointments({ patient, appointments, role }) {
   const { delete: destroy } = useForm();
 
-  // Delete appointment handler
   function handleDelete(id) {
     if (confirm("Are you sure you want to delete this appointment?")) {
       destroy(route('nurse.appointments.destroy', id));
     }
   }
 
-  // View appointment info (placeholder)
   function handleViewInfo(appointmentId) {
-
     window.location.href = `/physician/appointments/${patient.id}/${appointmentId}`;
   }
-
-  
 
   function handleLogout(e) {
     e.preventDefault();
@@ -34,6 +29,17 @@ export default function ViewSpecificPatientAppointments({ patient, appointments,
 
       <main className="flex-1 p-8">
         <div className="bg-white p-6 rounded-2xl shadow-lg">
+
+          {/* Back Button */}
+          <div className="mb-4">
+            <Link
+              href={route("nurse.patients.index")}
+              className="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded transition"
+            >
+              ← Back to Patients
+            </Link>
+          </div>
+
           {/* Patient Info Header */}
           <h1 className="text-3xl font-bold mb-4 text-center text-gray-800">
             Appointments for {patient.first_name} {patient.last_name}

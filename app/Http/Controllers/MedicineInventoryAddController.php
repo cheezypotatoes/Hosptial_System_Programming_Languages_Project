@@ -11,76 +11,74 @@ use App\Models\Item;
 class MedicineInventoryAddController extends Controller
 {
     public function index(Request $request)
-{
-    $user = $request->user();
-    $role = strtolower($user->position ?? 'guest');
+    {
+        $user = $request->user();
+        $role = strtolower($user->position);
 
-    // Fetch real data
-    $medicines = Medicine::orderBy('name')->get();
+        // ✅ Fetch data
+        $medicines = Medicine::orderBy('name')->get();
 
-    $services = Service::with('category:id,name')
-        ->orderBy('name')
-        ->get()
-        ->map(fn($service) => [
-            'id' => $service->id,
-            'name' => $service->name,
-            'description' => $service->description,
-            'price' => $service->price,
-            'category' => $service->category?->name ?? 'Uncategorized',
+        $services = Service::with('category:id,name')
+            ->orderBy('name')
+            ->get()
+            ->map(fn($service) => [
+                'id' => $service->id,
+                'name' => $service->name,
+                'description' => $service->description,
+                'price' => $service->price,
+                'category' => $service->category?->name ?? 'Uncategorized',
+            ]);
+
+        $items = Item::with('category:id,name')
+            ->orderBy('name')
+            ->get()
+            ->map(fn($item) => [
+                'id' => $item->id,
+                'name' => $item->name,
+                'description' => $item->description,
+                'price' => $item->price,
+                'stock' => $item->stock_quantity,
+                'category' => $item->category?->name ?? 'Uncategorized',
+            ]);
+
+        return Inertia::render('Medicine/MedicineInventory', [
+            'user' => $user,
+            'role' => $role,
+            'medicines' => $medicines,
+            'services' => $services,
+            'items' => $items,
         ]);
-
-    $items = Item::with('category:id,name')
-        ->orderBy('name')
-        ->get()
-        ->map(fn($item) => [
-            'id' => $item->id,
-            'name' => $item->name,
-            'description' => $item->description,
-            'price' => $item->price,
-            'stock' => $item->stock_quantity,
-            'category' => $item->category?->name ?? 'Uncategorized',
-        ]);
-
-    return Inertia::render('Medicine/MedicineInventory', [
-        'user' => [
-            'id' => $user->id ?? null,
-            'email' => $user->email ?? 'guest@example.com',
-        ],
-        'role' => $role,
-        'medicines' => $medicines,
-        'services' => $services,
-        'items' => $items,
-    ]);
-}
-
-
-    // return Inertia::render('Medicine/MedicineInventory', [
-
-
-    public function storeMedicine(Request $request)
-{
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'stock' => 'required|integer|min:0',
-        'expiry' => 'nullable|date',
-    ]);
-
-    // Only default if null or empty
-    if (empty($validated['expiry'])) {
-        $validated['expiry'] = now()->toDateString();
     }
 
-    Medicine::create($validated);
+    // ✅ Medicine Store
+    public function storeMedicine(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:500',
+            'stock' => 'required|integer|min:0',
+            'price' => 'required|numeric|min:0',
+            'expiry' => 'nullable|date',
+            'category_id' => 'nullable|exists:categories,id',
+        ]);
 
-    return redirect()->back()->with('success', 'Medicine added successfully!');
-}
+        if (empty($validated['expiry'])) {
+            $validated['expiry'] = now()->toDateString();
+        }
 
+        Medicine::create($validated);
 
+        return redirect()->back()->with('success', 'Medicine added successfully!');
+    }
+
+    // ✅ Service Store
     public function storeService(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:500',
             'price' => 'required|numeric|min:0',
+            'category_id' => 'nullable|exists:categories,id',
         ]);
 
         Service::create($validated);
@@ -88,6 +86,7 @@ class MedicineInventoryAddController extends Controller
         return redirect()->back()->with('success', 'Service added successfully!');
     }
 
+    // ✅ Item Store
     public function storeItem(Request $request)
     {
         $validated = $request->validate([
@@ -103,6 +102,7 @@ class MedicineInventoryAddController extends Controller
         return redirect()->back()->with('success', 'Item added successfully!');
     }
 
+    // ✅ Dispense Medicine
     public function dispense(Request $request)
     {
         $validated = $request->validate([

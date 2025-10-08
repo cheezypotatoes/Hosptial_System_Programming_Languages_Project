@@ -1,21 +1,40 @@
 import React from "react";
+import Swal from "sweetalert2";
 import { useForm } from "@inertiajs/react";
 
 export default function MakeAppointment({ patient, doctors }) {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         doctor_id: "",
         checkup_date: "",
+        problem: "",
+        history: "",
+        symptoms: "",
         notes: "",
         fee: "",
-        history: "",       // New field for medical history
-        symptoms: "",      // New field for symptoms
-        medication: "",    // New field for medication
     });
 
     function handleSubmit(e) {
         e.preventDefault();
-        // Send all the data (including new fields) to the backend
-        post(route("nurse.patients.storeAppointment", patient.id));
+
+        post(route("nurse.patients.storeAppointment", patient.id), {
+            onSuccess: () => {
+                Swal.fire({
+                    title: "Appointment Created!",
+                    text: "The appointment has been successfully added.",
+                    icon: "success",
+                    confirmButtonColor: "#3085d6",
+                });
+                reset();
+            },
+            onError: () => {
+                Swal.fire({
+                    title: "Error!",
+                    text: "Please check the form and try again.",
+                    icon: "error",
+                    confirmButtonColor: "#d33",
+                });
+            },
+        });
     }
 
     return (
@@ -31,7 +50,7 @@ export default function MakeAppointment({ patient, doctors }) {
                     <select
                         name="doctor_id"
                         value={data.doctor_id}
-                        onChange={e => setData("doctor_id", e.target.value)}
+                        onChange={(e) => setData("doctor_id", e.target.value)}
                         className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         required
                     >
@@ -42,8 +61,9 @@ export default function MakeAppointment({ patient, doctors }) {
                             </option>
                         ))}
                     </select>
-                    <p className="text-xs text-gray-500 mt-1">Select the doctor you want to schedule an appointment with.</p>
-                    {errors.doctor_id && <p className="text-red-500 text-sm">{errors.doctor_id}</p>}
+                    {errors.doctor_id && (
+                        <p className="text-red-500 text-sm">{errors.doctor_id}</p>
+                    )}
                 </div>
 
                 {/* Checkup date */}
@@ -53,26 +73,38 @@ export default function MakeAppointment({ patient, doctors }) {
                         type="datetime-local"
                         name="checkup_date"
                         value={data.checkup_date}
-                        onChange={e => setData("checkup_date", e.target.value)}
+                        onChange={(e) => setData("checkup_date", e.target.value)}
                         className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         required
                     />
-                    <p className="text-xs text-gray-500 mt-1">Pick a date and time for the appointment.</p>
-                    {errors.checkup_date && <p className="text-red-500 text-sm">{errors.checkup_date}</p>}
+                    {errors.checkup_date && (
+                        <p className="text-red-500 text-sm">{errors.checkup_date}</p>
+                    )}
                 </div>
 
-              
-                {/* Medical History */}
+                {/* Problem */}
+                <div>
+                    <label className="block text-sm font-medium mb-1">Problem / Reason for Visit</label>
+                    <textarea
+                        name="problem"
+                        value={data.problem}
+                        onChange={(e) => setData("problem", e.target.value)}
+                        className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        rows={3}
+                    />
+                    {errors.problem && <p className="text-red-500 text-sm">{errors.problem}</p>}
+                </div>
+
+                {/* History */}
                 <div>
                     <label className="block text-sm font-medium mb-1">Medical History</label>
                     <textarea
                         name="history"
                         value={data.history}
-                        onChange={e => setData("history", e.target.value)}
+                        onChange={(e) => setData("history", e.target.value)}
                         className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         rows={3}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Provide any relevant past medical history, treatments, or surgeries.</p>
                     {errors.history && <p className="text-red-500 text-sm">{errors.history}</p>}
                 </div>
 
@@ -82,26 +114,26 @@ export default function MakeAppointment({ patient, doctors }) {
                     <textarea
                         name="symptoms"
                         value={data.symptoms}
-                        onChange={e => setData("symptoms", e.target.value)}
+                        onChange={(e) => setData("symptoms", e.target.value)}
                         className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         rows={3}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Describe the symptoms the patient is experiencing (e.g., fever, nausea, dizziness, etc.).</p>
-                    {errors.symptoms && <p className="text-red-500 text-sm">{errors.symptoms}</p>}
+                    {errors.symptoms && (
+                        <p className="text-red-500 text-sm">{errors.symptoms}</p>
+                    )}
                 </div>
 
-                {/* Medication */}
+                {/* Notes */}
                 <div>
-                    <label className="block text-sm font-medium mb-1">Current Medication</label>
-                    <input
-                        type="text"
-                        name="medication"
-                        value={data.medication}
-                        onChange={e => setData("medication", e.target.value)}
+                    <label className="block text-sm font-medium mb-1">Additional Notes</label>
+                    <textarea
+                        name="notes"
+                        value={data.notes}
+                        onChange={(e) => setData("notes", e.target.value)}
                         className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        rows={2}
                     />
-                    <p className="text-xs text-gray-500 mt-1">List any current medications the patient is taking (e.g., tablets, injections, supplements, etc.).</p>
-                    {errors.medication && <p className="text-red-500 text-sm">{errors.medication}</p>}
+                    {errors.notes && <p className="text-red-500 text-sm">{errors.notes}</p>}
                 </div>
 
                 {/* Fee */}
@@ -111,17 +143,16 @@ export default function MakeAppointment({ patient, doctors }) {
                         type="number"
                         name="fee"
                         value={data.fee}
-                        onChange={e => setData("fee", e.target.value)}
+                        onChange={(e) => setData("fee", e.target.value)}
                         className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         min="0"
                         step="0.01"
                         required
                     />
-                    <p className="text-xs text-gray-500 mt-1">Enter the expected fee for the checkup (e.g., consultation fee, procedure cost, etc.).</p>
                     {errors.fee && <p className="text-red-500 text-sm">{errors.fee}</p>}
                 </div>
 
-                {/* Submit Button */}
+                {/* Submit */}
                 <button
                     type="submit"
                     disabled={processing}

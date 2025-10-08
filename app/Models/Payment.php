@@ -12,13 +12,13 @@ class Payment extends Model
     protected $fillable = [
         'patient_id',
         'amount',
-        'status',
-        'payment_method', 
         'amount_received',
+        'payment_method',
+        'status',
     ];
 
-    public function patient()
+    public function paymentItems()
     {
-        return $this->belongsTo(Patient::class);
+        return $this->hasMany(PaymentItem::class);
     }
 }

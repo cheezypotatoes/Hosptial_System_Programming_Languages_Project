@@ -1,279 +1,232 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import Sidebar from "../../Components/Sidebar";
-import axios from "axios";
-import { router, useForm } from "@inertiajs/react";
+import { useForm } from "@inertiajs/react";
+import { Inertia } from "@inertiajs/inertia";
+import Swal from "sweetalert2";
 
-export default function Dispensing({ role, user }) {
-  const { post } = useForm();
-  const [patients, setPatients] = useState([]);
-  const [search, setSearch] = useState("");
-  const [selectedPatient, setSelectedPatient] = useState(null);
-  const [suggestions, setSuggestions] = useState([]);
-  const [selectedDate, setSelectedDate] = useState("All"); // ✅ date filter
-  const printRef = useRef();
-
+export default function Dispensing({ role, user, patients = [] }) {
+  const { post, processing } = useForm();
   const activeLabel = "Dispensing";
 
-  function handleLogout(e) {
+  // ✅ Logout
+  const handleLogout = (e) => {
     e.preventDefault();
-    if (window.confirm("Are you sure you want to logout?")) post(route("logout"));
-  }
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to logout?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, logout",
+      cancelButtonText: "Cancel",
+    }).then((result) => {
+      if (result.isConfirmed) post(route("logout"));
+    });
+  };
 
-  useEffect(() => {
-    axios
-      .get("/patients")
-      .then((res) => setPatients(res.data))
-      .catch((err) => console.error("Error fetching patients:", err));
-  }, []);
+  // ✅ Fetch patient details via Inertia
+  const handlePatientClick = (id) => {
+    Inertia.get(route("dispensing.patients.show", id), {}, {
+      onSuccess: ({ props }) => {
+        const { patient, dispense_logs } = props;
+        showPatientModal(patient, dispense_logs);
+      },
+      onError: () => {
+        Swal.fire("Error", "Failed to load patient details.", "error");
+      },
+    });
+  };
 
-  const handleChange = (e) => {
-    const value = e.target.value;
-    setSearch(value);
-
-    if (value.trim() === "") {
-      setSuggestions([]);
+  // ✅ Dispense Medicine with SweetAlert
+  const handleDispense = async (patient, prescriptions) => {
+    if (!prescriptions.length) {
+      Swal.fire("No Prescriptions", "This patient has no prescriptions to dispense.", "info");
       return;
     }
 
-    const matches = patients.filter((p) =>
-      `${p.first_name} ${p.last_name}`.toLowerCase().includes(value.toLowerCase())
-    );
-    setSuggestions(matches);
-  };
-
-  const fetchPatientData = (found) => {
-    axios
-      .get(`/patients/${found.id}/prescriptions`)
-      .then((res) => {
-        axios
-          .get(`/patients/${found.id}/medical-conditions`)
-          .then((condRes) => {
-            setSelectedPatient({
-              ...found,
-              prescriptions: res.data,
-              medical_conditions: condRes.data,
-            });
-            setSuggestions([]);
-            setSelectedDate("All"); // reset filter on new search
-          })
-          .catch(() => {
-            setSelectedPatient({ ...found, prescriptions: res.data, medical_conditions: [] });
-            setSuggestions([]);
-          });
-      })
-      .catch(() => {
-        setSelectedPatient(found);
-        setSuggestions([]);
-      });
-  };
-
-  const handleSearch = () => {
-    const found = patients.find((p) =>
-      `${p.first_name} ${p.last_name}`.toLowerCase().includes(search.toLowerCase())
-    );
-
-    if (found) {
-      fetchPatientData(found);
-    } else {
-      setSelectedPatient(null);
-    }
-  };
-
-  const handlePrint = () => {
-    const logoPath = "/images/New_Logo.png";
-    const companyName = "Jorge & Co Medical Center";
-    const companyAddress = "University of Mindanao, Matina Davao City";
-
-    const nurseName = user ? `${user.first_name} ${user.last_name}` : "N/A";
-    const currentDate = new Date().toLocaleString();
-
-    const content = printRef.current.innerHTML;
-    const printWindow = window.open("", "", "width=900,height=650");
-
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Patient Record</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            h2, h3 { margin-top: 2px; margin-bottom: 5px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            table, th, td { border: 1px solid #333; }
-            th, td { padding: 8px; text-align: left; }
-            .header { text-align: center; margin-bottom: 20px; }
-            .header img { width: 160px; display: block; margin: 0 auto 5px; }
-            .footer { margin-top: 20px; font-size: 14px; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <img src="${logoPath}" alt="Company Logo">
-            <h2>${companyName}</h2>
-            <p>${companyAddress}</p>
-          </div>
-          <div class="footer">
-            <p><strong>Nurse:</strong> ${nurseName}</p>
-            <p><strong>Date:</strong> ${currentDate}</p>
-          </div>
-          ${content}
-        </body>
-      </html>
-    `);
-
-    printWindow.document.close();
-    printWindow.print();
-  };
-
-  // ✅ Get all unique dates from prescriptions + symptoms
-  const allDates = selectedPatient
-    ? Array.from(
-        new Set([
-          ...(selectedPatient.prescriptions?.map((p) => p.date_prescribed) || []),
-          ...(selectedPatient.medical_conditions?.map((c) => c.date) || []),
-        ])
+    const options = prescriptions
+      .map(
+        (p) =>
+          `<option value="${p.id}" data-name="${p.medication}" data-dosage="${p.dosage}">
+             ${p.medication} — ${p.dosage} (${p.doctor_name})
+           </option>`
       )
-    : [];
+      .join("");
 
-  // ✅ Apply filter to both prescriptions and symptoms
-  const filteredPrescriptions =
-    selectedDate === "All"
-      ? selectedPatient?.prescriptions || []
-      : selectedPatient?.prescriptions?.filter((p) => p.date_prescribed === selectedDate) || [];
+    const { value: formValues } = await Swal.fire({
+      title: "Dispense Medicine",
+      html: `
+        <select id="medicineSelect" class="swal2-input" style="width:90%">
+          <option value="">Select Prescribed Medicine</option>
+          ${options}
+        </select>
+        <input id="quantityInput" type="number" class="swal2-input" placeholder="Quantity" style="width:90%">
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: processing ? "Processing..." : "Dispense",
+      cancelButtonText: "Cancel",
+      preConfirm: () => {
+        const select = document.getElementById("medicineSelect");
+        const medicine_id = select.value;
+        const medicine_name = select.selectedOptions[0]?.getAttribute("data-name");
+        const dosage = select.selectedOptions[0]?.getAttribute("data-dosage");
+        const quantity = document.getElementById("quantityInput").value;
 
-  const filteredConditions =
-    selectedDate === "All"
-      ? selectedPatient?.medical_conditions || []
-      : selectedPatient?.medical_conditions?.filter((c) => c.date === selectedDate) || [];
+        if (!medicine_id || !quantity) {
+          Swal.showValidationMessage("Please select a medicine and enter quantity.");
+          return false;
+        }
+
+        return { medicine_id, medicine_name, dosage, quantity };
+      },
+    });
+
+    if (!formValues) return;
+
+    // ✅ Inertia post to dispense medicine
+    post(route("medicine.dispense"), {
+      patient_id: patient.id,
+      medication_id: formValues.medicine_id,
+      quantity: parseInt(formValues.quantity),
+      onSuccess: () => {
+        Swal.fire({
+          icon: "success",
+          title: "Medicine Dispensed",
+          text: `${formValues.medicine_name} (${formValues.dosage}) x ${formValues.quantity} successfully dispensed!`,
+          confirmButtonText: "OK",
+        }).then(() => {
+          // Reload or refetch page if necessary
+          Inertia.reload();
+        });
+      },
+      onError: (errors) => {
+        Swal.fire({
+          icon: "error",
+          title: "Failed to Dispense",
+          text: "Check console for more details.",
+        });
+        console.error("Dispense errors:", errors);
+      },
+    });
+  };
+
+  // ✅ Show patient modal
+  const showPatientModal = (patient, dispenseLogs) => {
+    const prescriptions = patient.prescriptions || [];
+    const conditions = patient.medicalConditions || [];
+
+    const condHTML =
+      conditions.length > 0
+        ? `<ul style="margin-top:8px;padding-left:20px">
+            ${conditions.map((c) => `<li><b>${c.symptom || c.condition_name || "Condition"}</b></li>`).join("")}
+          </ul>`
+        : `<p>No recorded symptoms.</p>`;
+
+    const prescHTML =
+      prescriptions.length > 0
+        ? `
+        <table style="width:100%;border-collapse:collapse;text-align:left;margin-top:8px">
+          <thead>
+            <tr style="background:#ddd">
+              <th style="border:1px solid #ccc;padding:5px">Medicine</th>
+              <th style="border:1px solid #ccc;padding:5px">Dosage</th>
+              <th style="border:1px solid #ccc;padding:5px">Instructions</th>
+              <th style="border:1px solid #ccc;padding:5px">Doctor</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${prescriptions.map(
+              (pr) => `
+              <tr>
+                <td style="border:1px solid #ccc;padding:5px">${pr.medication}</td>
+                <td style="border:1px solid #ccc;padding:5px">${pr.dosage}</td>
+                <td style="border:1px solid #ccc;padding:5px">${pr.instructions}</td>
+                <td style="border:1px solid #ccc;padding:5px">${pr.doctor_name}</td>
+              </tr>`
+            ).join("")}
+          </tbody>
+        </table>`
+        : `<p>No prescriptions found.</p>`;
+
+    const dispenseHTML =
+      dispenseLogs.length > 0
+        ? `
+        <table style="width:100%;border-collapse:collapse;text-align:left;margin-top:8px">
+          <thead>
+            <tr style="background:#ddd">
+              <th style="border:1px solid #ccc;padding:5px">Medicine</th>
+              <th style="border:1px solid #ccc;padding:5px">Quantity</th>
+              <th style="border:1px solid #ccc;padding:5px">Date Dispensed</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${dispenseLogs.map(
+              (d) => `
+              <tr>
+                <td style="border:1px solid #ccc;padding:5px">${d.medicine_name || "N/A"}</td>
+                <td style="border:1px solid #ccc;padding:5px">${d.quantity}</td>
+                <td style="border:1px solid #ccc;padding:5px">${d.dispensed_at}</td>
+              </tr>`
+            ).join("")}
+          </tbody>
+        </table>`
+        : `<p>No dispensing records yet.</p>`;
+
+    Swal.fire({
+      title: `${patient.first_name} ${patient.last_name}`,
+      html: `
+        <p><b>Birthdate:</b> ${patient.birthdate}</p>
+        <p><b>Gender:</b> ${patient.gender}</p>
+        <p><b>Contact:</b> ${patient.contact_num}</p>
+        <p><b>Address:</b> ${patient.address}</p>
+        <hr style="margin:10px 0"/>
+        <h3>Symptoms History:</h3>
+        ${condHTML}
+        <hr style="margin:10px 0"/>
+        <h3>Prescriptions:</h3>
+        ${prescHTML}
+        <hr style="margin:10px 0"/>
+        <h3>Dispensing History:</h3>
+        ${dispenseHTML}
+      `,
+      width: 800,
+      confirmButtonText: "Close",
+      showCancelButton: true,
+      cancelButtonText: "💊 Dispense Medicine",
+      didOpen: () => {
+        const cancelBtn = Swal.getCancelButton();
+        if (cancelBtn)
+          cancelBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            handleDispense(patient, prescriptions);
+          });
+      },
+    });
+  };
 
   return (
     <div className="flex h-screen bg-gray-100">
       <Sidebar role={role} activeLabel={activeLabel} handleLogout={handleLogout} />
-
-      <div className="flex-1 flex flex-col">
-        <div className="flex items-center justify-between bg-white p-4 shadow relative">
-          <div className="flex items-center gap-2 w-full max-w-lg">
-            <div className="relative w-full">
-              <input
-                type="text"
-                placeholder="Search patient..."
-                value={search}
-                onChange={handleChange}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className="w-full border rounded px-3 py-2"
-              />
-
-              {suggestions.length > 0 && (
-                <ul className="absolute z-10 bg-white border w-full mt-1 rounded shadow max-h-40 overflow-y-auto">
-                  {suggestions.map((p) => (
-                    <li
-                      key={p.id}
-                      onClick={() => {
-                        setSearch(`${p.first_name} ${p.last_name}`);
-                        fetchPatientData(p);
-                      }}
-                      className="px-3 py-2 cursor-pointer hover:bg-blue-100"
-                    >
-                      {p.first_name} {p.last_name}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            <button
-              onClick={handleSearch}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            >
-              Search
-            </button>
+      <div className="flex-1 p-6 overflow-y-auto">
+        <h1 className="text-2xl font-bold mb-6">Dispensing Records</h1>
+        {patients.length === 0 ? (
+          <p className="text-gray-500">No patients found.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {patients.map((p) => (
+              <div
+                key={p.id}
+                onClick={() => handlePatientClick(p.id)}
+                className="bg-white p-5 rounded-xl shadow-md hover:shadow-lg cursor-pointer transition"
+              >
+                <h2 className="text-lg font-bold">{p.first_name} {p.last_name}</h2>
+                <p className="text-sm text-gray-600">Birthdate: {p.birthdate}</p>
+                <p className="text-sm text-gray-600">Gender: {p.gender}</p>
+                <p className="text-sm text-gray-600">Contact: {p.contact_num}</p>
+              </div>
+            ))}
           </div>
-        </div>
-
-        <div className="p-6">
-          {selectedPatient ? (
-            <>
-              {/* ✅ Print + Date Filter */}
-              <div className="flex items-center justify-between mb-4">
-                <button
-                  onClick={handlePrint}
-                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                >
-                  🖨️ Print Patient Data
-                </button>
-
-                <select
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="border rounded px-3 py-2"
-                >
-                  <option value="All">All Dates</option>
-                  {allDates.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div ref={printRef}>
-                <h2 className="text-lg font-bold mb-4">Patient Info:</h2>
-                <p>
-                  <span className="font-semibold">Name:</span>{" "}
-                  {selectedPatient.first_name} {selectedPatient.last_name}
-                </p>
-                <p>
-                  <span className="font-semibold">Birthdate:</span>{" "}
-                  {selectedPatient.birthdate}
-                </p>
-
-                {/* ✅ Filtered Symptoms */}
-                <h3 className="mt-4 text-md font-bold">Symptoms History:</h3>
-                {filteredConditions.length > 0 ? (
-                  <ul className="list-disc pl-6">
-                    {filteredConditions.map((cond, i) => (
-                      <li key={`${cond.symptom}-${cond.date}-${i}`}>
-                        <strong>{cond.symptom}</strong> — {cond.date}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-gray-500">No symptoms history found for this date.</p>
-                )}
-
-                {/* ✅ Filtered Prescriptions */}
-                <h3 className="mt-4 text-md font-bold">Prescriptions:</h3>
-                {filteredPrescriptions.length > 0 ? (
-                  <table className="w-full border border-gray-300 bg-gray-100 rounded">
-                    <thead>
-                      <tr className="bg-gray-300 text-left">
-                        <th className="p-2 border">Medication</th>
-                        <th className="p-2 border">Dosage</th>
-                        <th className="p-2 border">Instructions</th>
-                        <th className="p-2 border">Doctor</th>
-                        <th className="p-2 border">Date Prescribed</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredPrescriptions.map((pres, index) => (
-                        <tr key={index}>
-                          <td className="p-2 border">{pres.medication}</td>
-                          <td className="p-2 border">{pres.dosage}</td>
-                          <td className="p-2 border">{pres.instructions}</td>
-                          <td className="p-2 border">{pres.doctor_name}</td>
-                          <td className="p-2 border">{pres.date_prescribed}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                ) : (
-                  <p className="text-gray-500">No prescriptions found for this date.</p>
-                )}
-              </div>
-            </>
-          ) : (
-            <p className="text-gray-500">🔍 Search for a patient to view their medical records.</p>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ export default function Index() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 to-blue-500 px-4">
       {/* Logo */}
       <div className="flex flex-col items-center mb-8">
-        <img src={Logo} alt="Jorge & Co Logo" className="w-32 h-32 mb-4 object-contain" />
+        <img src={Logo} alt="Jorge & Co Logo" className="w-50 h-50 mb-4 object-contain" />
         <h1 className="text-4xl md:text-5xl font-bold text-white text-center">
           Jorge & Co Medical Center
         </h1>
