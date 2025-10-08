@@ -46,7 +46,14 @@ const Sidebar = ({ role, activeLabel }) => {
     ],
     pharmacist: [
       { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
-      { href: route("pharmacist.index"), label: "Pharmacist", icon: <MdOutlinePersonPin /> },
+      // { href: route("pharmacist.index"), label: "Pharmacist", icon: <MdOutlinePersonPin /> },
+      { href: route('medicine.inventory'), label: "Medicine Inventory", icon: <MdInventory /> },
+    ],
+    labtech: [
+      { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
+      
+      
+      // { href: route("pharmacist.index"), label: "Pharmacist", icon: <MdOutlinePersonPin /> },
     ],
     default: [
       { href: route("dashboard"), label: "Dashboard", icon: <MdDashboard /> },
