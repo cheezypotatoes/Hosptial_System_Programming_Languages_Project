@@ -20,15 +20,13 @@ export default function Index() {
       <div className="flex flex-col md:flex-row gap-4">
         <Link
           href={route("login")}
-          className="w-48 px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg shadow hover:bg-blue-50 transition text-center"
-        >
+          className="w-48 px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg shadow hover:bg-blue-50 transition text-center" >
           Login
         </Link>
 
         <Link
           href={route("register")}
-          className="w-48 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition text-center"
-        >
+          className="w-48 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition text-center" >
           Register
         </Link>
       </div>

@@ -44,7 +44,6 @@ export default function AssistantDashboard() {
   );
 
   const handleLogout = () => {
-    // Add logout functionality here
     alert("Logged out!");
   };
 

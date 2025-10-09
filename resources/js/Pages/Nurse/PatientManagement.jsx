@@ -9,7 +9,6 @@ export default function PatientManagement({ patients, role, user, flash }) {
   const [searchTerm, setSearchTerm] = useState("");
   const { post } = useForm();
 
-  // ✅ Logout
   const handleLogout = (e) => {
     e.preventDefault();
     Swal.fire({
@@ -24,14 +23,12 @@ export default function PatientManagement({ patients, role, user, flash }) {
     });
   };
 
-  // Delete function
   function handleDelete(id) {
     if (confirm("Are you sure you want to delete this patient?")) {
       destroy(route("nurse.patients.destroy", id));
     }
   }
 
-  // Redirect to Edit page
   function handleEdit(id) {
     window.location.href = route("nurse.patients.edit", id);
   }
@@ -46,7 +43,6 @@ export default function PatientManagement({ patients, role, user, flash }) {
 
   const activeLabel = "Patient Management";
 
-  // Filter patients based on search term
   const filteredPatients = patients.filter(
     (patient) =>
       patient.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||

@@ -14,11 +14,9 @@ export default function CashierDashboard({ role, user, patients, servicesAndItem
   const [selectedService, setSelectedService] = useState("");
   const [loading, setLoading] = useState(false);
   const [servicePrice, setServicePrice] = useState(0);
-
   const activeLabel = "Billing";
   const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // Select patient
  const handleSelectPatient = (patient) => {
   if (selectedPatient?.id === patient.id) return;
 
@@ -26,7 +24,6 @@ export default function CashierDashboard({ role, user, patients, servicesAndItem
   setCart([]);
   setAmountReceived("");
 
-  // Automatically select the first appointment if available
   if (patient.appointments?.length > 0) {
     setSelectedAppointment(patient.appointments[0]);
   } else {
@@ -87,7 +84,6 @@ const handlePrint = () => {
   printWindow.print();
 };
 
-  // Select appointment
 const handleSelectAppointment = (appointmentId) => {
   if (!selectedPatient || !selectedPatient.appointments) return;
   const id = Number(appointmentId); 
@@ -99,7 +95,6 @@ const handleSelectAppointment = (appointmentId) => {
   }
 };
 
-  // When service changes, set its price automatically
   useEffect(() => {
     if (!selectedService) {
       setServicePrice(0);
@@ -109,7 +104,6 @@ const handleSelectAppointment = (appointmentId) => {
     setServicePrice(service ? parseFloat(service.price) : 0);
   }, [selectedService]);
 
-  // Add to cart
   const handleAddToCart = () => {
     if (!selectedService) return alert("Please select a service/item");
     const service = servicesAndItems.find((s) => `${s.type}_${s.id}` === selectedService);
@@ -135,8 +129,6 @@ const handleSelectAppointment = (appointmentId) => {
     setCart(cart.filter((c) => !(c.type === type && c.id === id)));
   };
 
-  // Show receipt
-// Show receipt
 const handleShowReceipt = () => {
   if (!selectedPatient) return alert("Please select a patient!");
   if (!selectedAppointment) return alert("Please select an appointment!");
@@ -157,8 +149,6 @@ const handleShowReceipt = () => {
   setShowReceipt(true);
 };
 
-  // Record payment & send to database
-// Record payment & send to database
 const handleRecordPayment = () => {
   if (!selectedPatient) return Swal.fire("Error", "Select a patient!", "error");
   if (!selectedAppointment) return Swal.fire("Error", "Select an appointment!", "error");
@@ -350,11 +340,9 @@ const handleRecordPayment = () => {
                                   onClick={() => handleSelectPatient(p)}
                                 >
                                   <p className="font-semibold">{p.full_name}</p>
-                                </div>
-                              );
-                            })}
-
-
+                          </div>
+                      );
+                })}
 
     {selectedPatient && selectedPatient.appointments.length > 0 && (
       <div className="mt-2">
@@ -372,15 +360,14 @@ const handleRecordPayment = () => {
               ) : (
                 `₱${Number(a.balance ?? 0).toFixed(2)}`
               )}
-            </option>
-          ))}
-        </select>
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
-    )}
-  </div>
-</div>
-
-        </div>
+    </div>
+ </div>
 
        {/* Receipt Modal */}
             {showReceipt && (
@@ -460,7 +447,6 @@ const handleRecordPayment = () => {
                 </div>
               </div>
             )}
-
       </main>
     </div>
   );

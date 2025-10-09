@@ -38,7 +38,6 @@ use App\Http\Middleware\EnsureUserIsNurse;
 Route::get('/', fn() => Inertia::render('Index'));
 Route::get('/login', fn() => Inertia::render('Auth/Login'))->name('login');
 Route::post('/login', [LoginController::class, 'store'])->name('login.store');
-
 Route::get('/register', fn() => Inertia::render('Auth/Register'))->name('register');
 Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 
@@ -50,8 +49,6 @@ Route::post('/register', [RegisterController::class, 'store'])->name('register.s
 Route::middleware(['auth'])->group(function () {
     Route::get('/pharmacist', [PharmacistController::class, 'index'])->name('pharmacist.index');
     Route::get('/pharmacist/prescriptions', [PharmacistController::class, 'prescriptions']);
-    
-    // Patient-specific prescriptions
     Route::get('/patients/{patient}/prescriptions', [PharmacistController::class, 'patientPrescriptions']);
     Route::post('/pharmacist/dispense/{id}', [PharmacistController::class, 'dispense']);
 });
@@ -85,8 +82,6 @@ Route::middleware('auth')->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    // Dispensing
    Route::middleware(['auth'])->group(function () {
     Route::get('/dispensing', [DispensingController::class, 'index'])->name('dispensing');
    Route::get('/dispensing/patients/{id}', [DispensingController::class, 'show'])->name('dispensing.patients.show');
@@ -96,7 +91,6 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth'])->prefix('/medicine')->group(function () {
-    // ✅ Inertia page for viewing inventory
     Route::get('/inventory', [MedicineController::class, 'inventoryPage'])->name('medicine.inventory');
     Route::get('/add', [MedicineController::class, 'inventoryPage'])->name('medicine.add');
     Route::post('/store', [MedicineController::class, 'store'])->name('medicine.store');

@@ -23,7 +23,6 @@ export default function PatientDetails() {
       quantity,
     });
 
-    // Call separate route/controller for dispensing
     post(
       route("dispense.store"),
       {

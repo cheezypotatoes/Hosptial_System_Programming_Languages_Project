@@ -28,8 +28,6 @@ class Patient extends Model
         'birthdate' => 'date:Y-m-d',
     ];
 
-    /** ---------------- Relationships ---------------- **/
-
     public function appointments()
     {
         return $this->hasMany(Appointment::class, 'patient_id');
@@ -56,9 +54,6 @@ class Patient extends Model
             'id'
         );
     }
-
-    /** ---------------- Accessors ---------------- **/
-
     public function getCurrentMedicalConditionsAttribute()
     {
         return $this->medicalConditions()
@@ -94,15 +89,13 @@ class Patient extends Model
         return "{$this->first_name} {$this->last_name}";
     }
 
-    /** ---------------- Mutators ---------------- **/
 
-    // Sanitize and limit contact number to 11 digits
     public function setContactNumAttribute($value): void
     {
-        // Remove non-digit characters
+  
         $digits = preg_replace('/\D/', '', $value);
 
-        // Limit to 11 digits max
+
         $this->attributes['contact_num'] = substr($digits, 0, 11);
     }
 }

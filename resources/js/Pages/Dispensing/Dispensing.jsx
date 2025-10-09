@@ -8,7 +8,6 @@ export default function Dispensing({ role, user, patients = [] }) {
   const { post, processing } = useForm();
   const activeLabel = "Dispensing";
 
-  // ✅ Logout
   const handleLogout = (e) => {
     e.preventDefault();
     Swal.fire({
@@ -23,7 +22,6 @@ export default function Dispensing({ role, user, patients = [] }) {
     });
   };
 
-  // ✅ Fetch patient details via Inertia
   const handlePatientClick = (id) => {
     Inertia.get(route("dispensing.patients.show", id), {}, {
       onSuccess: ({ props }) => {
@@ -36,7 +34,7 @@ export default function Dispensing({ role, user, patients = [] }) {
     });
   };
 
-  // ✅ Dispense Medicine with SweetAlert
+
   const handleDispense = async (patient, prescriptions) => {
     if (!prescriptions.length) {
       Swal.fire("No Prescriptions", "This patient has no prescriptions to dispense.", "info");
@@ -83,7 +81,6 @@ export default function Dispensing({ role, user, patients = [] }) {
 
     if (!formValues) return;
 
-    // ✅ Inertia post to dispense medicine
     post(route("medicine.dispense"), {
       patient_id: patient.id,
       medication_id: formValues.medicine_id,
@@ -95,7 +92,7 @@ export default function Dispensing({ role, user, patients = [] }) {
           text: `${formValues.medicine_name} (${formValues.dosage}) x ${formValues.quantity} successfully dispensed!`,
           confirmButtonText: "OK",
         }).then(() => {
-          // Reload or refetch page if necessary
+
           Inertia.reload();
         });
       },
@@ -110,7 +107,7 @@ export default function Dispensing({ role, user, patients = [] }) {
     });
   };
 
-  // ✅ Show patient modal
+
   const showPatientModal = (patient, dispenseLogs) => {
     const prescriptions = patient.prescriptions || [];
     const conditions = patient.medicalConditions || [];
@@ -192,7 +189,7 @@ export default function Dispensing({ role, user, patients = [] }) {
       width: 800,
       confirmButtonText: "Close",
       showCancelButton: true,
-      cancelButtonText: "💊 Dispense Medicine",
+      cancelButtonText: " Dispense Medicine",
       didOpen: () => {
         const cancelBtn = Swal.getCancelButton();
         if (cancelBtn)

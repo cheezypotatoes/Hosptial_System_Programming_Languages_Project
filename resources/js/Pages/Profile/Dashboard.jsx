@@ -32,11 +32,11 @@ const handleLogout = (e) => {
     { day: "Sun", patients: 30 },
   ];
   
-  const activeLabel = "Dashboard"; // Example of active label
+  const activeLabel = "Dashboard";
 
   return (
     <div className="flex min-h-screen bg-[#E6F0FA] font-sans text-[#1E3A8A]">
-      {/* Pass the user role (position in lowercase) to Sidebar */}
+      {/*Sidebar */}
       <Sidebar role={role} activeLabel={activeLabel} handleLogout={handleLogout} />
 
       {/* Main Content */}
@@ -64,18 +64,18 @@ const handleLogout = (e) => {
           <h1 className="text-3xl font-bold mb-6 text-[#1E40AF]">Welcome, {user.first_name}! as {role}</h1>
 
               {/* Dashboard Cards */}
-    <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10" aria-label="Dashboard summary cards">
-      {[ 
-        { label: "Patients Today", value: appointmentsTodayCount },
-        { label: "Upcoming Appointments", value: upcomingAppointmentsCount },
-        { label: "Medicine Stock Alerts", value: lowStockCount }, // dynamic value
-      ].map(({ label, value }) => (
-        <article key={label} className="bg-white shadow-md p-4 rounded" tabIndex={0} aria-label={`${label}: ${value}`}>
-          <h3 className="font-semibold text-[#1E40AF]">{label}</h3>
-          <p className="text-2xl mt-2 font-bold">{value}</p>
-        </article>
-      ))}
-    </section>
+                  <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10" aria-label="Dashboard summary cards">
+                    {[ 
+                      { label: "Patients Today", value: appointmentsTodayCount },
+                      { label: "Upcoming Appointments", value: upcomingAppointmentsCount },
+                      { label: "Medicine Stock Alerts", value: lowStockCount }, // dynamic value
+                    ].map(({ label, value }) => (
+                      <article key={label} className="bg-white shadow-md p-4 rounded" tabIndex={0} aria-label={`${label}: ${value}`}>
+                        <h3 className="font-semibold text-[#1E40AF]">{label}</h3>
+                        <p className="text-2xl mt-2 font-bold">{value}</p>
+                      </article>
+                    ))}
+                  </section>
 
 
           {/* Insights Row */}
@@ -101,8 +101,6 @@ const handleLogout = (e) => {
               {/* Your Pie Chart SVG goes here */}
             </article>
           </section>
-
-         
         </main>
       </div>
     </div>

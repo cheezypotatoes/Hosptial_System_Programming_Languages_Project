@@ -15,7 +15,6 @@ export default function Create() {
   function handleSubmit(e) {
     e.preventDefault();
 
-    // Validate contact number (must be 11 digits)
     if (!/^\d{11}$/.test(data.contact_num)) {
       Swal.fire({
         title: "Invalid Contact Number!",
@@ -34,7 +33,7 @@ export default function Create() {
           icon: "success",
           confirmButtonColor: "#3085d6",
         }).then(() => {
-          router.visit(route("nurse.patients.index")); // Redirect after success
+          router.visit(route("nurse.patients.index"));
         });
         reset();
       },
@@ -49,9 +48,8 @@ export default function Create() {
     });
   }
 
-  // Handle contact number input (only digits, up to 11)
   const handleContactChange = (e) => {
-    const value = e.target.value.replace(/\D/g, ""); // allow only digits
+    const value = e.target.value.replace(/\D/g, ""); 
     if (value.length <= 11) {
       setData("contact_num", value);
     }

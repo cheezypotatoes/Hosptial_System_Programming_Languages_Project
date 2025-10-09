@@ -9,13 +9,11 @@ export default function PhysicianRecords({
   user,
   patient: initialPatient,
   searchResults: initialSearchResults,
-}) {
+})  {
   const { data, setData } = useForm({ search: "" });
   const [searchResults, setSearchResults] = useState(initialSearchResults || []);
   const [selectedPatient, setSelectedPatient] = useState(initialPatient || null);
   const activeLabel = "Physician Record";
-
-  // Fixed
   const medicalConditions = selectedPatient?.medical_conditions || [];
   const appointmentMeds = selectedPatient?.appointment_medications || [];
 
@@ -26,20 +24,9 @@ export default function PhysicianRecords({
     }
   }
 
-  // DEBUG function
-  const logPatientData = (patient, stage) => {
-    console.log(`--- DEBUG [${stage}] ---`);
-    console.log("Patient object:", patient);
-    console.log("Medical conditions:", patient?.medical_conditions);
-    console.log("Appointment medications:", patient?.appointment_medications);
-    console.log("-----------------------");
-  };
-
-  // Search patients dynamically
   function handleSearch(e) {
     e.preventDefault();
     console.log("Searching patients for:", data.search);
-
     Inertia.get(
       "/physician/records",
       { search: data.search },
@@ -56,7 +43,6 @@ export default function PhysicianRecords({
     );
   }
 
-  // Fetch full patient record when selected
   function handleSelectPatient(patient, e) {
     if (e) e.preventDefault();
     console.log("Patient clicked:", patient);
@@ -79,22 +65,6 @@ export default function PhysicianRecords({
     );
   }
 
-  // Inside your component
-const handleSaveNotes = () => {
-  if (!selectedPatient) return;
-
-  Inertia.post(`/physician/patients/${selectedPatient.id}/notes`, {
-    notes: selectedPatient.notes || "",
-  }, {
-    onSuccess: () => {
-      alert("Notes saved successfully!");
-    },
-    onError: (errors) => {
-      console.error(errors);
-      alert("Failed to save notes.");
-    },
-  });
-};
 
 
   useEffect(() => {
@@ -117,12 +87,10 @@ const handleSaveNotes = () => {
               value={data.search}
               onChange={(e) => setData("search", e.target.value)}
               placeholder="Search patients by name or ID"
-              className="border rounded px-3 py-2 w-full"
-            />
+              className="border rounded px-3 py-2 w-full" />
             <button
               type="submit"
-              className="absolute right-0 top-0 mt-2 mr-2 bg-blue-600 text-white px-3 py-1 rounded"
-            >
+              className="absolute right-0 top-0 mt-2 mr-2 bg-blue-600 text-white px-3 py-1 rounded" >
               Search
             </button>
 

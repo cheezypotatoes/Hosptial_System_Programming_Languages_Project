@@ -32,7 +32,6 @@ export default function MedicineInventoryAdd() {
 const handleAddItem = (e) => {
   e.preventDefault();
 
-  // Determine backend route
   let routeName = "";
   if (modalType === "medicine") routeName = route("medicine.store");
   else if (modalType === "service") routeName = route("service.store");
@@ -47,10 +46,9 @@ const handleAddItem = (e) => {
     didOpen: () => Swal.showLoading(),
   });
 
-  // Prepare payload
   const payload = { ...data };
 
-  // Cast numeric fields and adjust for items
+
   if (modalType === "medicine") {
     payload.stock = Number(payload.stock);
     payload.price = Number(payload.price);
@@ -58,7 +56,7 @@ const handleAddItem = (e) => {
     payload.price = Number(payload.price);
     payload.category_id = payload.category_id ? Number(payload.category_id) : null;
   } else if (modalType === "item") {
-    payload.stock = Number(payload.stock_quantity); // backend expects 'stock'
+    payload.stock = Number(payload.stock_quantity); 
     delete payload.stock_quantity;
     payload.price = Number(payload.price);
   }
@@ -75,10 +73,10 @@ const handleAddItem = (e) => {
         showConfirmButton: false,
       });
 
-      reset();             // clear form
-      setShowModal(false); // close modal
+      reset();           
+      setShowModal(false); 
 
-      // Reload Inertia props without full page reload
+     
       setTimeout(() => router.reload(), 1800);
     },
     onError: (errors) => {
@@ -371,7 +369,7 @@ const handleAddItem = (e) => {
           </>
         )}
 
-        {/* ✅ Common Description Field for all */}
+        {/* Description Field for all */}
         <div>
           <label className="block text-sm font-semibold mb-1">
             Description
