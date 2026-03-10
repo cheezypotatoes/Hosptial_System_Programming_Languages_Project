@@ -13,13 +13,12 @@ return new class extends Migration
             $table->unsignedBigInteger('payment_id')->nullable();
             $table->unsignedBigInteger('patient_id')->nullable();
             $table->decimal('amount', 10, 2);
-            $table->string('status')->default('pending'); // pending, processing, completed, failed
+            $table->string('status')->default('pending'); 
             $table->timestamps();
 
-            // Foreign keys
+        
             $table->foreign('payment_id')->references('id')->on('payments')->onDelete('cascade');
-            // Optional: if you have a patients table
-            // $table->foreign('patient_id')->references('id')->on('patients')->onDelete('set null');
+             
         });
     }
 

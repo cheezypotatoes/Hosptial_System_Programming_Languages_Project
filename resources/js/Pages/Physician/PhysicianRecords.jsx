@@ -16,6 +16,13 @@ export default function PhysicianRecords({
   const activeLabel = "Physician Record";
   const medicalConditions = selectedPatient?.medical_conditions || [];
   const appointmentMeds = selectedPatient?.appointment_medications || [];
+  const logPatientData = (patient, context) => {
+    console.log(`[${context}] Selected Patient Data:`, patient);
+    if (patient) {
+      console.log("Medical Conditions:", patient.medical_conditions || []);
+      console.log("Appointment Medications:", patient.appointment_medications || []);
+    }
+  };
 
   function handleLogout(e) {
     e.preventDefault();
@@ -182,7 +189,7 @@ export default function PhysicianRecords({
       <button
         className="mt-4 bg-green-600 text-white px-4 py-2 rounded print:hidden"
         onClick={() => {
-          const logoPath = "/images/New_Logo.png";
+          const logoPath = "../images/New_Logo.png";
           const companyName = "Jorge & Co Medical Center";
           const companyAddress = "University of Mindanao, Matina Davao City";
           const nurseName = user ? `${user.first_name} ${user.last_name}` : "N/A";

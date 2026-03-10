@@ -127,8 +127,8 @@ Route::get('/categories', function () {
         Route::get('/appointments/{patientId}/{appointmentId}', [PhysicianAppointmentController::class, 'show'])->name('physician.appointments.show');
         Route::post('/appointments/{appointmentId?}', [PhysicianAppointmentController::class, 'store'])->name('physician.appointments.store');
     });
-Route::post('/physician/patients/{patient}/notes', [PhysicianController::class, 'saveNotes'])
-    ->name('physician.patients.saveNotes');
+      Route::post('/physician/patients/{patient}/notes', [PhysicianController::class, 'saveNotes'])
+     ->name('physician.patients.saveNotes');
 
     // Nurse Routes
     Route::prefix('nurse')->middleware(EnsureUserIsNurse::class)->group(function () {
@@ -155,7 +155,7 @@ Route::post('/physician/patients/{patient}/notes', [PhysicianController::class, 
 
     /*
         |--------------------------------------------------------------------------
-        | Cashier Routes (Inside Nurse)
+        | Cashier Routes
         |--------------------------------------------------------------------------
         */
     Route::prefix('nurse/cashier')->group(function () {

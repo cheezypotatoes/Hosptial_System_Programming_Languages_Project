@@ -1,5 +1,5 @@
 import React from 'react';
-import { useForm, Link } from '@inertiajs/react'; // ✅ Import Link
+import { useForm, Link } from '@inertiajs/react';
 import Sidebar from '@/Components/Sidebar';
 import AppointmentActionMenu from '@/Components/AppointmentActionMenu';
 

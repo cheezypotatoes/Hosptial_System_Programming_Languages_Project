@@ -22,7 +22,7 @@ class AppointmentMedicationSeeder extends Seeder
         }
 
         foreach ($appointmentIds as $appointmentId) {
-            // Each appointment gets 1-3 medications
+            
             for ($i = 0; $i < $faker->numberBetween(1, 3); $i++) {
                 DB::table('appointment_medications')->insert([
                     'appointment_id' => $appointmentId,

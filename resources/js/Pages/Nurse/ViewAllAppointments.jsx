@@ -9,12 +9,10 @@ export default function ViewAllAppointments({ appointments, role }) {
   const { delete: destroy } = useForm();
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Delete function
   function handleDelete(id) {
     destroy(route('nurse.appointments.destroy', id));
   }
 
-  // Redirect to View appointment details
   function handleViewAppointment(appointmentId) {
     const appointment = appointments.find((a) => a.id === appointmentId);
     if (!appointment) return;
@@ -22,13 +20,11 @@ export default function ViewAllAppointments({ appointments, role }) {
     const patientId = appointment.patient?.id || appointment.patient_id;
     console.log(`Viewing appointment ${appointmentId} for patient ${patientId}`);
 
-    // Navigate to the appointment view page
     window.location.href = `/physician/appointments/${patientId}/${appointmentId}`;
   }
 
-  const activeLabel = 'Appointments'; // highlight the active menu item
+  const activeLabel = 'Appointments'; 
 
-  // Filter appointments based on search term
   const filteredAppointments = appointments.filter(
     (appointment) =>
       appointment.patient.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||

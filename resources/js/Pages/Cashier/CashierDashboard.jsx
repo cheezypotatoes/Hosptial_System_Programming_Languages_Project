@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef} from "react";
-import { Inertia } from "@inertiajs/inertia";
 import Sidebar from "../../Components/Sidebar";
 import Swal from 'sweetalert2';
 
@@ -39,7 +38,7 @@ export default function CashierDashboard({ role, user, patients, servicesAndItem
   }
 
 const handlePrint = () => {
-  const logoPath = "/images/New_Logo.png";
+  const logoPath = ".../images/New_Logo.png";
   const companyName = "Jorge & Co Medical Center";
   const companyAddress = "University of Mindanao, Matina Davao City";
   const nurseName = user ? `${user.first_name} ${user.last_name}` : "N/A";
@@ -47,7 +46,6 @@ const handlePrint = () => {
   const totalBill = (Number(selectedAppointment?.balance ?? 0) + totalPrice).toFixed(2);
 
   const content = printRef.current.innerHTML;
-
   const printWindow = window.open("", "", "width=900,height=650");
 
   printWindow.document.write(`

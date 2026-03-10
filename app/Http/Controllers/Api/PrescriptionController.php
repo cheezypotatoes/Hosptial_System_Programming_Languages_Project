@@ -5,14 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Prescription;
 use App\Models\Patient;
-use Illuminate\Http\Request;       // ✅ Import Request
-use Illuminate\Http\JsonResponse; // ✅ Import JsonResponse
+use Illuminate\Http\Request;       
+use Illuminate\Http\JsonResponse; 
 
 class PrescriptionController extends Controller
 {
-    /**
-     * Fetch all prescriptions for a given patient.
-     */
+    
     public function getByPatient($id): JsonResponse
     {
         $patient = Patient::with('prescriptions')->find($id);
@@ -24,18 +22,14 @@ class PrescriptionController extends Controller
         return response()->json($patient->prescriptions);
     }
 
-    /**
-     * Optional: Fetch all prescriptions (admin view).
-     */
+
     public function index(): JsonResponse
     {
         $prescriptions = Prescription::with('patient')->get();
         return response()->json($prescriptions);
     }
 
-    /**
-     * Store a new prescription for a patient.
-     */
+
     public function store(Request $request): JsonResponse
     {
         $data = $request->validate([

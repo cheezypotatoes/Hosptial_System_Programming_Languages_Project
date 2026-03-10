@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class ServiceController extends Controller
 {
-    // ✅ Fetch all services with category data
+
     public function index()
     {
         $services = Service::with('category:id,name')
@@ -21,7 +21,6 @@ class ServiceController extends Controller
         ]);
     }
 
-    // ✅ Add a new service
     public function store(Request $request)
     {
         $validated = $request->validate([

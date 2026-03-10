@@ -13,9 +13,9 @@ return new class extends Migration
             $table->foreignId('patient_id')
                   ->constrained('patients')
                   ->onDelete('cascade');
-            $table->string('condition_name'); // e.g., "Diabetes", "Hypertension"
-            $table->text('notes')->nullable(); // extra info
-            $table->date('diagnosed_date')->nullable(); // when condition was diagnosed
+            $table->string('condition_name'); 
+            $table->text('notes')->nullable(); 
+            $table->date('diagnosed_date')->nullable(); 
             $table->enum('status', ['active', 'resolved', 'chronic'])->default('active');
             $table->timestamps();
         });

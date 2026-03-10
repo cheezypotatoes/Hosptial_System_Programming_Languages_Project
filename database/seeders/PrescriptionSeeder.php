@@ -21,10 +21,10 @@ class PrescriptionSeeder extends Seeder
         }
 
         foreach ($patientIds as $patientId) {
-            // Each patient gets 1-5 prescriptions
+          
             for ($i = 0; $i < $faker->numberBetween(1, 5); $i++) {
-                // Randomly decide if the prescription is already dispensed
-                $isDispensed = $faker->boolean(30); // 30% chance dispensed
+            
+                $isDispensed = $faker->boolean(30); 
                 DB::table('prescriptions')->insert([
                     'patient_id'      => $patientId,
                     'doctor_name'     => $faker->name(),

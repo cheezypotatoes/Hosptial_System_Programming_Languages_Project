@@ -9,7 +9,6 @@ class Appointment extends Model
 {
     use HasFactory;
 
-    // Add the new fields to the fillable array
     protected $fillable = [
         'patient_id',
         'doctor_id',
@@ -27,7 +26,6 @@ class Appointment extends Model
         'fee' => 'decimal:2',
     ];
 
-    // Define relationships
     public function patient()
     {
         return $this->belongsTo(Patient::class);
