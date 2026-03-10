@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Appointment;
 use Faker\Factory as Faker;
-use Illuminate\Support\Facades\DB; // <- Correct import
+use Illuminate\Support\Facades\DB; 
 
 class AppointmentServiceSeeder extends Seeder
 {
@@ -21,7 +21,7 @@ class AppointmentServiceSeeder extends Seeder
         }
 
         foreach ($appointmentIds as $appointmentId) {
-            // Each appointment gets 0-2 services
+   
             for ($i = 0; $i < $faker->numberBetween(0, 2); $i++) {
                 DB::table('appointment_services')->insert([
                     'appointment_id' => $appointmentId,

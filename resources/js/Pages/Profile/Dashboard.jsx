@@ -2,7 +2,6 @@ import React from "react";
 import { useForm } from "@inertiajs/react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Sidebar from '../../Components/Sidebar';
-import { Inertia } from "@inertiajs/inertia";
 import Swal from "sweetalert2";
 
 export default function Dashboard({ user, role, appointmentsTodayCount, upcomingAppointmentsCount , lowStockCount}) {

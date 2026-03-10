@@ -9,7 +9,7 @@ class HospitalSeeder extends Seeder
 {
     public function run(): void
     {
-        // Categories
+
         $categories = [
             ['name' => 'Consultation', 'description' => 'Doctor consultations and related services'],
             ['name' => 'Diagnostics', 'description' => 'Diagnostic services like X-rays and MRI'],
@@ -19,7 +19,6 @@ class HospitalSeeder extends Seeder
         ];
         DB::table('categories')->insert($categories);
 
-        // Services
         $services = [
             ['name' => 'General Consultation', 'description' => 'Basic doctor consultation', 'price' => 500.00, 'category_id' => 1],
             ['name' => 'Specialist Consultation', 'description' => 'Specialist doctor visit', 'price' => 1200.00, 'category_id' => 1],
@@ -30,7 +29,7 @@ class HospitalSeeder extends Seeder
         ];
         DB::table('services')->insert($services);
 
-        // Items
+        
         $items = [
             ['name' => 'Paracetamol 500mg', 'description' => 'Pain reliever and fever reducer', 'stock_quantity' => 100, 'price' => 5.00, 'category_id' => 4],
             ['name' => 'Amoxicillin 500mg', 'description' => 'Antibiotic capsule', 'stock_quantity' => 50, 'price' => 12.00, 'category_id' => 4],

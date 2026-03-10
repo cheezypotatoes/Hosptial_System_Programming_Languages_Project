@@ -16,15 +16,15 @@ export default function Register() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [loading, setLoading] = useState(false); // Loading overlay state
+  const [loading, setLoading] = useState(false);
 
   function handleSubmit(e) {
     e.preventDefault();
-    setLoading(true); // Show loading overlay
+    setLoading(true); 
 
     post(route("register.store"), {
       onSuccess: () => {
-        setLoading(false); // Hide loading
+        setLoading(false); 
         Swal.fire({
           icon: "success",
           title: "Registration Successful",
@@ -43,7 +43,7 @@ export default function Register() {
         });
       },
       onError: () => {
-        setLoading(false); // Hide loading
+        setLoading(false); 
         Swal.fire({
           icon: "error",
           title: "Registration Failed",
@@ -159,7 +159,7 @@ export default function Register() {
                 required
               >
                 <option value="">Select a specialization</option>
-                 <option value="General Medicine">General Medicine</option>
+                <option value="General Medicine">General Medicine</option>
                 <option value="Cardiology">Cardiology</option>
                 <option value="Orthopedics">Orthopedics</option>
                 <option value="Pediatrics">Pediatrics</option>

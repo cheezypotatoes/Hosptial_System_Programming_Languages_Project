@@ -19,8 +19,6 @@ class Prescription extends Model
         'status',
         'dispensed_at',
     ];
-
-    // Relations
     public function patient()
     {
         return $this->belongsTo(Patient::class);

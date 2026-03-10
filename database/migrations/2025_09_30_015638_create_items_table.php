@@ -6,19 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    
     public function up(): void
     {
         Schema::create('items', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // e.g., Paracetamol, Syringe
+            $table->string('name'); 
             $table->text('description')->nullable();
             $table->integer('stock_quantity')->default(0);
             $table->decimal('price', 10, 2);
 
-            // Foreign key to categories
+  
             $table->foreignId('category_id')
                   ->nullable()
                   ->constrained('categories')
@@ -28,9 +26,7 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+  
     public function down(): void
     {
         Schema::dropIfExists('items');

@@ -9,7 +9,6 @@ class Category extends Model
 {
     use HasFactory;
 
-    // Mass assignable fields
     protected $fillable = [
         'name',     
         'description' 

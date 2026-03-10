@@ -9,7 +9,7 @@ class InitialDataSeeder extends Seeder
 {
     public function run()
     {
-        // Categories
+
         $categories = [
             ['name' => 'Consultation', 'description' => 'Doctor consultations and related services'],
             ['name' => 'Diagnostics', 'description' => 'Diagnostic services like X-rays and MRI'],
@@ -19,7 +19,7 @@ class InitialDataSeeder extends Seeder
         ];
         DB::table('categories')->insert($categories);
 
-        // Services
+ 
         $services = [
             ['name' => 'General Consultation', 'description' => 'Basic doctor consultation', 'price' => 500.00, 'category_id' => 1],
             ['name' => 'Specialist Consultation', 'description' => 'Specialist doctor visit', 'price' => 1200.00, 'category_id' => 1],
