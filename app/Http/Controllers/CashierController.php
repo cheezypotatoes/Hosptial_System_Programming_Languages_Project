@@ -28,12 +28,19 @@ class CashierController extends Controller
                 'first_name' => $patient->first_name,
                 'last_name' => $patient->last_name,
                 'full_name' => $patient->full_name,
-                'appointments' => $patient->appointments->map(function ($appointment) {
+                'appointments' => $patient->appointments->map(function ($appointment) use ($patient) {
+
+                    // Calculate previous balance
+                   $paymentsSum = Payment::where('patient_id', $patient->id)
+                      ->sum('amount');
+
+                $remainingBalance = max(($appointment->fee ?? 350) - $paymentsSum, 0);
+
                     return [
                         'id' => $appointment->id,
                         'checkup_date' => $appointment->checkup_date?->format('Y-m-d H:i'),
-                        'fee' => $appointment->fee ?? 350, // default fee if null
-                        'balance' => $appointment->fee ?? 350, // placeholder, can compute from payments table
+                        'fee' => $appointment->fee ?? 350,
+                        'balance' => $remainingBalance,
                         'problem' => $appointment->problem,
                         'symptoms' => $appointment->symptoms,
                         'notes' => $appointment->notes,
@@ -57,23 +64,22 @@ class CashierController extends Controller
             return [
                 'id' => $m->id,
                 'name' => $m->name,
-                'price' => $m->price ?? 350, // default to 350 if null
+                'price' => $m->price ?? 350,
                 'type' => 'medicine',
             ];
         })->toArray();
 
-        // Fetch all items from DB
         $items = Item::all()->map(function ($i) {
             return [
                 'id' => $i->id,
                 'name' => $i->name,
-                'price' => $i->price ?? 0, // use item's price
+                'price' => $i->price ?? 0,
                 'stock_quantity' => $i->stock_quantity,
                 'type' => 'item',
             ];
         })->toArray();
 
-        // Combine services + medicines + items
+
         $servicesAndItems = array_merge($services, $medicines, $items);
 
         return Inertia::render('Cashier/CashierDashboard', [
@@ -84,7 +90,7 @@ class CashierController extends Controller
         ]);
     }
 
-    // 🔹 Search patients
+
     public function searchPatients(Request $request)
     {
         $query = $request->get('q', '');
@@ -97,7 +103,7 @@ class CashierController extends Controller
         return response()->json($patients);
     }
 
-    // 🔹 Generate bill
+
     public function generateBill(Request $request)
     {
         $bill = Payment::create([
@@ -109,53 +115,43 @@ class CashierController extends Controller
         return response()->json(['success' => true, 'bill' => $bill]);
     }
 
-    // 🔹 Record payment
-// 🔹 Record payment & remove patient
-public function recordPayment(Request $request)
-{
-    // Validate request
-    $request->validate([
-        'patient_id' => 'required|exists:patients,id',
-        'total' => 'required|numeric',
-        'amount_received' => 'required|numeric',
-        'payment_method' => 'required|string',
-        'items' => 'required|array',
-    ]);
+    public function recordPayment(Request $request)
+    {
 
-    // Create payment
-    $payment = Payment::create([
-        'patient_id' => $request->patient_id,
-        'amount' => $request->total,
-        'amount_received' => $request->amount_received,
-        'payment_method' => $request->payment_method,
-        'status' => 'paid',
-    ]);
-
-    // Insert payment items
-    foreach ($request->items as $item) {
-        $payment->paymentItems()->create([
-            'item_type' => $item['type'],
-            'item_id' => $item['id'],
-            'quantity' => $item['quantity'],
-            'price' => $item['price'],
+        $request->validate([
+            'patient_id' => 'required|exists:patients,id',
+            'total' => 'required|numeric',
+            'amount_received' => 'required|numeric',
+            'payment_method' => 'required|string',
+            'items' => 'required|array',
         ]);
+
+
+        $payment = Payment::create([
+            'patient_id' => $request->patient_id,
+            'amount' => $request->total,
+            'amount_received' => $request->amount_received,
+            'payment_method' => $request->payment_method,
+            'status' => 'paid',
+        ]);
+
+        foreach ($request->items as $item) {
+            $payment->paymentItems()->create([
+                'item_type' => $item['type'],
+                'item_id' => $item['id'],
+                'quantity' => $item['quantity'],
+                'price' => $item['price'],
+            ]);
+        }
+
+
+        Transaction::create([
+            'patient_id' => $payment->patient_id,
+            'amount' => $payment->amount,
+            'status' => 'paid',
+        ]);
+
+
+        return response()->json(['success' => true, 'payment_id' => $payment->id]);
     }
-
-    // Create transaction record
-    Transaction::create([
-        'patient_id' => $payment->patient_id,
-        'amount' => $payment->amount,
-        'status' => 'paid',
-    ]);
-
-    // Remove the patient from the database
-    $patient = Patient::find($request->patient_id);
-    if ($patient) {
-        $patient->delete();
-    }
-
-    return response()->json(['success' => true, 'payment_id' => $payment->id]);
-}
-
-
 }

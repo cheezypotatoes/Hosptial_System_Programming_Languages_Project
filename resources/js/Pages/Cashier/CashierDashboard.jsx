@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef} from "react";
 import Sidebar from "../../Components/Sidebar";
 import Swal from 'sweetalert2';
+import { Inertia } from '@inertiajs/inertia';
 
 export default function CashierDashboard({ role, user, patients, servicesAndItems }) {
   const [quantity, setQuantity] = useState(1);
@@ -30,12 +31,12 @@ export default function CashierDashboard({ role, user, patients, servicesAndItem
   }
 };
 
- function handleLogout(e) {
-    e.preventDefault();
-    if (window.confirm("Are you sure you want to logout?")) {
-      post(route("logout"));
-    }
+function handleLogout(e) {
+  e.preventDefault();
+  if (window.confirm("Are you sure you want to logout?")) {
+    Inertia.post(route("logout"));
   }
+}
 
 const handlePrint = () => {
   const logoPath = ".../images/New_Logo.png";
@@ -222,9 +223,7 @@ const handleRecordPayment = () => {
       )}
 
         <div className="p-6 grid grid-cols-3 gap-6">
-          {/* Left Section */}
           <div className="col-span-2 space-y-6">
-            {/* Patient Info */}
             {selectedPatient && selectedAppointment && (
               <div className="border rounded p-4 mb-4">
                 <h2 className="font-semibold">Patient Info</h2>
@@ -324,7 +323,6 @@ const handleRecordPayment = () => {
             </div>
           </div>
 
-          {/* Right Section */}
           <div className="space-y-6">
             <div className="border rounded p-4 max-h-96 overflow-y-auto">
               <h2 className="font-semibold mb-3">Select Patient</h2>
@@ -367,11 +365,9 @@ const handleRecordPayment = () => {
     </div>
  </div>
 
-       {/* Receipt Modal */}
             {showReceipt && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                 <div className="bg-white rounded p-6 w-96">
-                  {/* Printable content */}
                   <div ref={printRef}>
                     <div className="text-center mb-4">
                       <img src="/images/New_Logo.png" alt="Logo" className="w-32 mx-auto mb-2" />
@@ -427,7 +423,6 @@ const handleRecordPayment = () => {
                     </div>
                   </div>
 
-                  {/* Buttons outside of printable content */}
                   <div className="mt-4 flex justify-between">
                     <button 
                       onClick={() => setShowReceipt(false)} 

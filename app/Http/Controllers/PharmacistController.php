@@ -6,10 +6,11 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Prescription;
 use App\Models\Patient;
+use Carbon\Carbon;
 
 class PharmacistController extends Controller
 {
-    // Render pharmacist dashboard
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -24,7 +25,6 @@ class PharmacistController extends Controller
         ]);
     }
 
-    // Fetch all prescriptions
     public function prescriptions()
     {
         $prescriptions = Prescription::with('patient')->get()->map(function ($pres) {
@@ -35,8 +35,10 @@ class PharmacistController extends Controller
                 'dosage' => $pres->dosage,
                 'instructions' => $pres->instructions,
                 'doctor_name' => $pres->doctor_name,
-                'prescribed_date' => $pres->prescribed_date->format('Y-m-d'),
-                'status' => $pres->status ?? 'pending', // add status if needed
+                'prescribed_date' => $pres->prescribed_date
+                    ? Carbon::parse($pres->prescribed_date)->format('Y-m-d')
+                    : null,
+                'status' => $pres->status ?? 'pending', 
             ];
         });
 
@@ -46,7 +48,6 @@ class PharmacistController extends Controller
         ]);
     }
 
-    // Mark prescription as dispensed
     public function dispense($id)
     {
         $prescription = Prescription::find($id);
@@ -66,8 +67,6 @@ class PharmacistController extends Controller
         return response()->json(['success' => true, 'message' => 'Prescription dispensed successfully.']);
     }
 
-    // Fetch prescriptions for a specific patient
-   // Fetch prescriptions for a specific patient
 public function patientPrescriptions($patientId)
 {
     $patient = Patient::find($patientId);
@@ -86,8 +85,10 @@ public function patientPrescriptions($patientId)
                 'dosage' => $pres->dosage,
                 'instructions' => $pres->instructions,
                 'doctor_name' => $pres->doctor_name,
-                'prescribed_date' => $pres->prescribed_date->format('Y-m-d'),
-                'status' => $pres->status ?? 'pending', // default to pending
+                'prescribed_date' => $pres->prescribed_date
+                    ? Carbon::parse($pres->prescribed_date)->format('Y-m-d')
+                    : null,
+                'status' => $pres->status ?? 'pending', 
             ];
         });
 

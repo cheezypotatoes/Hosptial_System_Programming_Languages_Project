@@ -19,6 +19,9 @@ class Prescription extends Model
         'status',
         'dispensed_at',
     ];
+    protected $casts = [
+    'prescribed_date' => 'datetime',
+];
     public function patient()
     {
         return $this->belongsTo(Patient::class);

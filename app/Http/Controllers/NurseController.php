@@ -9,17 +9,16 @@ use App\Models\Nurse;
 
 class NurseController extends Controller
 {
-    // Show edit form
+ 
     public function edit()
     {
         $user = Auth::user();
 
-        // Only allow nurses
+  
         if ($user->position !== 'Nurse') {
             return redirect()->route('dashboard');
         }
-
-        // Fetch nurse record
+        
         $nurse = Nurse::where('user_id', $user->id)->first();
 
         return Inertia::render('Nurse/NurseEdit', [
@@ -28,7 +27,6 @@ class NurseController extends Controller
         ]);
     }
 
-    // Handle form submission
     public function update(Request $request)
     {
 
@@ -39,7 +37,6 @@ class NurseController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        // Validate input
         $data = $request->validate([
             'first_name'  => 'required|string|max:255',
             'last_name'   => 'required|string|max:255',
@@ -48,13 +45,14 @@ class NurseController extends Controller
             'end_time'    => 'nullable|date_format:H:i',
         ]);
 
-        // Update user info
+       /** @var \App\Models\User $user */
+        $user = Auth::user();
         $user->update([
             'first_name' => $data['first_name'],
-            'last_name'  => $data['last_name'],
+            'last_name' => $data['last_name'],
         ]);
 
-        // Update or create nurse record
+        
         Nurse::updateOrCreate(
             ['user_id' => $user->id],
             [

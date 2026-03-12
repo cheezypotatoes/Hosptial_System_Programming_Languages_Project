@@ -27,17 +27,15 @@ Route::middleware('guest')->group(function () {
 });
 
 // Authenticated routes
-Route::middleware('auth')->group(function () {
-
-
+    Route::middleware('auth')->group(function () {
     Route::get('/medicine-inventory', action: [MedicineInventoryAddController::class, 'index'])->name('medicine.index');
     Route::post('/medicine/store', [MedicineInventoryAddController::class, 'storeMedicine'])->name('medicine.store');
     Route::post('/service/store', [MedicineInventoryAddController::class, 'storeService'])->name('service.store');
     Route::post('/item/store', [MedicineInventoryAddController::class, 'storeItem'])->name('item.store');
 
-Route::post('/medicine/add', [MedicineInventoryAddController::class, 'storeMedicine'])->name('medicine.add.store');
-Route::post('/service/add', [MedicineInventoryAddController::class, 'storeService'])->name('service.add.store');
-Route::post('/item/add', [MedicineInventoryAddController::class, 'storeItem'])->name('item.add.store');
+    Route::post('/medicine/add', [MedicineInventoryAddController::class, 'storeMedicine'])->name('medicine.add.store');
+    Route::post('/service/add', [MedicineInventoryAddController::class, 'storeService'])->name('service.add.store');
+    Route::post('/item/add', [MedicineInventoryAddController::class, 'storeItem'])->name('item.add.store');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
@@ -53,15 +51,15 @@ Route::post('/item/add', [MedicineInventoryAddController::class, 'storeItem'])->
 
     Route::get('/physician/appointments', [PhysicianAppointmentController::class, 'index'])
         ->name('physician.appointments.index');
-    
-   Route::get('/physician/appointments/{patientId}/{appointmentId}', [PhysicianAppointmentController::class, 'show']);
+
+    Route::get('/physician/appointments/{patientId}/{appointmentId}', [PhysicianAppointmentController::class, 'show']);
 
     Route::post('/physician/appointments/{appointmentId?}', [PhysicianAppointmentController::class, 'store'])
-    ->name('physician.appointments.store');
-    
+        ->name('physician.appointments.store');
+
     Route::get('/patients/{id}/prescriptions', [PatientController::class, 'getPrescriptions']);
-Route::get('/patients/{id}/medical-conditions', [PatientController::class, 'getMedicalConditions']);
- 
+    Route::get('/patients/{id}/medical-conditions', [PatientController::class, 'getMedicalConditions']);
+    
 
     // Nurse patient management routes with middleware applied to all
     Route::prefix('nurse')->middleware(EnsureUserIsNurse::class)->group(function () {
@@ -71,18 +69,16 @@ Route::get('/patients/{id}/medical-conditions', [PatientController::class, 'getM
         Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('nurse.patients.edit');
         Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('nurse.patients.update');
         Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('nurse.patients.destroy');
-        
-         Route::get('/appointments/{appointment}', [PhysicianAppointmentController::class, 'index'])
-                ->name('physician.appointments.index');
 
-         Route::get('/patients/{id}', [PatientController::class, 'show']);
+        Route::get('/appointments/{appointment}', [PhysicianAppointmentController::class, 'index'])
+            ->name('physician.appointments.index');
+
+        Route::get('/patients/{id}', [PatientController::class, 'show']);
         Route::get('/patients/{id}/prescriptions', [PrescriptionController::class, 'getByPatient']);
         Route::get('/appointments', [AppointmentController::class, 'viewAllAppointments'])->name('nurse.appointments.viewAll');
         Route::get('/patients/{patient}/appointments', action: [AppointmentController::class, 'viewAppointments'])->name('nurse.patients.viewAppointments');
         Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroyAppointment'])->name('nurse.appointments.destroy');
         Route::get('/patients/{patient}/make-appointment', [AppointmentController::class, 'create'])->name('nurse.patients.makeAppointment');
         Route::post('/patients/{patient}/make-appointment', [AppointmentController::class, 'store'])->name('nurse.patients.storeAppointment');
-    }); 
-    
-
+    });
 });

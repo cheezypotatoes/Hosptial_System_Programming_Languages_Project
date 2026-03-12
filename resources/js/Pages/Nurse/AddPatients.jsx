@@ -24,7 +24,6 @@ export default function Create() {
       });
       return;
     }
-
     post(route("nurse.patients.store"), {
       onSuccess: () => {
         Swal.fire({

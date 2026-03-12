@@ -20,7 +20,6 @@ export default function Login() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-500 p-6">
             <div className="flex bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full">
-                {/* Logo Section */}
                 <div className="hidden md:flex w-1/2 bg-white items-center justify-center p-6">
                     <img
                         src = {Logo}
@@ -29,15 +28,13 @@ export default function Login() {
                     />
                 </div>
 
-                {/* Login Section */}
                 <div className="w-full md:w-1/2 p-8">
                     <h1 className="text-3xl font-extrabold mb-6 text-center text-gray-900">
                         Login
                     </h1>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
-                        {/* Email */}
-                        <div>
+                         <div>
                             <label className="block text-sm font-semibold mb-1 text-gray-700">
                                 Email
                             </label>
@@ -53,7 +50,6 @@ export default function Login() {
                             )}
                         </div>
 
-                        {/* Password */}
                         <div>
                             <label className="block text-sm font-semibold mb-1 text-gray-700">
                                 Password
@@ -79,7 +75,6 @@ export default function Login() {
                             )}
                         </div>
 
-                        {/* Remember Me */}
                         <div className="flex items-center">
                             <input
                                 type="checkbox"
@@ -90,7 +85,6 @@ export default function Login() {
                             <label className="text-sm text-gray-700">Remember me</label>
                         </div>
 
-                        {/* Login Button */}
                         <button
                             type="submit"
                             disabled={processing}
@@ -100,7 +94,6 @@ export default function Login() {
                         </button>
                     </form>
 
-                    {/* Register link */}
                     <p className="text-sm text-center mt-6 text-gray-700">
                         Don't have an account?{" "}
                         <Link

@@ -6,7 +6,7 @@ use Illuminate\Database\Seeder;
 use App\Models\Appointment;
 use Faker\Factory as Faker;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB; // <- Correct import
+use Illuminate\Support\Facades\DB; 
 
 class AppointmentMedicationSeeder extends Seeder
 {

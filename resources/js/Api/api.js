@@ -1,5 +1,3 @@
-// Centralized API calls
-
 export const fetchPatients = async (query = "") => {
   const url = query
     ? `http://localhost:8000/cashier/patients?q=${query}`

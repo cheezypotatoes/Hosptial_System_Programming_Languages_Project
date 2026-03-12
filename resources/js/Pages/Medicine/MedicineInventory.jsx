@@ -9,7 +9,6 @@ export default function MedicineInventoryAdd() {
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState("medicine");
-
   const { data, setData, post, processing, reset } = useForm({
     name: "",
     stock: "",
@@ -21,7 +20,6 @@ export default function MedicineInventoryAdd() {
   });
 
   const activeLabel = "Medicine Inventory";
-
   const handleLogout = (e) => {
     e.preventDefault();
     if (window.confirm("Are you sure you want to logout?")) {
@@ -124,7 +122,6 @@ const handleAddItem = (e) => {
           </button>
         </div>
 
-    {/* Medicines Table */}
 <h2 className="text-xl font-semibold mb-2">Medicines</h2>
 <table className="w-full border-collapse border bg-white shadow rounded mb-6">
   <thead>
@@ -157,7 +154,6 @@ const handleAddItem = (e) => {
   </tbody>
 </table>
 
-{/* Services Table */}
 <h2 className="text-xl font-semibold mb-2">Services</h2>
 <table className="w-full border-collapse border bg-white shadow rounded mb-6">
   <thead>
@@ -226,22 +222,27 @@ const handleAddItem = (e) => {
         Add {modalType.charAt(0).toUpperCase() + modalType.slice(1)}
       </h2>
 
-      {/* Type Switch Buttons */}
-      <div className="flex gap-2 mb-4">
-        {["medicine", "service", "item"].map((type) => (
-          <button
-            key={type}
-            className={`px-3 py-1 rounded ${
-              modalType === type
-                ? "bg-blue-600 text-white"
-                : "bg-gray-200 hover:bg-gray-300"
-            }`}
-            onClick={() => setModalType(type)}
-          >
-            {type.charAt(0).toUpperCase() + type.slice(1)}
-          </button>
-        ))}
-      </div>
+     {/* Type Switch Buttons */}
+<div className="flex gap-2 mb-4">
+  {["medicine", "service", "item"].map((type) => (
+    <button
+      key={type}
+      className={`px-3 py-1 rounded ${
+        modalType === type
+          ? "bg-blue-600 text-white"
+          : "bg-gray-200 hover:bg-gray-300"
+      }`}
+      onClick={() => {
+        setModalType(type);
+        if (type === "item") setData("category_id", 3);      
+        else if (type === "service") setData("category_id", 1); 
+        else setData("category_id", "");                      
+      }}
+    >
+      {type.charAt(0).toUpperCase() + type.slice(1)}
+    </button>
+  ))}
+</div>
 
       <form onSubmit={handleAddItem} className="space-y-3">
         {/* Name */}
@@ -269,6 +270,7 @@ const handleAddItem = (e) => {
                 value={data.category_id}
                 onChange={(e) => setData("category_id", e.target.value)}
                 className="w-full border rounded px-3 py-2"
+                disabled
                 required
               >
                 <option value="">-- Select Category --</option>
@@ -339,36 +341,49 @@ const handleAddItem = (e) => {
         )}
 
         {/* === Item Fields === */}
-        {modalType === "item" && (
-          <>
-            <div>
-              <label className="block text-sm font-semibold mb-1">
-                Stock Quantity
-              </label>
-              <input
-                type="number"
-                value={data.stock_quantity}
-                onChange={(e) => setData("stock_quantity", e.target.value)}
-                className="w-full border rounded px-3 py-2"
-                required
-              />
-            </div>
+{modalType === "item" && (
+  <>
+    <div>
+      <label className="block text-sm font-semibold mb-1">Category</label>
+      <select
+        value={data.category_id}
+        onChange={(e) => setData("category_id", e.target.value)}
+        className="w-full border rounded px-3 py-2"
+        disabled
+        required
+      >
+        <option value="">-- Select Category --</option>
+        {categories.map((cat) => (
+          <option key={cat.id} value={cat.id}>
+            {cat.name}
+          </option>
+        ))}
+      </select>
+    </div>
 
-            <div>
-              <label className="block text-sm font-semibold mb-1">
-                Price (₱)
-              </label>
-              <input
-                type="number"
-                value={data.price}
-                onChange={(e) => setData("price", e.target.value)}
-                className="w-full border rounded px-3 py-2"
-                required
-              />
-            </div>
-          </>
-        )}
+    <div>
+      <label className="block text-sm font-semibold mb-1">Stock Quantity</label>
+      <input
+        type="number"
+        value={data.stock_quantity}
+        onChange={(e) => setData("stock_quantity", e.target.value)}
+        className="w-full border rounded px-3 py-2"
+        required
+      />
+    </div>
 
+    <div>
+      <label className="block text-sm font-semibold mb-1">Price (₱)</label>
+      <input
+        type="number"
+        value={data.price}
+        onChange={(e) => setData("price", e.target.value)}
+        className="w-full border rounded px-3 py-2"
+        required
+      />
+    </div>
+  </>
+)}
         {/* Description Field for all */}
         <div>
           <label className="block text-sm font-semibold mb-1">

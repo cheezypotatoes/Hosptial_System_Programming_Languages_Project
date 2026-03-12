@@ -12,7 +12,7 @@ export default function NurseEdit({ user, nurse }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route("nurse.update")); // using POST request
+        post(route("nurse.update")); 
     };
 
     return (

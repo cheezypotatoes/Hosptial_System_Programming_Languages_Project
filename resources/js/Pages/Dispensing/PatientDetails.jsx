@@ -67,7 +67,6 @@ export default function PatientDetails() {
       <Head title={`${patient.first_name} ${patient.last_name} - Details`} />
 
       <div className="min-h-screen bg-gray-50 p-6">
-        {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center space-x-2">
             <Link
@@ -80,7 +79,6 @@ export default function PatientDetails() {
           </div>
         </div>
 
-        {/* Patient Info */}
         <div className="bg-white rounded-2xl shadow p-6 mb-6">
           <div className="flex items-center space-x-4 mb-4">
             <div className="bg-blue-100 p-3 rounded-full">
@@ -106,7 +104,6 @@ export default function PatientDetails() {
           </div>
         </div>
 
-        {/* Prescriptions */}
         <div className="bg-white rounded-2xl shadow p-6 mb-6">
           <div className="flex items-center space-x-2 mb-4">
             <Pill className="text-green-600" />
@@ -139,7 +136,6 @@ export default function PatientDetails() {
           )}
         </div>
 
-        {/* Dispense Form */}
         <div className="bg-white rounded-2xl shadow p-6 mb-6">
           <div className="flex items-center space-x-2 mb-4">
             <Send className="text-blue-600" />
@@ -187,7 +183,6 @@ export default function PatientDetails() {
           </form>
         </div>
 
-        {/* Dispense Logs */}
         <div className="bg-white rounded-2xl shadow p-6">
           <div className="flex items-center space-x-2 mb-4">
             <ClipboardList className="text-purple-600" />

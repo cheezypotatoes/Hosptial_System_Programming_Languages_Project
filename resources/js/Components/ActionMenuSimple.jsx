@@ -4,10 +4,8 @@ import { MdMoreHoriz } from "react-icons/md";
 const ActionMenuSimple = ({ appointmentId, onDelete, onView }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Toggle the dropdown menu
   const toggleMenu = () => setIsOpen(!isOpen);
 
-  // Close menu when clicking outside
   const handleOutsideClick = (e) => {
     if (!e.target.closest(".action-menu")) {
       setIsOpen(false);

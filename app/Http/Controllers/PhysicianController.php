@@ -11,7 +11,6 @@ use App\Models\Patient;
 
 class PhysicianController extends Controller
 {
-    // Display patient records
     public function records(Request $request)
     {
         $user = Auth::user();
@@ -23,7 +22,7 @@ class PhysicianController extends Controller
         $search = $request->input('search');
         $patientId = $request->input('patient_id');
 
-        // 🔹 Upcoming appointments
+
         $upcomingAppointments = Appointment::with('patient')
             ->where('doctor_id', $user->id)
             ->whereDate('checkup_date', '>=', now())
@@ -36,7 +35,6 @@ class PhysicianController extends Controller
                 'reason' => $appt->notes ?? 'No reason provided',
             ])->values();
 
-        // 🔹 Search multiple patients
         $searchResults = [];
         if ($search) {
             $searchResults = Patient::query()
@@ -55,14 +53,14 @@ class PhysicianController extends Controller
                 ])->values();
         }
 
-        // 🔹 Selected patient full record
+
         $selectedPatient = null;
 
         if ($patientId) {
             $p = Patient::with(['appointmentMedications', 'medicalConditions', 'appointments'])->find($patientId);
 
             if ($p) {
-                // Get the latest appointment for notes
+       
                 $latestAppointment = $p->appointments()->latest('checkup_date')->first();
 
                 $selectedPatient = [
@@ -71,10 +69,10 @@ class PhysicianController extends Controller
                     'age' => $p->birthdate ? Carbon::parse($p->birthdate)->age : null,
                     'gender' => $p->gender,
                     'contact' => $p->contact_num,
-                    'notes' => $latestAppointment?->notes ?? "", // fetch notes from latest appointment
-                    'latest_appointment_id' => $latestAppointment?->id ?? null, // for saving notes
+                    'notes' => $latestAppointment?->notes ?? "", 
+                    'latest_appointment_id' => $latestAppointment?->id ?? null, 
 
-                    // Past medical conditions
+           
                     'medical_conditions' => $p->medicalConditions
                         ->map(fn($mc) => [
                             'id' => $mc->id,
@@ -84,7 +82,6 @@ class PhysicianController extends Controller
                             'ended_date' => $mc->ended_date ? Carbon::parse($mc->ended_date)->format('Y-m-d') : null,
                         ])->values()->all(),
 
-                    // Appointment medications
                     'appointment_medications' => $p->appointmentMedications
                         ->map(fn($am) => [
                             'id' => $am->id,
@@ -108,7 +105,7 @@ class PhysicianController extends Controller
         ]);
     }
 
-    // 🔹 Save notes to latest appointment
+ 
     public function saveNotes(Request $request, $appointmentId)
     {
         $request->validate([

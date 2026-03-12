@@ -4,7 +4,6 @@ import { MdMoreHoriz } from "react-icons/md";
 const ActionMenu = ({ patientId, onEdit, onDelete, onMakeAppointment, onViewAppointments }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Toggle the action menu visibility
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };

@@ -12,7 +12,7 @@ import Sidebar from "../../Components/Sidebar";
         const activeLabel = "Pharmacist Dashboard";
 
         useEffect(() => {
-          fetchUser();
+          
           fetchPrescriptions();
         }, []);
 
@@ -84,17 +84,16 @@ import Sidebar from "../../Components/Sidebar";
             alert(`All pending prescriptions for ${patientName} have been dispensed!`);
             fetchPrescriptions();
           } catch (error) {
-            console.error("❌ Failed to dispense prescriptions:", error);
+            console.error(" Failed to dispense prescriptions:", error);
           }
         };
 
-        const handleLogout = (e) => {
-          e.preventDefault();
-          if (window.confirm("Are you sure you want to logout?")) {
-            post(route("logout"));
-          }
-        };
-
+        function handleLogout(e) {
+        e.preventDefault();
+        if (window.confirm("Are you sure you want to logout?")) {
+          Inertia.post(route("logout"));
+        }
+      }
       
         const groupedByPatient = prescriptions.reduce((acc, pres) => {
           acc[pres.patient_name] = acc[pres.patient_name] || [];

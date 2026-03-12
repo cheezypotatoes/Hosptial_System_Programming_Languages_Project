@@ -12,13 +12,11 @@ use App\Models\Service;
 
 class PhysicianAppointmentController extends Controller
 {
-    /**
-     * Display a listing of the physician's appointments.
-     */
+
     public function index(Request $request)
     {
         $user = $request->user();
-        $role = strtolower($user->position); // role for frontend
+        $role = strtolower($user->position); 
 
         $physician = $request->user();
 
@@ -34,12 +32,10 @@ class PhysicianAppointmentController extends Controller
         ]);
     }
 
-    /**
-     * Show details of an appointment including medications and services.
-     */
+   
     public function show(Request $request, $patientId, $appointmentId)
     {
-        $user = $request->user(); // authenticated physician
+        $user = $request->user();
         $role = strtolower($user->position);
 
         $appointment = Appointment::with('patient', 'doctor', 'medications', 'services')
@@ -47,7 +43,7 @@ class PhysicianAppointmentController extends Controller
             ->where('id', $appointmentId)
             ->firstOrFail();
 
-        $patient = $appointment->patient; // fetch patient from appointment
+        $patient = $appointment->patient; 
 
         $medicineNames = Medicine::pluck('name');
         $serviceNames = Service::pluck('name');
@@ -55,15 +51,13 @@ class PhysicianAppointmentController extends Controller
         return Inertia::render('Physician/AppointmentDetails', [
             'appointment' => $appointment,
             'role' => $role,
-            'user' => $patient,          // pass patient here
+            'user' => $patient,         
             'medicineNames' => $medicineNames,
             'serviceNames' => $serviceNames,
         ]);
     }
 
-    /**
-     * Store or update appointment details including medications and services.
-     */
+    
     public function store(Request $request, $appointmentId = null)
     {
         $medications = $request->input('medications', []);
@@ -80,18 +74,16 @@ class PhysicianAppointmentController extends Controller
             $appointment->notes = $request->input('notes');
         }
 
-        $appointment->save(); // create or update
+        $appointment->save(); 
 
-        // Clear existing medications and services if updating
-        if ($appointmentId) {
+       if ($appointmentId) {
             $appointment->medications()->delete();
             $appointment->services()->delete();
         }
 
-        // Store medications
-        foreach ($medications as $medication) {
+       foreach ($medications as $medication) {
             if (empty($medication['name'])) {
-                continue; // skip medications with no name
+                continue; 
             }
 
             AppointmentMedication::create([
@@ -104,7 +96,7 @@ class PhysicianAppointmentController extends Controller
             ]);
         }
 
-        // Store services
+
         foreach ($services as $service) {
             AppointmentService::create([
                 'appointment_id' => $appointment->id,

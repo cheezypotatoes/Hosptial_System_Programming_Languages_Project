@@ -57,7 +57,6 @@ export default function Register() {
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-100">
       
-      {/* Loading Overlay */}
       {loading && (
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
@@ -72,7 +71,6 @@ export default function Register() {
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* First Name */}
           <div>
             <label className="block text-sm font-semibold mb-1 text-gray-700">
               First Name
@@ -89,7 +87,6 @@ export default function Register() {
             )}
           </div>
 
-          {/* Last Name */}
           <div>
             <label className="block text-sm font-semibold mb-1 text-gray-700">
               Last Name
@@ -106,7 +103,6 @@ export default function Register() {
             )}
           </div>
 
-          {/* Email */}
           <div>
             <label className="block text-sm font-semibold mb-1 text-gray-700">
               Email
@@ -123,7 +119,6 @@ export default function Register() {
             )}
           </div>
 
-          {/* Position */}
           <div>
             <label className="block text-sm font-semibold mb-1 text-gray-700">
               Position
@@ -146,7 +141,6 @@ export default function Register() {
             )}
           </div>
 
-          {/* Specialization (Doctor) */}
           {data.position === "Doctor" && (
             <div>
               <label className="block text-sm font-semibold mb-1 text-gray-700">
@@ -172,7 +166,6 @@ export default function Register() {
             </div>
           )}
 
-          {/* Password */}
           <div>
             <label className="block text-sm font-semibold mb-1 text-gray-700">
               Password
@@ -198,7 +191,6 @@ export default function Register() {
             )}
           </div>
 
-          {/* Confirm Password */}
           <div>
             <label className="block text-sm font-semibold mb-1 text-gray-700">
               Confirm Password
@@ -228,7 +220,6 @@ export default function Register() {
             )}
           </div>
 
-          {/* Register Button */}
           <button
             type="submit"
             disabled={processing}

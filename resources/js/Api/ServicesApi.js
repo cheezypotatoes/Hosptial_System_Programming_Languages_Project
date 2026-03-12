@@ -3,8 +3,7 @@ export async function fetchServicesAndItems() {
     const res = await fetch("http://localhost:8000/cashier/services-items");
     if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
     const data = await res.json();
-
-    // Ensure it returns an array
+    
     return Array.isArray(data) ? data : data.data || [];
   } catch (err) {
     console.error("Error fetching services/items:", err);
