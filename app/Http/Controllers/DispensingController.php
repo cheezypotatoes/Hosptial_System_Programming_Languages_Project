@@ -12,9 +12,7 @@ use App\Models\Patient;
 
 class DispensingController extends Controller
 {
-    /**
-     * 🔹 Show all patients for the listing page
-     */
+ 
     public function index(Request $request)
     {
         $user = $request->user();
@@ -35,17 +33,13 @@ class DispensingController extends Controller
         ]);
     }
 
-    /**
-     * 🔹 Show full details of one patient (PatientDetails page)
-     */
+  
     public function show($id)
     {
         $patient = Patient::with(['prescriptions', 'medicalConditions'])->findOrFail($id);
 
-        // Ensure prescriptions is always a collection
         $prescriptions = $patient->prescriptions ?? collect();
 
-        // Fetch dispense logs for this patient
         $dispenseLogs = Dispense::where('patient_id', $patient->id)
             ->with('medicine')
             ->orderByDesc('dispensed_at')
@@ -66,9 +60,6 @@ class DispensingController extends Controller
         ]);
     }
 
-    /**
-     * 🔹 Store a new dispense record
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -84,10 +75,8 @@ class DispensingController extends Controller
             return back()->with('error', 'Not enough stock available.');
         }
 
-        // Deduct stock
         $medicine->decrement('stock', $request->quantity);
 
-        // Record dispense
         Dispense::create([
             'patient_id' => $request->patient_id,
             'medicine_id' => $medicine->id,
@@ -98,9 +87,6 @@ class DispensingController extends Controller
         return back()->with('success', 'Medicine dispensed successfully!');
     }
 
-    /**
-     * 🔹 Fetch all prescriptions
-     */
     public function prescriptions()
     {
         $prescriptions = Prescription::with('patient', 'medicine')->get()->map(function ($pres) {
@@ -120,9 +106,6 @@ class DispensingController extends Controller
         ]);
     }
 
-    /**
-     * 🔹 Fetch categories with services/items (optional)
-     */
     public function categories()
     {
         $categories = Category::with(['services', 'items'])->get();
@@ -132,9 +115,6 @@ class DispensingController extends Controller
         ]);
     }
 
-    /**
-     * 🔹 Latest 10 dispense logs globally
-     */
     public function logs()
     {
         $logs = Dispense::with(['medicine', 'patient'])

@@ -30,7 +30,6 @@ const ActionMenuSimple = ({ appointmentId, onDelete, onView }) => {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
           <ul className="py-2">
-            {/* View Button */}
             <li>
               <button
                 onClick={() => onView(appointmentId)}
@@ -40,7 +39,6 @@ const ActionMenuSimple = ({ appointmentId, onDelete, onView }) => {
               </button>
             </li>
 
-            {/* Delete Button */}
             <li>
               <button
                 onClick={() => onDelete(appointmentId)}

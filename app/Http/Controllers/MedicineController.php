@@ -12,9 +12,6 @@ use Carbon\Carbon;
 
 class MedicineController extends Controller
 {
-    /**
-     * ✅ Render the main inventory page with all data via Inertia
-     */
     public function inventoryPage(Request $request)
     {
         $user = $request->user();
@@ -24,7 +21,6 @@ class MedicineController extends Controller
 
         $role = strtolower($user->position ?? 'guest');
 
-        // ✅ Fetch Medicines
         $medicines = Medicine::with('category:id,name')
             ->orderBy('name')
             ->get()
@@ -37,7 +33,6 @@ class MedicineController extends Controller
                 'category' => $m->category?->name ?? 'Uncategorized',
             ]);
 
-        // ✅ Fetch Services
         $services = Service::with('category:id,name')
             ->orderBy('name')
             ->get()
@@ -49,7 +44,6 @@ class MedicineController extends Controller
                 'category' => $s->category?->name ?? 'Uncategorized',
             ]);
 
-        // ✅ Fetch Items
         $items = Item::with('category:id,name')
             ->orderBy('name')
             ->get()
@@ -62,7 +56,6 @@ class MedicineController extends Controller
                 'category' => $i->category?->name ?? 'Uncategorized',
             ]);
 
-        // ✅ Fetch Categories
         $categories = Category::orderBy('name')->get(['id', 'name', 'description']);
 
         return Inertia::render('Medicine/MedicineInventory', [
@@ -80,9 +73,6 @@ class MedicineController extends Controller
         ]);
     }
 
-    /**
-     * ✅ Store a new medicine
-     */
 public function store(Request $request)
 {
     $validated = $request->validate([
@@ -93,15 +83,12 @@ public function store(Request $request)
         'description' => 'nullable|string|max:255',
     ]);
 
-    // Default expiry to today if not provided
-    $validated['expiry'] = $validated['expiry'] ?? now()->toDateString();
+     $validated['expiry'] = $validated['expiry'] ?? now()->toDateString();
 
-    // Cast numeric fields
     $validated['stock'] = (int) $validated['stock'];
     $validated['price'] = (float) $validated['price'];
 
-    // Remove any unexpected fields (e.g., category_id)
-    unset($validated['category_id']);
+   unset($validated['category_id']);
 
     $medicine = \App\Models\Medicine::create($validated);
 
@@ -113,9 +100,6 @@ public function store(Request $request)
 }
 
 
-    /**
-     * ✅ Store a new service
-     */
     public function storeService(Request $request)
     {
         $validated = $request->validate([
@@ -134,9 +118,7 @@ public function store(Request $request)
         ]);
     }
 
-    /**
-     * ✅ Store a new item
-     */
+
     public function storeItem(Request $request)
     {
         $validated = $request->validate([
@@ -155,10 +137,7 @@ public function store(Request $request)
             'item' => $item,
         ]);
     }
-
-    /**
-     * ✅ Dispense a medicine
-     */
+    
     public function dispense(Request $request)
     {
         $validated = $request->validate([

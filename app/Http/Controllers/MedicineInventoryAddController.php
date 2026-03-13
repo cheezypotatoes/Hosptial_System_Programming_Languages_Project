@@ -15,7 +15,6 @@ class MedicineInventoryAddController extends Controller
         $user = $request->user();
         $role = strtolower($user->position);
 
-        // ✅ Fetch data
         $medicines = Medicine::orderBy('name')->get();
 
         $services = Service::with('category:id,name')
@@ -49,8 +48,6 @@ class MedicineInventoryAddController extends Controller
             'items' => $items,
         ]);
     }
-
-    // ✅ Medicine Store
     public function storeMedicine(Request $request)
     {
         $validated = $request->validate([
@@ -71,7 +68,6 @@ class MedicineInventoryAddController extends Controller
         return redirect()->back()->with('success', 'Medicine added successfully!');
     }
 
-    // ✅ Service Store
     public function storeService(Request $request)
     {
         $validated = $request->validate([
@@ -86,7 +82,7 @@ class MedicineInventoryAddController extends Controller
         return redirect()->back()->with('success', 'Service added successfully!');
     }
 
-    // ✅ Item Store
+
     public function storeItem(Request $request)
     {
         $validated = $request->validate([
@@ -102,7 +98,7 @@ class MedicineInventoryAddController extends Controller
         return redirect()->back()->with('success', 'Item added successfully!');
     }
 
-    // ✅ Dispense Medicine
+
     public function dispense(Request $request)
     {
         $validated = $request->validate([

@@ -37,7 +37,7 @@ const ActionMenu = ({ patientId, onEdit, onDelete, onMakeAppointment, onViewAppo
                 Delete
               </button>
             </li>
-            {/* View Appointments Option */}
+      
             <li>
               <button
                 onClick={() => onViewAppointments(patientId)}
@@ -46,7 +46,7 @@ const ActionMenu = ({ patientId, onEdit, onDelete, onMakeAppointment, onViewAppo
                 View Appointments
               </button>
             </li>
-            {/* Make Appointment Option */}
+           
             <li>
               <button
                 onClick={() => onMakeAppointment(patientId)}

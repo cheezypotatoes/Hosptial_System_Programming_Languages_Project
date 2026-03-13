@@ -5,7 +5,6 @@ import Logo from "@/../images/New_Logo.png";
 export default function Index() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 to-blue-500 px-4">
-      {/* Logo */}
       <div className="flex flex-col items-center mb-8">
         <img src={Logo} alt="Jorge & Co Logo" className="w-50 h-50 mb-4 object-contain" />
         <h1 className="text-4xl md:text-5xl font-bold text-white text-center">
@@ -16,7 +15,6 @@ export default function Index() {
         </p>
       </div>
 
-      {/* Action Buttons */}
       <div className="flex flex-col md:flex-row gap-4">
         <Link
           href={route("login")}
@@ -31,7 +29,6 @@ export default function Index() {
         </Link>
       </div>
 
-      {/* Footer */}
       <footer className="mt-12 text-white text-center text-sm opacity-80">
         &copy; {new Date().getFullYear()} Jorge & Co Medical Center. All rights reserved.
       </footer>

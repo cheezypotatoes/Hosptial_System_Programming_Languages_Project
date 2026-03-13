@@ -15,13 +15,12 @@ use App\Models\Item;
 
 class CashierController extends Controller
 {
-    // 🔹 Dashboard view
     public function index(Request $request)
     {
         $user = $request->user();
         $role = strtolower($user->position);
 
-        // Fetch all patients with their appointments
+
         $patients = Patient::with('appointments')->get()->map(function ($patient) {
             return [
                 'id' => $patient->id,
@@ -30,7 +29,6 @@ class CashierController extends Controller
                 'full_name' => $patient->full_name,
                 'appointments' => $patient->appointments->map(function ($appointment) use ($patient) {
 
-                    // Calculate previous balance
                    $paymentsSum = Payment::where('patient_id', $patient->id)
                       ->sum('amount');
 
@@ -49,17 +47,15 @@ class CashierController extends Controller
             ];
         })->toArray();
 
-        // Fetch all services from DB
         $services = Service::all()->map(function ($s) {
             return [
                 'id' => $s->id,
                 'name' => $s->name,
-                'price' => $s->price ?? 350, // default to 350 if null
+                'price' => $s->price ?? 350, 
                 'type' => 'service',
             ];
         })->toArray();
 
-        // Fetch all medicines from DB
         $medicines = Medicine::all()->map(function ($m) {
             return [
                 'id' => $m->id,

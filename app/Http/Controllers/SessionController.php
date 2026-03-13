@@ -7,15 +7,12 @@ use Illuminate\Support\Facades\Session;
 
 class SessionController extends Controller
 {
-    // Show session data
-    public function index()
+      public function index()
     {
         return response()->json([
             'session_data' => Session::all()
         ]);
     }
-
-    // Store data into session
     public function store(Request $request)
     {
         $request->validate([
@@ -30,9 +27,7 @@ class SessionController extends Controller
             'data' => [$request->key => $request->value]
         ]);
     }
-
-    // Remove data from session
-    public function destroy($key)
+        public function destroy($key)
     {
         Session::forget($key);
 

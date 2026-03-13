@@ -12,12 +12,10 @@ use Inertia\Inertia;
 
 class DispenseController extends Controller
 {
-    /**
-     * Store a dispense record
-     */
+
     public function store(Request $request)
     {
-        // Validate request
+
         $validator = Validator::make($request->all(), [
             'patient_id' => 'required|exists:patients,id',
             'prescription_id' => 'required|exists:prescriptions,id',
@@ -28,19 +26,14 @@ class DispenseController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        // Find prescription and related medicine
         $prescription = Prescription::findOrFail($request->prescription_id);
         $medicine = Medicine::findOrFail($prescription->medicine_id);
 
-        // Check stock
         if ($medicine->stock < $request->quantity) {
             return back()->withErrors(['quantity' => 'Not enough stock available.']);
         }
 
-        // Deduct stock
         $medicine->decrement('stock', $request->quantity);
-
-        // Record dispense
         Dispense::create([
             'patient_id' => $request->patient_id,
             'medicine_id' => $medicine->id,
@@ -51,9 +44,6 @@ class DispenseController extends Controller
         return back()->with('success', 'Medicine dispensed successfully!');
     }
 
-    /**
-     * Show patient details and dispense logs
-     */
     public function show($id)
     {
         $patient = Patient::with('prescriptions')->findOrFail($id);

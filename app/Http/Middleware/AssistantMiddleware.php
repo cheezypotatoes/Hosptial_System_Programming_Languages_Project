@@ -9,7 +9,7 @@ class AssistantMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if (auth()->user()->role !== 'assistant') {
+        if ($request->user()->role !== 'assistant') {
             abort(403);
         }
         return $next($request);

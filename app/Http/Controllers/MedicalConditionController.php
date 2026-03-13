@@ -7,9 +7,7 @@ use Illuminate\Http\Request;
 
 class MedicalConditionController extends Controller
 {
-    /**
-     * List all medical conditions for a given patient.
-     */
+
     public function index($patientId)
     {
         $conditions = MedicalCondition::where('patient_id', $patientId)->get();
@@ -17,9 +15,7 @@ class MedicalConditionController extends Controller
         return response()->json($conditions);
     }
 
-    /**
-     * Show a single medical condition (by id).
-     */
+ 
     public function show($id)
     {
         $condition = MedicalCondition::findOrFail($id);
@@ -27,9 +23,7 @@ class MedicalConditionController extends Controller
         return response()->json($condition);
     }
 
-    /**
-     * Store a new medical condition for a patient.
-     */
+  
     public function store(Request $request, $patientId)
     {
         $validated = $request->validate([
